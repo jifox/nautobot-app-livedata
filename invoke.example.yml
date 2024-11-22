@@ -2,7 +2,7 @@
 livedata:
   project_name: "dev-livedata"
   nautobot_ver: "2.0.0"
-  python_ver: "3.11"
+  python_ver: "3.12"
   local: false
   compose_dir: "development"
   compose_files:
