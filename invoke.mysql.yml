@@ -1,5 +1,5 @@
 ---
-livedata:
+nautobot_app_livedata:
   project_name: "livedata"
   nautobot_ver: "2.0.0"
   local: false

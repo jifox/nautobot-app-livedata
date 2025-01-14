@@ -1,4 +1,4 @@
-# Live Data
+# Nautobot App Livedata
 
 <!--
 Developer Note - Remove Me!
@@ -14,7 +14,7 @@ To avoid extra work and temporary links, make sure that publishing docs (or merg
   <img src="https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/icon-livedata.png" class="logo" height="200px">
   <br>
   <a href="https://github.com/jifox/nautobot-app-livedata.git/actions"><img src="https://github.com/jifox/nautobot-app-livedata.git/actions/workflows/ci.yml/badge.svg?branch=main"></a>
-  <a href="https://docs.swarm-services.home.local/projects/livedata/en/latest/"><img src="https://readthedocs.org/projects/nautobot-app-livedata/badge/"></a>
+  <a href="https://github.com/jifox/projects/livedata/en/latest/"><img src="https://readthedocs.org/projects/nautobot-app-livedata/badge/"></a>
   <a href="https://pypi.org/project/livedata/"><img src="https://img.shields.io/pypi/v/livedata"></a>
   <a href="https://pypi.org/project/livedata/"><img src="https://img.shields.io/pypi/dm/livedata"></a>
   <br>
@@ -31,7 +31,7 @@ To avoid extra work and temporary links, make sure that publishing docs (or merg
 
 > Developer Note: Place the files in the `docs/images/` folder and link them using only full URLs from GitHub, for example: `![Overview](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/app-overview.png)`. This absolute static linking is required to ensure the README renders properly in GitHub, the docs site, and any other external sites like PyPI.
 
-More screenshots can be found in the [Using the App](https://docs.swarm-services.home.local/projects/livedata/en/latest/user/app_use_cases/) page in the documentation. Here's a quick overview of some of the app's added functionality:
+More screenshots can be found in the [Using the App](https://github.com/jifox/projects/livedata/en/latest/user/app_use_cases/) page in the documentation. Here's a quick overview of some of the app's added functionality:
 
 ![](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/placeholder.png)
 
@@ -47,20 +47,20 @@ This App is installed in the Nautobot Community Sandbox found over at [demo.naut
 
 Full documentation for this App can be found over on the [Nautobot Docs](https://github.com/jifox/) website:
 
-- [User Guide](https://docs.swarm-services.home.local/projects/livedata/en/latest/user/app_overview/) - Overview, Using the App, Getting Started.
-- [Administrator Guide](https://docs.swarm-services.home.local/projects/livedata/en/latest/admin/install/) - How to Install, Configure, Upgrade, or Uninstall the App.
-- [Developer Guide](https://docs.swarm-services.home.local/projects/livedata/en/latest/dev/contributing/) - Extending the App, Code Reference, Contribution Guide.
-- [Release Notes / Changelog](https://docs.swarm-services.home.local/projects/livedata/en/latest/admin/release_notes/).
-- [Frequently Asked Questions](https://docs.swarm-services.home.local/projects/livedata/en/latest/user/faq/).
+- [User Guide](https://github.com/jifox/projects/livedata/en/latest/user/app_overview/) - Overview, Using the App, Getting Started.
+- [Administrator Guide](https://github.com/jifox/projects/livedata/en/latest/admin/install/) - How to Install, Configure, Upgrade, or Uninstall the App.
+- [Developer Guide](https://github.com/jifox/projects/livedata/en/latest/dev/contributing/) - Extending the App, Code Reference, Contribution Guide.
+- [Release Notes / Changelog](https://github.com/jifox/projects/livedata/en/latest/admin/release_notes/).
+- [Frequently Asked Questions](https://github.com/jifox/projects/livedata/en/latest/user/faq/).
 
 ### Contributing to the Documentation
 
 You can find all the Markdown source for the App documentation under the [`docs`](https://github.com/jifox/nautobot-app-livedata.git/tree/develop/docs) folder in this repository. For simple edits, a Markdown capable editor is sufficient: clone the repository and edit away.
 
-If you need to view the fully-generated documentation site, you can build it with [MkDocs](https://www.mkdocs.org/). A container hosting the documentation can be started using the `invoke` commands (details in the [Development Environment Guide](https://docs.swarm-services.home.local/projects/livedata/en/latest/dev/dev_environment/#docker-development-environment)) on [http://localhost:8001](http://localhost:8001). Using this container, as your changes to the documentation are saved, they will be automatically rebuilt and any pages currently being viewed will be reloaded in your browser.
+If you need to view the fully-generated documentation site, you can build it with [MkDocs](https://www.mkdocs.org/). A container hosting the documentation can be started using the `invoke` commands (details in the [Development Environment Guide](https://github.com/jifox/projects/livedata/en/latest/dev/dev_environment/#docker-development-environment)) on [http://localhost:8001](http://localhost:8001). Using this container, as your changes to the documentation are saved, they will be automatically rebuilt and any pages currently being viewed will be reloaded in your browser.
 
 Any PRs with fixes or improvements are very welcome!
 
 ## Questions
 
-For any questions or comments, please check the [FAQ](https://docs.swarm-services.home.local/projects/livedata/en/latest/user/faq/) first. Feel free to also swing by the [Network to Code Slack](https://networktocode.slack.com/) (channel `#nautobot`), sign up [here](http://slack.networktocode.com/) if you don't have an account.
+For any questions or comments, please check the [FAQ](https://github.com/jifox/projects/livedata/en/latest/user/faq/) first. Feel free to also swing by the [Network to Code Slack](https://networktocode.slack.com/) (channel `#nautobot`), sign up [here](http://slack.networktocode.com/) if you don't have an account.

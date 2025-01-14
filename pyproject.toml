@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "livedata"
 version = "0.1.0"
-description = "LiveData is a Nautobot plugin that provides a live view of the network data."
+description = "Nautobot App Livedata is a Nautobot app that provides a live view of the network data."
 authors = ["Josef Fuchs <josef.fuchs@j-fuchs.at>"]
 license = "Apache-2.0"
 readme = "README.md"
 homepage = "https://github.com/jifox/nautobot-app-livedata.git"
 repository = "https://github.com/jifox/nautobot-app-livedata.git"
-documentation = "https://docs.swarm-services.home.local/projects/livedata/en/latest/"
+documentation = "https://github.com/jifox/projects/livedata/en/latest/"
 keywords = ["nautobot", "nautobot-app", "nautobot-plugin"]
 classifiers = [
     "Intended Audience :: Developers",
@@ -20,11 +20,11 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 packages = [
-    { include = "livedata" },
+    { include = "nautobot_app_livedata" },
 ]
 include = [
     # Poetry by default will exclude files that are in .gitignore
-    "livedata/static/livedata/docs/**/*",
+    "nautobot_app_livedata/static/nautobot_app_livedata/docs/**/*",
 ]
 
 [tool.poetry.dependencies]
@@ -135,10 +135,10 @@ ignore = [
 convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
-"livedata/migrations/*" = [
+"nautobot_app_livedata/migrations/*" = [
     "D",
 ]
-"livedata/tests/*" = [
+"nautobot_app_livedata/tests/*" = [
     "D",
     "S"
 ]
@@ -148,7 +148,7 @@ requires = ["poetry_core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.towncrier]
-package = "livedata"
+package = "nautobot_app_livedata"
 directory = "changes"
 filename = "docs/admin/release_notes/version_X.Y.md"
 template = "development/towncrier_template.j2"

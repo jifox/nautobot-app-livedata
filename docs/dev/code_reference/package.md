@@ -1,1 +1,1 @@
-::: livedata
+::: nautobot_app_livedata

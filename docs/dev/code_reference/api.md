@@ -1,5 +1,5 @@
-# Live Data API Package
+# Nautobot App Livedata API Package
 
-::: livedata.api
+::: nautobot_app_livedata.api
     options:
         show_submodules: True

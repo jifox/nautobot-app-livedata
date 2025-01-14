@@ -1,9 +1,9 @@
 ---
 dev_addr: "127.0.0.1:8001"
 edit_uri: "edit/main/docs"
-site_dir: "livedata/static/livedata/docs"
-site_name: "Live Data Documentation"
-site_url: "https://docs.swarm-services.home.local/projects/livedata/en/latest/"
+site_dir: "nautobot_app_livedata/static/nautobot_app_livedata/docs"
+site_name: "Nautobot App Livedata Documentation"
+site_url: "https://github.com/jifox/projects/livedata/en/latest/"
 repo_url: "https://github.com/jifox/nautobot-app-livedata.git"
 copyright: "Copyright &copy; The Authors"
 theme:

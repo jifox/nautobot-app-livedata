@@ -29,7 +29,7 @@ The app is available as a Python package via PyPI and can be installed with `pip
 pip install livedata
 ```
 
-To ensure Live Data is automatically re-installed during future upgrades, create a file named `local_requirements.txt` (if not already existing) in the Nautobot root directory (alongside `requirements.txt`) and list the `livedata` package:
+To ensure Nautobot App Livedata is automatically re-installed during future upgrades, create a file named `local_requirements.txt` (if not already existing) in the Nautobot root directory (alongside `requirements.txt`) and list the `livedata` package:
 
 ```shell
 echo livedata >> local_requirements.txt
@@ -37,15 +37,15 @@ echo livedata >> local_requirements.txt
 
 Once installed, the app needs to be enabled in your Nautobot configuration. The following block of code below shows the additional configuration required to be added to your `nautobot_config.py` file:
 
-- Append `"livedata"` to the `PLUGINS` list.
-- Append the `"livedata"` dictionary to the `PLUGINS_CONFIG` dictionary and override any defaults.
+- Append `"nautobot_app_livedata"` to the `PLUGINS` list.
+- Append the `"nautobot_app_livedata"` dictionary to the `PLUGINS_CONFIG` dictionary and override any defaults.
 
 ```python
 # In your nautobot_config.py
-PLUGINS = ["livedata"]
+PLUGINS = ["nautobot_app_livedata"]
 
 # PLUGINS_CONFIG = {
-#   "livedata": {
+#   "nautobot_app_livedata": {
 #     ADD YOUR SETTINGS HERE
 #   }
 # }

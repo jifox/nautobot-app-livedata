@@ -20,7 +20,7 @@ The [Invoke](http://www.pyinvoke.org/) library is used to provide some helper co
 - `compose_dir`: the full path to a directory containing the project compose files
 - `compose_files`: a list of compose files applied in order (see [Multiple Compose files](https://docs.docker.com/compose/extends/#multiple-compose-files) for more information)
 
-Using **Invoke** these configuration options can be overridden using [several methods](https://docs.pyinvoke.org/en/stable/concepts/configuration.html). Perhaps the simplest is setting an environment variable `INVOKE_LIVEDATA_VARIABLE_NAME` where `VARIABLE_NAME` is the variable you are trying to override. The only exception is `compose_files`, because it is a list it must be overridden in a YAML file. There is an example `invoke.yml` (`invoke.example.yml`) in this directory which can be used as a starting point.
+Using **Invoke** these configuration options can be overridden using [several methods](https://docs.pyinvoke.org/en/stable/concepts/configuration.html). Perhaps the simplest is setting an environment variable `INVOKE_NAUTOBOT_APP_LIVEDATA_VARIABLE_NAME` where `VARIABLE_NAME` is the variable you are trying to override. The only exception is `compose_files`, because it is a list it must be overridden in a YAML file. There is an example `invoke.yml` (`invoke.example.yml`) in this directory which can be used as a starting point.
 
 ### Docker Development Environment
 
@@ -56,7 +56,7 @@ To either stop or destroy the development environment use the following options.
 
 ```yaml
 ---
-livedata:
+nautobot_app_livedata:
   local: true
 ```
 
@@ -188,18 +188,18 @@ Next, you need to start up your Docker containers.
 ➜ invoke start
 Starting Nautobot in detached mode...
 Running docker-compose command "up --detach"
-Creating network "livedata_default" with the default driver
-Creating volume "livedata_postgres_data" with default driver
-Creating livedata_redis_1 ...
-Creating livedata_docs_1  ...
-Creating livedata_postgres_1 ...
-Creating livedata_postgres_1 ... done
-Creating livedata_redis_1    ... done
-Creating livedata_nautobot_1 ...
-Creating livedata_docs_1     ... done
-Creating livedata_nautobot_1 ... done
-Creating livedata_worker_1   ...
-Creating livedata_worker_1   ... done
+Creating network "nautobot_app_livedata_default" with the default driver
+Creating volume "nautobot_app_livedata_postgres_data" with default driver
+Creating nautobot_app_livedata_redis_1 ...
+Creating nautobot_app_livedata_docs_1  ...
+Creating nautobot_app_livedata_postgres_1 ...
+Creating nautobot_app_livedata_postgres_1 ... done
+Creating nautobot_app_livedata_redis_1    ... done
+Creating nautobot_app_livedata_nautobot_1 ...
+Creating nautobot_app_livedata_docs_1     ... done
+Creating nautobot_app_livedata_nautobot_1 ... done
+Creating nautobot_app_livedata_worker_1   ...
+Creating nautobot_app_livedata_worker_1   ... done
 Docker Compose is now in the Docker CLI, try `docker compose up`
 ```
 
@@ -208,11 +208,11 @@ This will start all of the Docker containers used for hosting Nautobot. You shou
 ```bash
 ➜ docker ps
 ****CONTAINER ID   IMAGE                            COMMAND                  CREATED          STATUS          PORTS                                       NAMES
-ee90fbfabd77   livedata/nautobot:2.0.0-py3.11  "nautobot-server rqw…"   16 seconds ago   Up 13 seconds                                               livedata_worker_1
-b8adb781d013   livedata/nautobot:2.0.0-py3.11  "/docker-entrypoint.…"   20 seconds ago   Up 15 seconds   0.0.0.0:8080->8080/tcp, :::8080->8080/tcp   livedata_nautobot_1
-d64ebd60675d   livedata/nautobot:2.0.0-py3.11  "mkdocs serve -v -a …"   25 seconds ago   Up 18 seconds   0.0.0.0:8001->8080/tcp, :::8001->8080/tcp   livedata_docs_1
-e72d63129b36   postgres:13-alpine               "docker-entrypoint.s…"   25 seconds ago   Up 19 seconds   0.0.0.0:5432->5432/tcp, :::5432->5432/tcp   livedata_postgres_1
-96c6ff66997c   redis:6-alpine                   "docker-entrypoint.s…"   25 seconds ago   Up 21 seconds   0.0.0.0:6379->6379/tcp, :::6379->6379/tcp   livedata_redis_1
+ee90fbfabd77   livedata/nautobot:2.0.0-py3.11  "nautobot-server rqw…"   16 seconds ago   Up 13 seconds                                               nautobot_app_livedata_worker_1
+b8adb781d013   livedata/nautobot:2.0.0-py3.11  "/docker-entrypoint.…"   20 seconds ago   Up 15 seconds   0.0.0.0:8080->8080/tcp, :::8080->8080/tcp   nautobot_app_livedata_nautobot_1
+d64ebd60675d   livedata/nautobot:2.0.0-py3.11  "mkdocs serve -v -a …"   25 seconds ago   Up 18 seconds   0.0.0.0:8001->8080/tcp, :::8001->8080/tcp   nautobot_app_livedata_docs_1
+e72d63129b36   postgres:13-alpine               "docker-entrypoint.s…"   25 seconds ago   Up 19 seconds   0.0.0.0:5432->5432/tcp, :::5432->5432/tcp   nautobot_app_livedata_postgres_1
+96c6ff66997c   redis:6-alpine                   "docker-entrypoint.s…"   25 seconds ago   Up 21 seconds   0.0.0.0:6379->6379/tcp, :::6379->6379/tcp   nautobot_app_livedata_redis_1
 ```
 
 Once the containers are fully up, you should be able to open up a web browser, and view:
@@ -256,27 +256,27 @@ The last command to know for now is `invoke stop`.
 ➜ invoke stop
 Stopping Nautobot...
 Running docker-compose command "down"
-Stopping livedata_worker_1   ...
-Stopping livedata_nautobot_1 ...
-Stopping livedata_docs_1     ...
-Stopping livedata_redis_1    ...
-Stopping livedata_postgres_1 ...
-Stopping livedata_worker_1   ... done
-Stopping livedata_nautobot_1 ... done
-Stopping livedata_postgres_1 ... done
-Stopping livedata_redis_1    ... done
-Stopping livedata_docs_1     ... done
-Removing livedata_worker_1   ...
-Removing livedata_nautobot_1 ...
-Removing livedata_docs_1     ...
-Removing livedata_redis_1    ...
-Removing livedata_postgres_1 ...
-Removing livedata_postgres_1 ... done
-Removing livedata_docs_1     ... done
-Removing livedata_worker_1   ... done
-Removing livedata_redis_1    ... done
-Removing livedata_nautobot_1 ... done
-Removing network livedata_default
+Stopping nautobot_app_livedata_worker_1   ...
+Stopping nautobot_app_livedata_nautobot_1 ...
+Stopping nautobot_app_livedata_docs_1     ...
+Stopping nautobot_app_livedata_redis_1    ...
+Stopping nautobot_app_livedata_postgres_1 ...
+Stopping nautobot_app_livedata_worker_1   ... done
+Stopping nautobot_app_livedata_nautobot_1 ... done
+Stopping nautobot_app_livedata_postgres_1 ... done
+Stopping nautobot_app_livedata_redis_1    ... done
+Stopping nautobot_app_livedata_docs_1     ... done
+Removing nautobot_app_livedata_worker_1   ...
+Removing nautobot_app_livedata_nautobot_1 ...
+Removing nautobot_app_livedata_docs_1     ...
+Removing nautobot_app_livedata_redis_1    ...
+Removing nautobot_app_livedata_postgres_1 ...
+Removing nautobot_app_livedata_postgres_1 ... done
+Removing nautobot_app_livedata_docs_1     ... done
+Removing nautobot_app_livedata_worker_1   ... done
+Removing nautobot_app_livedata_redis_1    ... done
+Removing nautobot_app_livedata_nautobot_1 ... done
+Removing network nautobot_app_livedata_default
 ```
 
 This will safely shut down all of your running Docker containers for this project. When you are ready to spin containers back up, it is as simple as running `invoke start` again [as seen previously](#invoke-starting-the-development-environment).
@@ -314,7 +314,7 @@ When trying to debug an issue, one helpful thing you can look at are the logs wi
 !!! info
     Want to limit the log output even further? Use the `--tail <#>` command line argument in conjunction with `-f`.
 
-So for example, our app is named `livedata`, the command would most likely be `docker logs livedata_nautobot_1 -f`. You can find the name of all running containers via `docker ps`.
+So for example, our app is named `livedata`, the command would most likely be `docker logs nautobot_app_livedata_nautobot_1 -f`. You can find the name of all running containers via `docker ps`.
 
 If you want to view the logs specific to the worker container, simply use the name of that container instead.
 
@@ -384,10 +384,10 @@ Once the containers are up and running, you should now see the new app installed
 To update the Python version, you can update it within `tasks.py`.
 
 ```python
-namespace = Collection("livedata")
+namespace = Collection("nautobot_app_livedata")
 namespace.configure(
     {
-        "livedata": {
+        "nautobot_app_livedata": {
             ...
             "python_ver": "3.11",
 	    ...
@@ -396,17 +396,17 @@ namespace.configure(
 )
 ```
 
-Or set the `INVOKE_LIVEDATA_PYTHON_VER` variable.
+Or set the `INVOKE_NAUTOBOT_APP_LIVEDATA_PYTHON_VER` variable.
 
 ### Updating Nautobot Version
 
 To update the Nautobot version, you can update it within `tasks.py`.
 
 ```python
-namespace = Collection("livedata")
+namespace = Collection("nautobot_app_livedata")
 namespace.configure(
     {
-        "livedata": {
+        "nautobot_app_livedata": {
             ...
             "nautobot_ver": "2.0.0",
 	    ...
@@ -415,7 +415,7 @@ namespace.configure(
 )
 ```
 
-Or set the `INVOKE_LIVEDATA_NAUTOBOT_VER` variable.
+Or set the `INVOKE_NAUTOBOT_APP_LIVEDATA_NAUTOBOT_VER` variable.
 
 ## Other Miscellaneous Commands To Know
 
@@ -467,7 +467,7 @@ To run an individual test, you can run any or all of the following:
 
 ### App Configuration Schema
 
-In the package source, there is the `livedata/app-config-schema.json` file, conforming to the [JSON Schema](https://json-schema.org/) format. This file is used to validate the configuration of the app in CI pipelines.
+In the package source, there is the `nautobot_app_livedata/app-config-schema.json` file, conforming to the [JSON Schema](https://json-schema.org/) format. This file is used to validate the configuration of the app in CI pipelines.
 
 If you make changes to `PLUGINS_CONFIG` or the configuration schema, you can run the following command to validate the schema:
 

@@ -151,24 +151,24 @@ if not _TESTING:
 #
 
 # Enable installed Apps. Add the name of each App to the list.
-PLUGINS = ["livedata"]
+PLUGINS = ["nautobot_app_livedata"]
 
 # Apps configuration settings. These settings are used by various Apps that the user may have installed.
 # Each key in the dictionary is the name of an installed App and its value is a dictionary of settings.
 # PLUGINS_CONFIG = {
-#     'livedata': {
+#     'nautobot_app_livedata': {
 #         'foo': 'bar',
 #         'buzz': 'bazz'
 #     }
 # }
-if "livedata" in PLUGINS:
+if "nautobot_app_livedata" in PLUGINS:
     if "PLUGINS_CONFIG" not in locals():
         PLUGINS_CONFIG = {}
-    if "livedata" not in PLUGINS_CONFIG:
-    	PLUGINS_CONFIG["livedata"] = {}
+    if "nautobot_app_livedata" not in PLUGINS_CONFIG:
+    	PLUGINS_CONFIG["nautobot_app_livedata"] = {}
 
 PLUGINS_CONFIG = {
-    'livedata': {
+    'nautobot_app_livedata': {
     }
 }
 
