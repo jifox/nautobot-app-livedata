@@ -8,7 +8,7 @@
         "verbose_name": "Live Data",
         "app_slug": "livedata",
         "project_slug": "nautobot-app-livedata",
-        "repo_url": "ssh://git.j-fuchs.at:/volume1/gitlab/net-automation/nautobot-app-livedata.git",
+        "repo_url": "https://github.com/jifox/nautobot-app-livedata.git",
         "base_url": "livedata",
         "min_nautobot_version": "2.0.0",
         "max_nautobot_version": "2.9999",
@@ -16,7 +16,7 @@
         "project_short_description": "LiveData is a Nautobot plugin that provides a live view of the network data.",
         "model_class_name": "None",
         "open_source_license": "Apache-2.0",
-        "docs_base_url": "https://docs.swarm-services.home.local",
+        "docs_base_url": "https://github.com/jifox/",
         "docs_app_url": "https://docs.swarm-services.home.local/projects/livedata/en/latest",
         "postgres_version": "17-alpine",
         "enable_ldap_auth": "Yes",
@@ -30,6 +30,6 @@
         "_template": "/home/admin/nautobot2-dev/cookiecutter-nautobot-app-upstream",
         "_output_dir": "/home/admin/nautobot2-dev/cookiecutter-nautobot-app-upstream/outputs",
         "_repo_dir": "/home/admin/nautobot2-dev/cookiecutter-nautobot-app-upstream/nautobot-app",
-        "_checkout": "refernce-v2"
+        "_checkout": "reference-v2"
     }
 }

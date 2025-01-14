@@ -37,7 +37,7 @@ This document describes all new features and changes in the release `1.0`. The f
 
 ### Fixed
 
-- [#123](ssh://git.j-fuchs.at:/volume1/gitlab/net-automation/nautobot-app-livedata.git/issues/123) Fixed Tag filtering not working in job launch form
+- [#123](https://github.com/jifox/nautobot-app-livedata.git/issues/123) Fixed Tag filtering not working in job launch form
 
 ## [v1.0.0] - 2021-08-03
 

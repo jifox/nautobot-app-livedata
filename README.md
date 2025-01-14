@@ -13,7 +13,7 @@ To avoid extra work and temporary links, make sure that publishing docs (or merg
 <p align="center">
   <img src="https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/icon-livedata.png" class="logo" height="200px">
   <br>
-  <a href="ssh://git.j-fuchs.at:/volume1/gitlab/net-automation/nautobot-app-livedata.git/actions"><img src="ssh://git.j-fuchs.at:/volume1/gitlab/net-automation/nautobot-app-livedata.git/actions/workflows/ci.yml/badge.svg?branch=main"></a>
+  <a href="https://github.com/jifox/nautobot-app-livedata.git/actions"><img src="https://github.com/jifox/nautobot-app-livedata.git/actions/workflows/ci.yml/badge.svg?branch=main"></a>
   <a href="https://docs.swarm-services.home.local/projects/livedata/en/latest/"><img src="https://readthedocs.org/projects/nautobot-app-livedata/badge/"></a>
   <a href="https://pypi.org/project/livedata/"><img src="https://img.shields.io/pypi/v/livedata"></a>
   <a href="https://pypi.org/project/livedata/"><img src="https://img.shields.io/pypi/dm/livedata"></a>
@@ -45,7 +45,7 @@ This App is installed in the Nautobot Community Sandbox found over at [demo.naut
 
 ## Documentation
 
-Full documentation for this App can be found over on the [Nautobot Docs](https://docs.swarm-services.home.local) website:
+Full documentation for this App can be found over on the [Nautobot Docs](https://github.com/jifox/) website:
 
 - [User Guide](https://docs.swarm-services.home.local/projects/livedata/en/latest/user/app_overview/) - Overview, Using the App, Getting Started.
 - [Administrator Guide](https://docs.swarm-services.home.local/projects/livedata/en/latest/admin/install/) - How to Install, Configure, Upgrade, or Uninstall the App.
@@ -55,7 +55,7 @@ Full documentation for this App can be found over on the [Nautobot Docs](https:/
 
 ### Contributing to the Documentation
 
-You can find all the Markdown source for the App documentation under the [`docs`](ssh://git.j-fuchs.at:/volume1/gitlab/net-automation/nautobot-app-livedata.git/tree/develop/docs) folder in this repository. For simple edits, a Markdown capable editor is sufficient: clone the repository and edit away.
+You can find all the Markdown source for the App documentation under the [`docs`](https://github.com/jifox/nautobot-app-livedata.git/tree/develop/docs) folder in this repository. For simple edits, a Markdown capable editor is sufficient: clone the repository and edit away.
 
 If you need to view the fully-generated documentation site, you can build it with [MkDocs](https://www.mkdocs.org/). A container hosting the documentation can be started using the `invoke` commands (details in the [Development Environment Guide](https://docs.swarm-services.home.local/projects/livedata/en/latest/dev/dev_environment/#docker-development-environment)) on [http://localhost:8001](http://localhost:8001). Using this container, as your changes to the documentation are saved, they will be automatically rebuilt and any pages currently being viewed will be reloaded in your browser.
 

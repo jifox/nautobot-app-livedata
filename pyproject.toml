@@ -5,8 +5,8 @@ description = "LiveData is a Nautobot plugin that provides a live view of the ne
 authors = ["Josef Fuchs <josef.fuchs@j-fuchs.at>"]
 license = "Apache-2.0"
 readme = "README.md"
-homepage = "ssh://git.j-fuchs.at:/volume1/gitlab/net-automation/nautobot-app-livedata.git"
-repository = "ssh://git.j-fuchs.at:/volume1/gitlab/net-automation/nautobot-app-livedata.git"
+homepage = "https://github.com/jifox/nautobot-app-livedata.git"
+repository = "https://github.com/jifox/nautobot-app-livedata.git"
 documentation = "https://docs.swarm-services.home.local/projects/livedata/en/latest/"
 keywords = ["nautobot", "nautobot-app", "nautobot-plugin"]
 classifiers = [
@@ -153,7 +153,7 @@ directory = "changes"
 filename = "docs/admin/release_notes/version_X.Y.md"
 template = "development/towncrier_template.j2"
 start_string = "<!-- towncrier release notes start -->"
-issue_format = "[#{issue}](ssh://git.j-fuchs.at:/volume1/gitlab/net-automation/nautobot-app-livedata.git/issues/{issue})"
+issue_format = "[#{issue}](https://github.com/jifox/nautobot-app-livedata.git/issues/{issue})"
 
 [[tool.towncrier.type]]
 directory = "security"
