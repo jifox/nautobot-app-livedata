@@ -49,11 +49,11 @@ This app addresses the need for dynamic and up-to-date network information, allo
 
 - Configure the show commands to be executed on Platform level:
 
-![Livedata App Platform Screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-app-platform-custom-fields-edit.png)
+  ![Livedata App Platform Screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-app-platform-custom-fields-edit.png)
 
 - Job to clean up old data:
 
- ![Livedata App Cleanup Job Results Screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-app-cleanup-job-results.png)
+  ![Livedata App Cleanup Job Results Screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-app-cleanup-job-results.png)
 
 
 > Developer Note: Add any representative screenshots of the App in action. These images should also be added to the `docs/user/app_use_cases.md` section.
