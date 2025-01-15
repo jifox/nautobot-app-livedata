@@ -1,6 +1,6 @@
 [tool.poetry]
-name = "livedata"
-version = "0.1.0"
+name = "nautobot_app_livedata"
+version = "2.4.0b1"
 description = "Nautobot App Livedata is a Nautobot app that provides a live view of the network data."
 authors = ["Josef Fuchs <josef.fuchs@j-fuchs.at>"]
 license = "Apache-2.0"
@@ -13,7 +13,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "Development Status :: 5 - Production/Stable",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -28,20 +27,15 @@ include = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.13"
+python = ">=3.9,<3.13"
 # Used for local development
-nautobot = "^2.0.0"
+nautobot = "^2.4.0"
 
 [tool.poetry.group.dev.dependencies]
 coverage = "*"
 django-debug-toolbar = "~4.4.0"
 invoke = "~2.2.0"
 ipython = "*"
-pylint = "~3.2.7"
-pylint-django = "~2.5.3"
-pylint-nautobot = "*"
-ruff = "~0.5.7"
-yamllint = "~1.35.1"
 toml = "*"
 Markdown = "~3.6"
 # Render custom markdown for version added/changed/remove notes
@@ -57,23 +51,23 @@ griffe = "1.1.1"
 towncrier = "~23.11.0"
 to-json-schema = "*"
 jsonschema = "^4.7.0"
-# Based on https://github.com/nautobot/nautobot-app-secrets-providers/blob/develop/pyproject.toml
-azure-identity = { version = "^1.15.0", optional = false }
-azure-keyvault-secrets = { version = "^4.8.0", optional = false }
-boto3 = { version = "^1.19.5", optional = false }
-hvac = { version = ">=0.11.0, <1.1.0", optional = false }
-python-tss-sdk = {version = "~1.2.0", optional = false}
-nautobot-secrets-providers = "~3.1.1"
-django-allow-cidr = "~0.7.1"
-nautobot-ssot = {extras = ["all"], version = "~3.1.0"}
 nautobot-plugin-nornir = "~2.1.0"
-nautobot-device-onboarding = ">=3.0,<4.0"
-nautobot-data-validation-engine = "~3.1.1"
-nautobot-golden-config = "~2.1.2"
+
+[tool.poetry.group.linting.dependencies]
+# Code static analysis
+pylint = "~3.3.3"
+# Pylint extensions for Django
+pylint-django = "~2.6.1"
+# Python implementation of markdownlint
+pymarkdownlnt = "~0.9.26"
+# Combination linter and code formatter
+ruff = "~0.8.6"
+# YAML linting
+yamllint = "~1.35.1"
+
 
 [tool.poetry.extras]
-all = [
-]
+all = []
 
 [tool.pylint.master]
 # Include the pylint_django plugin to avoid spurious warnings about Django patterns

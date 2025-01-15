@@ -23,9 +23,40 @@ To avoid extra work and temporary links, make sure that publishing docs (or merg
 
 ## Overview
 
-> Developer Note: Add a long (2-3 paragraphs) description of what the App does, what problems it solves, what functionality it adds to Nautobot, what external systems it works with etc.
+The [Nautobot App LiveData](https://github.com/jifox/nautobot-app-livedata/) is providing real-time data from network devices that are supported by [Netmiko](https://github.com/ktbyers/netmiko).
+
+At the moment, the app is supporting only interface specific data. The data is collected from the devices via platform specific show commands and will be presented in the interface's 'Life Data' tab.
+
+This app addresses the need for dynamic and up-to-date network information, allowing network administrators and engineers to make informed decisions based on the latest data. 
+
+
+!!! warning "Developer Note!"
+    This app is currently in development and is not yet ready for production use.
+
+    The functionality is tested manually and works as expected.
+    Automated tests are not yet in place. 
+    
+    The app is not yet available on PyPI.
+
+
 
 ### Screenshots
+
+- Live Data Output for interfaces
+
+  ![Livedata output screenshot](images/livedata-app-output.png)
+  ![Livedata output screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-app-output.png)
+
+- Configure the show commands to be executed on Platform level:
+
+![Livedata App Platform Screenshot](images/livedata-app-platform-custom-fields-edit.png)
+![Livedata App Platform Screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-app-platform-custom-fields-edit.png)
+
+- Job to clean up old data:
+
+ ![Livedata App Cleanup Job Results Screenshot](images/livedata-app-cleanup-job-results.png)
+ ![Livedata App Cleanup Job Results Screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-app-cleanup-job-results.png)
+
 
 > Developer Note: Add any representative screenshots of the App in action. These images should also be added to the `docs/user/app_use_cases.md` section.
 

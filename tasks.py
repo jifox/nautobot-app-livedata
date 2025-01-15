@@ -665,12 +665,12 @@ def import_media(context, input_file="media.tgz"):
         start(context, "nautobot")
     _await_healthy_service(context, "nautobot")
     command = ["exec -- nautobot sh -c '"]
-    command += [ "tar", "-xzf", "-", "-C", "/" ]
+    command += ["tar", "-xzf", "-", "-C", "/"]
     command += [
         "'",
         f"< '{input_file}'",
     ]
-    
+
     docker_compose(context, " ".join(command), pty=False)
     print("Media files import complete, all files are now available in Nautobot container.")
 
@@ -691,7 +691,7 @@ def backup_media(context, media_dir="/opt/nautobot/media", output_file="media.tg
     _await_healthy_service(context, "nautobot")
 
     command = ["exec -- nautobot sh -c '"]
-    command += [ "tar", "-czf", "-", media_dir ]
+    command += ["tar", "-czf", "-", media_dir]
     command += [
         "'",
         f"> '{output_file}'",

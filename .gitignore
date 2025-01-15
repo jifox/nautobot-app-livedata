@@ -306,4 +306,5 @@ invoke.yml
 public
 /compose.yaml
 /dump.sql
+/media.tgz
 /nautobot_app_livedata/static/nautobot_app_livedata/docs
