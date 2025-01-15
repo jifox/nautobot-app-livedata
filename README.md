@@ -44,17 +44,15 @@ This app addresses the need for dynamic and up-to-date network information, allo
 
 - Live Data Output for interfaces
 
-  ![Livedata output screenshot](images/livedata-app-output.png)
+
   ![Livedata output screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-app-output.png)
 
 - Configure the show commands to be executed on Platform level:
 
-![Livedata App Platform Screenshot](images/livedata-app-platform-custom-fields-edit.png)
 ![Livedata App Platform Screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-app-platform-custom-fields-edit.png)
 
 - Job to clean up old data:
 
- ![Livedata App Cleanup Job Results Screenshot](images/livedata-app-cleanup-job-results.png)
  ![Livedata App Cleanup Job Results Screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-app-cleanup-job-results.png)
 
 
