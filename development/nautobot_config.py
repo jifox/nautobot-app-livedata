@@ -91,11 +91,14 @@ if not _TESTING:
         "disable_existing_loggers": False,
         "formatters": {
             "normal": {
-                "format": "%(asctime)s.%(msecs)03d %(levelname)-7s %(name)s : %(message)s",
+                "format": ("%(asctime)s.%(msecs)03d %(levelname)-7s %(name)s : " "%(message)s"),
                 "datefmt": "%H:%M:%S",
             },
             "verbose": {
-                "format": "%(asctime)s.%(msecs)03d %(levelname)-7s %(name)-20s %(filename)-15s %(funcName)30s() : %(message)s",
+                "format": (
+                    "%(asctime)s.%(msecs)03d %(levelname)-7s %(name)-20s %(filename)-15s "
+                    "%(funcName)30s() : %(message)s"
+                ),
                 "datefmt": "%H:%M:%S",
             },
         },
@@ -175,7 +178,9 @@ if NORNIR_ENABLED:
                     "allowed_location_types": ["region", "site"],
                     "denied_location_types": ["rack"],
                     "nornir_settings": {
-                        "credentials": "nautobot_plugin_nornir.plugins.credentials.nautobot_secrets.CredentialsNautobotSecrets",
+                        "credentials": (
+                            "nautobot_plugin_nornir.plugins.credentials." "nautobot_secrets.CredentialsNautobotSecrets"
+                        ),
                         "runner": {
                             "plugin": "threaded",
                             "options": {
@@ -193,7 +198,8 @@ if NORNIR_ENABLED:
                             },
                         },
                     },
-                    # "secret_access_type": "GENERIC",  # (default: GENERIC|CONSOLE|GNMI|HTTP|NETCONF|REST|RESTCONF|SNMP|SSH")
+                    # "secret_access_type": "GENERIC",
+                    #    (default: GENERIC|CONSOLE|GNMI|HTTP|NETCONF|REST|RESTCONF|SNMP|SSH")
                 }
             }
         )

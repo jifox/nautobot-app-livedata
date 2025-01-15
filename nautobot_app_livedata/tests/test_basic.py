@@ -18,7 +18,7 @@ class TestDocsPackaging(unittest.TestCase):
             requirements = [line for line in file.read().splitlines() if (len(line) > 0 and not line.startswith("#"))]
         for pkg in requirements:
             package_name = pkg
-            if len(pkg.split("==")) == 2:  # noqa: PLR2004
+            if len(pkg.split("==")) == 2:
                 package_name, version = pkg.split("==")
             else:
                 version = "*"

@@ -345,7 +345,7 @@ class LivedataCleanupJobResultsJob(Job):
         default=False,
     )
 
-    def run(
+    def run(  # pylint: disable=arguments-differ
         self,
         days_to_keep,
         dry_run,

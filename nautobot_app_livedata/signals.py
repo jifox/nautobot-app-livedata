@@ -132,6 +132,6 @@ def _set_permission(name, actions_list, description, model_name, apps=global_app
         permission.save()
         ContentType = apps.get_model("contenttypes", "ContentType")  # pylint: disable=invalid-name
         permission_content_type_model = ContentType.objects.get(app_label=app_label, model=model_name)
-        permission.content_types.set([ContentType.objects.get_for_model(permission_content_type_model)])  # type: ignore
+        permission.content_type.set([ContentType.objects.get_for_model(permission_content_type_model)])  # type: ignore
         permission.save()
         print(f"Permissions {name} created")
