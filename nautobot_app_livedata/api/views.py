@@ -133,9 +133,9 @@ class LivedataManagedDeviceApiView(GenericAPIView, PermissionRequiredMixin):
         """Handle GET request for Livedata Managed Device API.
 
         Args:
-            request: The request object.
+            request (HttpRequest): The request object.
             pk: The primary key of the object.
-            object_type: The object type.
+            object_type (str): The object type.
             *args: Additional positional arguments.
             **kwargs: Additional keyword arguments.
 
