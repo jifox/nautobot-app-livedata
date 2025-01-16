@@ -30,6 +30,11 @@ include = [
 python = ">=3.9,<3.13"
 # Used for local development
 nautobot = "^2.4.0"
+griffe = "1.1.1"
+towncrier = "~23.11.0"
+to-json-schema = "*"
+jsonschema = "^4.7.0"
+nautobot-plugin-nornir = "~2.1.0"
 
 [tool.poetry.group.dev.dependencies]
 coverage = "*"
@@ -38,7 +43,8 @@ invoke = "~2.2.0"
 ipython = "*"
 toml = "*"
 Markdown = "~3.6"
-[tool.poetry.group.docs.dependencies]
+
+#  [tool.poetry.group.docs.dependencies]
 # Rendering docs to HTML
 mkdocs = "~1.6.1"
 # Embedding YAML files into Markdown documents as tables
@@ -65,14 +71,7 @@ mkdocstrings = "~0.27.0"
 # Python-specific extension to mkdocstrings
 mkdocstrings-python = "~1.13.0"
 
-
-griffe = "1.1.1"
-towncrier = "~23.11.0"
-to-json-schema = "*"
-jsonschema = "^4.7.0"
-nautobot-plugin-nornir = "~2.1.0"
-
-[tool.poetry.group.linting.dependencies]
+# [tool.poetry.group.linting.dependencies]
 # Code static analysis
 pylint = "~3.3.3"
 # Pylint extensions for Django
