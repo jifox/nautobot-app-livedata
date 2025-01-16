@@ -56,7 +56,7 @@ def nautobot_database_ready_callback(sender, *, apps=global_apps, **kwargs):
     key_name = "livedata_interface_commands"
     field_type = CustomFieldTypeChoices.TYPE_MARKDOWN
 
-    CustomField = apps.get_model("extras", "CustomField")
+    CustomField = apps.get_model("extras", "customfield")
     # Check if the custom field already exists
     try:
         CustomField.objects.get(
@@ -134,7 +134,7 @@ def _set_permission(name, actions_list, description, model_name, apps=global_app
     app_label = model_info[0].lower()
     model_name = model_info[1].lower()
 
-    ObjectPermission = apps.get_model("users", "ObjectPermission")
+    ObjectPermission = apps.get_model("users", "objectpermission")
     permission, created = ObjectPermission.objects.get_or_create(
         name=name,
         actions=actions_list,
@@ -143,7 +143,7 @@ def _set_permission(name, actions_list, description, model_name, apps=global_app
     if created:
         # Add the content type to the permission
         permission.save()
-        ContentType = apps.get_model("contenttypes", "ContentType")  # pylint: disable=invalid-name
+        ContentType = apps.get_model("contenttypes", "contentType")  # pylint: disable=invalid-name
         permission_content_type_model = ContentType.objects.get(app_label=app_label, model=model_name)
         permission.object_types.set([permission_content_type_model])  # type: ignore
         permission.save()
