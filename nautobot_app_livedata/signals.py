@@ -50,7 +50,6 @@ def nautobot_database_ready_callback(sender, *, apps=global_apps, **kwargs):
 
     # ADD CUSTOM FIELDS
     ContentType = apps.get_model("contenttypes", "ContentType")
-    content_type_platform = apps.get_model("dcim", "Platform")
 
     from nautobot.extras.choices import CustomFieldTypeChoices
 
@@ -83,21 +82,35 @@ def nautobot_database_ready_callback(sender, *, apps=global_apps, **kwargs):
                 "advanced_ui": True,
             },
         )
-        field.save()
-        field.content_types.set([ContentType.objects.get_for_model(content_type_platform)])
+        if created:
+            # Add the content type to the custom field
+            field.save()
+            interface_content_type_model = ContentType.objects.get(app_label='dcim', model='interface')
+            field.content_types.set([interface_content_type_model])  # type: ignore
+            print(f"Custom field {key_name} created")
         field.save()
 
     # Ensure that the job is enabled
+    _enable_job(apps, job_name=PLUGIN_SETTINGS["query_interface_job_name"])
+
+
+def _enable_job(apps, job_name):
+    """Enable the job with the given name.
+
+    Args:
+        apps (django.apps.apps.Apps): Use this to look up model classes as needed.
+        job_name (str): The name of the job to enable.
+    """
     Job = apps.get_model("extras", "Job")
     try:
         job = Job.objects.get(
-            name=PLUGIN_SETTINGS["query_interface_job_name"],
+            name=job_name,
         )
-        if not job.enabled:
-            job.enabled = True
+        if not job.enabled:  # type: ignore
+            job.enabled = True  # type: ignore
             job.save()
     except Job.DoesNotExist:
-        print(f"WARNING: Job {PLUGIN_SETTINGS['query_interface_job_name']} not found")
+        print(f"WARNING: Job {job_name} not found")
 
 
 def _set_permission(name, actions_list, description, model_name, apps=global_apps):
@@ -132,6 +145,6 @@ def _set_permission(name, actions_list, description, model_name, apps=global_app
         permission.save()
         ContentType = apps.get_model("contenttypes", "ContentType")  # pylint: disable=invalid-name
         permission_content_type_model = ContentType.objects.get(app_label=app_label, model=model_name)
-        permission.content_types.set([ContentType.objects.get_for_model(permission_content_type_model)])  # type: ignore
+        permission.object_types.set([permission_content_type_model])  # type: ignore
         permission.save()
         print(f"Permissions {name} created")
