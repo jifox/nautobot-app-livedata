@@ -5,7 +5,7 @@
 from nautobot.apps.ui import DistinctViewTab, TemplateExtension
 
 
-class LivedataInterfaceExtraTabs(TemplateExtension):
+class LivedataInterfaceExtraTabs(TemplateExtension):  # pylint: disable=abstract-method
     """Add a tab to the interface detail view."""
 
     model = "dcim.interface"

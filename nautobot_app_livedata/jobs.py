@@ -20,12 +20,12 @@ from .nornir_plays.processor import ProcessLivedata
 from .urls import APP_NAME, PLUGIN_SETTINGS
 
 # Groupname: Livedata
-name = GROUP_NAME = APP_NAME
+name = GROUP_NAME = APP_NAME  # pylint: disable=invalid-name
 
 InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
 
 
-class LivedataQueryInterfaceJob(Job):
+class LivedataQueryInterfaceJob(Job):  # pylint: disable=too-many-instance-attributes
     """Job to query live data on an interface.
 
     For more information on implementing jobs, refer to the Nautobot job documentation:
@@ -43,7 +43,7 @@ class LivedataQueryInterfaceJob(Job):
         **kwargs: Additional keyword arguments.
     """
 
-    class Meta:
+    class Meta:  # pylint: disable=too-few-public-methods
         """Metadata for the Livedata Query Interface Job."""
 
         name = PLUGIN_SETTINGS.get("query_interface_job_name")
@@ -72,6 +72,7 @@ class LivedataQueryInterfaceJob(Job):
         self.device_name = None  # The device name of the device where the interface is located
         self.device_ip = None  # The primary IP address of the managed device
         self.execution_timestamp = None  # The current timestamp in the format "YYYY-MM-DD HH:MM:SS"
+        self.now = None  # The current timestamp
 
     def parse_commands(self, commands_j2):
         """Replace jinja2 variables in the commands with the interface-specific context.
@@ -133,37 +134,12 @@ class LivedataQueryInterfaceJob(Job):
         self.now = make_aware(datetime.now())
 
         # Initialize the job-specific variables
-        if "interface_id" not in kwargs:
-            raise ValueError("interface_id is required.")
-        try:
-            self.interface = Interface.objects.get(pk=kwargs.get("interface_id"))
-        except Interface.DoesNotExist as error:
-            raise ValueError(f"Interface with ID {kwargs.get('interface_id')} not found.") from error
-        # Initialize the managed device
-        if "managed_device_id" not in kwargs:
-            managed_device_id = GetManagedDevice("dcim.interface", self.interface.id).managed_device.id  # type: ignore
-        else:
-            managed_device_id = kwargs.get("managed_device_id")
-        try:
-            self.managed_device = Device.objects.get(pk=managed_device_id)
-        except Device.DoesNotExist:
-            raise ValueError(f"Managed Device with ID {managed_device_id} not found.")
+        self._initialize_interface(kwargs)
+        self._initialize_managed_device(kwargs)
         self.device_name = self.managed_device.name
         self.device_ip = self.managed_device.primary_ip.address  # type: ignore
-
-        # Initalize the device
-        if "device_id" in kwargs:
-            device_id = kwargs.get("device_id")
-        else:
-            device_id = self.interface.device.id  # type: ignore
-        if device_id:
-            self.device = Device.objects.get(pk=device_id)
-            self.device_name = self.device.name
-        # Initialize the virtual chassis
-        if "virtual_chassis_id" in kwargs:
-            virtual_chassis_id = kwargs.get("virtual_chassis_id")
-            if virtual_chassis_id:
-                self.virtual_chassis = VirtualChassis.objects.get(pk=virtual_chassis_id)
+        self._initialize_device(kwargs)
+        self.initialize_virtual_chassis(kwargs)
         if "user" in kwargs:
             self.user = kwargs.get("user")  # type: ignore
         if "remote_addr" in kwargs:
@@ -179,6 +155,43 @@ class LivedataQueryInterfaceJob(Job):
         self.commands = self.parse_commands(kwargs.get("commands_j2"))
         # Initialize Variables for template rendering
         self.execution_timestamp = self.now.strftime("%Y-%m-%d %H:%M:%S")
+
+    def initialize_virtual_chassis(self, kwargs):
+        """Initialize the virtual chassis object if applicable."""
+        if "virtual_chassis_id" in kwargs:
+            virtual_chassis_id = kwargs.get("virtual_chassis_id")
+            if virtual_chassis_id:
+                self.virtual_chassis = VirtualChassis.objects.get(pk=virtual_chassis_id)
+
+    def _initialize_device(self, kwargs):
+        """Initialize the device object."""
+        if "device_id" in kwargs:
+            device_id = kwargs.get("device_id")
+        else:
+            device_id = self.interface.device.id  # type: ignore
+        if device_id:
+            self.device = Device.objects.get(pk=device_id)
+            self.device_name = self.device.name
+
+    def _initialize_managed_device(self, kwargs):
+        """Initialize the managed device object."""
+        if "managed_device_id" not in kwargs:
+            managed_device_id = GetManagedDevice("dcim.interface", self.interface.id).managed_device.id  # type: ignore
+        else:
+            managed_device_id = kwargs.get("managed_device_id")
+        try:
+            self.managed_device = Device.objects.get(pk=managed_device_id)
+        except Device.DoesNotExist:
+            raise ValueError(f"Managed Device with ID {managed_device_id} not found.")  # pylint: disable=raise-missing-from
+
+    def _initialize_interface(self, kwargs):
+        """Initialize the interface object."""
+        if "interface_id" not in kwargs:
+            raise ValueError("interface_id is required.")
+        try:
+            self.interface = Interface.objects.get(pk=kwargs.get("interface_id"))
+        except Interface.DoesNotExist as error:
+            raise ValueError(f"Interface with ID {kwargs.get('interface_id')} not found.") from error
 
     # If both before_start() and run() are successful, the on_success() method
     # will be called next, if implemented.
@@ -202,7 +215,7 @@ class LivedataQueryInterfaceJob(Job):
     # will be marked as a success and the returned value will be stored in
     # the associated JobResult database record.
 
-    def run(
+    def run(  # pylint: disable=too-many-locals
         self,
         *args,
         **kwargs,
@@ -283,14 +296,14 @@ class LivedataQueryInterfaceJob(Job):
         return_values = []
         for res in results:
             result = res["task_result"]
-            self.logger.debug(f"Livedata results for interface: \n```{result}\n```")
+            self.logger.debug("Livedata results for interface: \n```%s\n```", result)
             value = {
                 "command": res["command"],
                 "stdout": result,
                 "stderr": "",  # Adjust if needed based on actual result structure
             }
             return_values.append(value)
-            self.logger.debug(f"Livedata results for interface: \n```{value}\n```")
+            self.logger.debug("Livedata results for interface: \n```%s\n```", value)
         # Return the results
         return return_values
 
@@ -323,7 +336,7 @@ class LivedataCleanupJobResultsJob(Job):
         **kwargs: Additional keyword arguments.
     """
 
-    class Meta:
+    class Meta:  # pylint: disable=too-few-public-methods
         """Metadata for the Livedata Cleanup Job Results Job."""
 
         name = "Livedata Cleanup job results"

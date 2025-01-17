@@ -7,7 +7,7 @@ from django.db import DEFAULT_DB_ALIAS, router
 PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_app_livedata"]
 
 
-def nautobot_database_ready_callback(sender, *, apps=global_apps, **kwargs):
+def nautobot_database_ready_callback(sender, *, apps=global_apps, **kwargs):  # pylint: disable=unused-argument
     """
     Callback function triggered by the nautobot_database_ready signal when the Nautobot database is fully ready.
 
@@ -50,7 +50,7 @@ def nautobot_database_ready_callback(sender, *, apps=global_apps, **kwargs):
     )
     # Add the custom field to the Platform model, which is used to store the
     # Commands to display on the Interface page.
-    from nautobot.extras.choices import CustomFieldTypeChoices
+    from nautobot.extras.choices import CustomFieldTypeChoices  # pylint: disable=import-outside-toplevel
 
     key_name = "livedata_interface_commands"
     field_type = CustomFieldTypeChoices.TYPE_MARKDOWN
@@ -90,7 +90,7 @@ def _get_content_type(apps):
     print("Database-Ready - Checking if ContentType model is available...")
     # Determine whether or not the ContentType model is available.
     try:
-        ContentType = apps.get_model("contenttypes", "ContentType")
+        ContentType = apps.get_model("contenttypes", "ContentType")  # pylint: disable=invalid-name
     except LookupError:
         available = False
     else:
@@ -103,7 +103,7 @@ def _get_content_type(apps):
     return ContentType
 
 
-def _add_custom_field(apps, key_name, field_type, defaults, app_label, model_name):
+def _add_custom_field(apps, key_name, field_type, defaults, app_label, model_name):  # pylint: disable=too-many-arguments,too-many-positional-arguments
     """Add a custom field with the given key name and field type.
 
     Args:
@@ -115,7 +115,7 @@ def _add_custom_field(apps, key_name, field_type, defaults, app_label, model_nam
         model_name (str): The model name of the model.
     """
     print(f"Database-Ready - Creating custom field {key_name}...")
-    CustomField = apps.get_model("extras", "customfield")
+    CustomField = apps.get_model("extras", "customfield")  # pylint: disable=invalid-name
     # Check if the custom field already exists
     try:
         field = CustomField.objects.get(
@@ -135,7 +135,7 @@ def _add_custom_field(apps, key_name, field_type, defaults, app_label, model_nam
     # if the ContentType of the field is empty, assign it
     if not field.content_types.exists():
         print(f"Database-Ready     - Assigning content type '{app_label}.{model_name}' to custom field '{key_name}'...")
-        ContentType = _get_content_type(apps)
+        ContentType = _get_content_type(apps)  # pylint: disable=invalid-name
         if not ContentType or not app_label or not model_name:
             print(
                 "WARNING: Database-Ready     - Could not assign the content type",
@@ -163,7 +163,7 @@ def _enable_job(apps, job_name):
         job_name (str): The name of the job to enable.
     """
     print(f"Database-Ready - Enabling job '{job_name}'...")
-    Job = apps.get_model("extras", "Job")
+    Job = apps.get_model("extras", "Job")  # pylint: disable=invalid-name
     try:
         job = Job.objects.get(
             name=job_name,
@@ -199,7 +199,7 @@ def _set_permission(name, actions_list, description, model_name, apps=global_app
     app_label = model_info[0].lower()
     model_name = model_info[1].lower()
 
-    ObjectPermission = apps.get_model("users", "objectpermission")
+    ObjectPermission = apps.get_model("users", "objectpermission")  # pylint: disable=invalid-name
     permission, created = ObjectPermission.objects.get_or_create(
         name=name,
         actions=actions_list,
