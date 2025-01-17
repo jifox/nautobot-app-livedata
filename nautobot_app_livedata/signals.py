@@ -103,7 +103,9 @@ def _get_content_type(apps):
     return ContentType
 
 
-def _add_custom_field(apps, key_name, field_type, defaults, app_label, model_name):  # pylint: disable=too-many-arguments,too-many-positional-arguments
+def _add_custom_field(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+    apps, key_name, field_type, defaults, app_label, model_name
+):
     """Add a custom field with the given key name and field type.
 
     Args:
@@ -133,7 +135,7 @@ def _add_custom_field(apps, key_name, field_type, defaults, app_label, model_nam
             print(f"Database-Ready     - Custom field '{key_name}' created")
 
     # if the ContentType of the field is empty, assign it
-    if not field.content_types.exists():
+    if not field.content_types:
         print(f"Database-Ready     - Assigning content type '{app_label}.{model_name}' to custom field '{key_name}'...")
         ContentType = _get_content_type(apps)  # pylint: disable=invalid-name
         if not ContentType or not app_label or not model_name:
@@ -145,7 +147,14 @@ def _add_custom_field(apps, key_name, field_type, defaults, app_label, model_nam
             )
             print("WARNING: Database-Ready     - Assign the content type manually.")
             return
-        content_type_model = ContentType.objects.get(app_label=app_label, model=model_name)
+        ContentType = _get_content_type(apps)  # pylint: disable=invalid-name
+        print(f"Database-Ready     - ContentType.objects.get(app_label={app_label}, model={model_name})")
+        try:
+            content_type_model = ContentType.objects.get(app_label=app_label, model=model_name)
+        except ContentType.DoesNotExist:
+            # Add the ContentType for model specified in the app_label and model_name
+            print(f"WARNING: Database-Ready     - ContentType.DoesNotExist:")
+
         field.content_types.set([content_type_model])  # type: ignore
         field.save()
         print(f"Database-Ready     - ContenType '{app_label}.{model_name}' assigned to custom field '{key_name}'")
