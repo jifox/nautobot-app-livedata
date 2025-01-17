@@ -3,6 +3,7 @@
 # filepath: livedata/api/views.py
 
 from http import HTTPStatus
+from typing import Any, Optional
 
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from nautobot.dcim.models import Device, Interface
@@ -31,7 +32,7 @@ class LivedataQueryInterfaceApiView(GenericAPIView, PermissionRequiredMixin):
     serializer_class = LivedataSerializer
     queryset = Interface.objects.all()
 
-    def get(self, request, *args, pk=None, **kwargs):
+    def get(self, request: Any, *args: Any, pk: Optional[int] = None, **kwargs: Any) -> Response:
         """Handle GET request for Livedata Query Interface API.
 
         The get method is used to enqueue the Livedata Query Interface Job.
@@ -129,7 +130,9 @@ class LivedataManagedDeviceApiView(GenericAPIView, PermissionRequiredMixin):
     serializer_class = LivedataSerializer
     queryset = Device.objects.all()
 
-    def get(self, request, *args, pk=None, object_type=None, **kwargs):
+    def get(
+        self, request: Any, *args: Any, pk: Optional[int] = None, object_type: Optional[str] = None, **kwargs: Any
+    ) -> Response:
         """Handle GET request for Livedata Managed Device API.
 
         Args:
