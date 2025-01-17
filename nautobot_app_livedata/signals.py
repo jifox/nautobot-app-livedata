@@ -153,7 +153,7 @@ def _add_custom_field(  # pylint: disable=too-many-arguments,too-many-positional
             content_type_model = ContentType.objects.get(app_label=app_label, model=model_name)
         except ContentType.DoesNotExist:
             # Add the ContentType for model specified in the app_label and model_name
-            print(f"WARNING: Database-Ready     - ContentType.DoesNotExist:")
+            print("WARNING: Database-Ready     - ContentType.DoesNotExist:")
 
         field.content_types.set([content_type_model])  # type: ignore
         field.save()
