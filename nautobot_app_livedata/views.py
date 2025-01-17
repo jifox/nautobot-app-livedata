@@ -15,11 +15,13 @@ class LivedataInterfaceExtraTabView(views.ObjectView):
     queryset = Interface.objects.all()
     template_name = "nautobot_app_livedata/interface_live_data.html"
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs):  # pylint: disable=no-member
         """Get context data for the view."""
         now = make_aware(datetime.now())
 
-        context = super().get_context_data(**kwargs)  # type: ignore
+        context = super().get_context_data(**kwargs)  # type: ignore # pylint: disable=no-member
+        if not context:
+            context = {}
         context["interface"] = self
         context["now"] = now.strftime("%Y-%m-%d %H:%M:%S")
 

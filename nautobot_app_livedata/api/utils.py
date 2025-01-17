@@ -67,28 +67,7 @@ class GetManagedDevice:
 
     def get_managed_device(self):
         """Get the managed device for the given object type and ID."""
-        if self._object_type == "dcim.interface":
-            try:
-                self._interface = Interface.objects.get(pk=self._pk)
-                self._device = self._interface.device
-            except Interface.DoesNotExist as err:
-                raise ValueError("Interface does not exist") from err
-        elif self._object_type == "dcim.device":
-            try:
-                self._device = Device.objects.get(pk=self._pk)
-            except Device.DoesNotExist as err:
-                raise ValueError("Device does not exist") from err
-        elif self._object_type == "dcim.virtualchassis":
-            try:
-                self.virtual_cassis = VirtualChassis.objects.get(pk=self._pk)
-                if self.virtual_cassis.master:
-                    self._device = self.virtual_cassis.master
-                else:
-                    self._device = self.virtual_cassis.members.first()  # type: ignore
-            except VirtualChassis.DoesNotExist as err:
-                raise ValueError("VirtualChassis does not exist") from err
-        else:
-            raise ValueError("Invalid object type")
+        self._get_associated_device()
 
         # Check if device is None
         if self._device is None:
@@ -110,6 +89,30 @@ class GetManagedDevice:
         # Check if the device state is active
         if str(self._managed_device.status) != "Active":
             raise ValueError("Device is not active")
+
+    def _get_associated_device(self):
+        if self._object_type == "dcim.interface":
+            try:
+                self._interface = Interface.objects.get(pk=self._pk)
+                self._device = self._interface.device
+            except Interface.DoesNotExist as err:
+                raise ValueError("Interface does not exist") from err
+        elif self._object_type == "dcim.device":
+            try:
+                self._device = Device.objects.get(pk=self._pk)
+            except Device.DoesNotExist as err:
+                raise ValueError("Device does not exist") from err
+        elif self._object_type == "dcim.virtualchassis":
+            try:
+                self._virtual_chassis = VirtualChassis.objects.get(pk=self._pk)
+                if self._virtual_chassis.master:
+                    self._device = self._virtual_chassis.master
+                else:
+                    self._device = self._virtual_chassis.members.first()  # type: ignore
+            except VirtualChassis.DoesNotExist as err:
+                raise ValueError("VirtualChassis does not exist") from err
+        else:
+            raise ValueError("Invalid object type")
 
     def to_dict(self):
         """Cast the GetManagedDevice object to a dictionary."""
