@@ -139,24 +139,23 @@ class LivedataQueryInterfaceJob(Job):  # pylint: disable=too-many-instance-attri
         self.device_name = self.managed_device.name
         self.device_ip = self.managed_device.primary_ip.address  # type: ignore
         self._initialize_device(kwargs)
-        self.initialize_virtual_chassis(kwargs)
+        self._initialize_virtual_chassis(kwargs)
         if "user" in kwargs:
             self.user = kwargs.get("user")  # type: ignore
         if "remote_addr" in kwargs:
             self.remote_addr = kwargs.get("remote_addr")
         if "x_forwarded_for" in kwargs:
             self.x_forwarded_for = kwargs.get("x_forwarded_for")
-        # Initialize the commands
+        # Initialize the show commands
         if "commands_j2" not in kwargs:
             raise ValueError("commands_j2 is required.")
         self.intf_name = self.interface.name
         self.intf_name_only, self.intf_number = split_interface(self.intf_name)
         self.intf_abbrev = abbreviated_interface_name(self.interface.name)
         self.commands = self.parse_commands(kwargs.get("commands_j2"))
-        # Initialize Variables for template rendering
         self.execution_timestamp = self.now.strftime("%Y-%m-%d %H:%M:%S")
 
-    def initialize_virtual_chassis(self, kwargs):
+    def _initialize_virtual_chassis(self, kwargs):
         """Initialize the virtual chassis object if applicable."""
         if "virtual_chassis_id" in kwargs:
             virtual_chassis_id = kwargs.get("virtual_chassis_id")
@@ -237,13 +236,14 @@ class LivedataQueryInterfaceJob(Job):  # pylint: disable=too-many-instance-attri
             jobresult_id: The job result ID of the job that was enqueued.
         """
         # The job-specific variables are initialized in the before_start() method
-        # self.logger.info(
-        #     f"Livedata Query Interface Job for interface {self.intf_name} on {self.device_name} started.",
-        #     extra={"grouping": f"Query: {self.device_name}, {self.intf_name}", "object": self.job_result},
-        # )
-        # logger.info("This job is running!", extra={"grouping": "myjobisrunning", "object": self.job_result})
-        # self.create_file("greeting.txt", "Hello world!")
-        # self.create_file("farewell.txt", b"Goodbye for now!")  # content can be a str or bytes
+        # Example commands:
+        #   self.logger.info(
+        #       f"Livedata Query Interface Job for interface {self.intf_name} on {self.device_name} started.",
+        #       extra={"grouping": f"Query: {self.device_name}, {self.intf_name}", "object": self.job_result},
+        #   )
+        #   logger.info("This job is running!", extra={"grouping": "myjobisrunning", "object": self.job_result})
+        #   self.create_file("greeting.txt", "Hello world!")
+        #   self.create_file("farewell.txt", b"Goodbye for now!")  # content can be a str or bytes
 
         callername = self.user.username  # type: ignore
         # ManagedDevice is the device that is manageabe
@@ -284,19 +284,19 @@ class LivedataQueryInterfaceJob(Job):  # pylint: disable=too-many-instance-attri
                 .inventory.hosts[self.device_name]  # type: ignore
                 .get_connection("netmiko", nr_with_processors.config)
             )
-            for command in self.commands:
-                try:
-                    self.logger.debug(f"Executing '{command}' on device {self.device_name}")
-                    task_result = connection.send_command(command)
-                    results.append({"command": command, "task_result": task_result})
-                except NornirExecutionError as error:
-                    raise ValueError(f"`E3001:` {error}") from error
-            # Close the connection
-            connection.disconnect()
+            try:
+                for command in self.commands:
+                    try:
+                        self.logger.debug(f"Executing '{command}' on device {self.device_name}")
+                        task_result = connection.send_command(command)
+                        results.append({"command": command, "task_result": task_result})
+                    except NornirExecutionError as error:
+                        raise ValueError(f"`E3001:` {error}") from error
+            finally:
+                connection.disconnect()
         return_values = []
         for res in results:
             result = res["task_result"]
-            self.logger.debug("Livedata results for interface: \n```%s\n```", result)
             value = {
                 "command": res["command"],
                 "stdout": result,
@@ -306,23 +306,6 @@ class LivedataQueryInterfaceJob(Job):  # pylint: disable=too-many-instance-attri
             self.logger.debug("Livedata results for interface: \n```%s\n```", value)
         # Return the results
         return return_values
-
-    def execute_command(self, command):
-        """Execute a command and return the result.
-
-        Args:
-            command: The command to execute.
-
-        Returns:
-            str: The result of the command execution.
-        """
-        # Placeholder for command execution logic
-        res = {
-            "command": command,
-            "stdout": "Command executed successfully",
-            "stderr": "",
-        }
-        return res
 
 
 class LivedataCleanupJobResultsJob(Job):
@@ -407,5 +390,4 @@ class LivedataCleanupJobResultsJob(Job):
 
 
 print("Registering Jobs: LivedataQueryInterfaceJob, LivedataCleanupJobResultsJob")
-# Register the Live Data Interface Query job
 register_jobs(LivedataQueryInterfaceJob, LivedataCleanupJobResultsJob)
