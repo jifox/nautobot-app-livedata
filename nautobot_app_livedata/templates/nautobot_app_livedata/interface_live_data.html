@@ -28,7 +28,7 @@
         var jobresultPk = document.getElementById("jobresult-pk").value;
 
         if (jobresultPk === "") {
-            fetch(`/api/plugins/nautobot_app_livedata/intf/{{ object.pk }}/?depth=1&exclude_m2m=false`, {
+            fetch("{% url 'plugins-api:nautobot_app_livedata-api:livedata-query-intf-api' pk=object.pk %}", {
                 method: 'GET',
                 headers: {
                     'X-CSRFToken': csrftoken,
