@@ -1,4 +1,4 @@
-# v1.0 Release Notes
+# v2.4.0 Release Notes
 
 !!! warning "Developer Note - Remove Me!"
     Guiding Principles:
@@ -25,11 +25,11 @@ This document describes all new features and changes in the release `1.0`. The f
 
 ## Release Overview
 
-- Major features or milestones
+- First release of the Nautobot LiveData plugin
 - Achieved in this `x.y` release
 - Changes to compatibility with Nautobot and/or other apps, libraries etc.
 
-## [v1.0.1] - 2021-09-08
+## [v2.4.0] - 2025-02-01
 
 ### Added
 
@@ -37,12 +37,12 @@ This document describes all new features and changes in the release `1.0`. The f
 
 ### Fixed
 
-- [#123](https://github.com/jifox/nautobot-app-livedata.git/issues/123) Fixed Tag filtering not working in job launch form
+### Deprecated
 
-## [v1.0.0] - 2021-08-03
+### Removed
 
-### Added
+### Security
 
-### Changed
+### Developer Notes
 
-### Fixed
+- Added te setting `NAUTOBOT_TEST_FACTORY_SEED=stable_test_database_records` to the file `development/development.env` to allow for the use of stable test database records when running tests. This setting is only used when running tests and should not be used in production environments.

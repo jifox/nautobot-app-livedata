@@ -15,7 +15,8 @@ from nornir import InitNornir
 from nornir.core.exceptions import NornirExecutionError
 from nornir.core.plugins.inventory import InventoryPluginRegister
 
-from .api.utils import GetManagedDevice
+from nautobot_app_livedata.utilities.primarydevice import PrimaryDeviceUtils
+
 from .nornir_plays.processor import ProcessLivedata
 from .urls import APP_NAME, PLUGIN_SETTINGS
 
@@ -35,7 +36,7 @@ class LivedataQueryInterfaceJob(Job):  # pylint: disable=too-many-instance-attri
         commands_j2 (List[str]): The commands to execute in jinja2 syntax.
         device_id (int): The device ID.
         interface_id (int): The interface ID.
-        managed_device_id (int): The managed device ID with management ip.
+        primary_device_id (int): The primary device ID with management ip.
         remote_addr (str): The request.META.get("REMOTE_ADDR").
         virtual_chassis_id (int): The virtual chassis ID.
         x_forwarded_for (str): The request.META.get("HTTP_X_FORWARDED_FOR").
@@ -61,7 +62,7 @@ class LivedataQueryInterfaceJob(Job):  # pylint: disable=too-many-instance-attri
         self.device = None
         self.interface = None  # The interface object
         self.remote_addr = None  # The remote address request.META.get("REMOTE_ADDR")
-        self.managed_device = None  # The managed device object that will be used to execute the commands
+        self.primary_device = None  # The primary device object that will be used to execute the commands
         self.virtual_chassis = None  # The virtual chassis object if applicable
         self.x_forwarded_for = None  # The forwarded address request.META.get("HTTP_X_FORWARDED_FOR")
         self.results = []  # The results of the command execution
@@ -70,7 +71,7 @@ class LivedataQueryInterfaceJob(Job):  # pylint: disable=too-many-instance-attri
         self.intf_number = None  # The interface number (e.g. "1/0/10")
         self.intf_abbrev = None  # The abbreviated interface name (e.g. "Gi1/0/10")
         self.device_name = None  # The device name of the device where the interface is located
-        self.device_ip = None  # The primary IP address of the managed device
+        self.device_ip = None  # The primary IP address of the primary device
         self.execution_timestamp = None  # The current timestamp in the format "YYYY-MM-DD HH:MM:SS"
         self.now = None  # The current timestamp
 
@@ -97,7 +98,7 @@ class LivedataQueryInterfaceJob(Job):  # pylint: disable=too-many-instance-attri
             "intf_number": self.intf_number,
             "intf_abbrev": self.intf_abbrev,
             "device_name": self.device_name,
-            "managed_device": self.managed_device.name,  # type: ignore
+            "primary_device": self.primary_device.name,  # type: ignore
             "device_ip": self.device_ip,
             "obj": self.interface,
             "timestamp": self.execution_timestamp,
@@ -125,19 +126,19 @@ class LivedataQueryInterfaceJob(Job):  # pylint: disable=too-many-instance-attri
             ValueError: If the interface_id is not provided.
             ValueError: If the commands_j2 is not provided.
             ValueError: If the interface with the provided interface_id is not found.
-            ValueError: If the managed device with the provided managed_device_id is not found.
+            ValueError: If the primary device with the provided primary_device_id is not found.
         """
         super().before_start(task_id, args, kwargs)
         self.callername = self.user.username  # type: ignore
-        # ManagedDevice is the device that is manageabe
+        # PrimaryDevice is the device that is manageabe
 
         self.now = make_aware(datetime.now())
 
         # Initialize the job-specific variables
         self._initialize_interface(kwargs)
-        self._initialize_managed_device(kwargs)
-        self.device_name = self.managed_device.name
-        self.device_ip = self.managed_device.primary_ip.address  # type: ignore
+        self._initialize_primary_device(kwargs)
+        self.device_name = self.primary_device.name
+        self.device_ip = self.primary_device.primary_ip.address  # type: ignore
         self._initialize_device(kwargs)
         self._initialize_virtual_chassis(kwargs)
         if "user" in kwargs:
@@ -172,21 +173,21 @@ class LivedataQueryInterfaceJob(Job):  # pylint: disable=too-many-instance-attri
             self.device = Device.objects.get(pk=device_id)
             self.device_name = self.device.name
 
-    def _initialize_managed_device(self, kwargs):
-        """Initialize the managed device object."""
-        if "managed_device_id" not in kwargs:
-            managed_device_id = GetManagedDevice("dcim.interface", self.interface.id).managed_device.id  # type: ignore
+    def _initialize_primary_device(self, kwargs):
+        """Initialize the primary device object."""
+        if "primary_device_id" not in kwargs:
+            primary_device_id = PrimaryDeviceUtils("dcim.interface", self.interface.id).primary_device.id
         else:
-            managed_device_id = kwargs.get("managed_device_id")
+            primary_device_id = kwargs.get("primary_device_id")
         try:
-            self.managed_device = Device.objects.get(pk=managed_device_id)
+            self.primary_device = Device.objects.get(pk=primary_device_id)
         except Device.DoesNotExist:
-            raise ValueError(f"Managed Device with ID {managed_device_id} not found.")  # pylint: disable=raise-missing-from
+            raise ValueError(f"Primary Device with ID {primary_device_id} not found.")  # pylint: disable=raise-missing-from
 
     def _initialize_interface(self, kwargs):
         """Initialize the interface object."""
         if "interface_id" not in kwargs:
-            raise ValueError("interface_id is required.")
+            raise ValueError("Interface_id is required.")
         try:
             self.interface = Interface.objects.get(pk=kwargs.get("interface_id"))
         except Interface.DoesNotExist as error:
@@ -225,7 +226,7 @@ class LivedataQueryInterfaceJob(Job):  # pylint: disable=too-many-instance-attri
             commands (List[str]): The commands to execute
             device_id (int): The device ID.
             interface_id (int): The interface ID.
-            managed_device (int): The managed device ID.
+            primary_device (int): The primary device ID.
             remote_addr (str): The remote address.
             virtual_chassis_id (int): The virtual chassis ID.
             x_forwarded_for (str): The forwarded address.
@@ -246,17 +247,17 @@ class LivedataQueryInterfaceJob(Job):  # pylint: disable=too-many-instance-attri
         #   self.create_file("farewell.txt", b"Goodbye for now!")  # content can be a str or bytes
 
         callername = self.user.username  # type: ignore
-        # ManagedDevice is the device that is manageabe
+        # PrimaryDevice is the device that is manageabe
 
         now = make_aware(datetime.now())
-        qs = Device.objects.filter(id=self.managed_device.id).distinct()  # type: ignore
+        qs = Device.objects.filter(id=self.primary_device.id).distinct()  # type: ignore
 
         data = {
             "now": now,
             "caller": callername,
             "interface": self.interface,
             "device_name": self.device_name,
-            "device_ip": self.managed_device.primary_ip.address,  # type: ignore
+            "device_ip": self.primary_device.primary_ip.address,  # type: ignore
         }
 
         inventory = {

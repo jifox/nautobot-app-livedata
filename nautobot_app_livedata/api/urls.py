@@ -4,7 +4,7 @@
 
 from django.urls import path
 
-from .views import LivedataManagedDeviceApiView, LivedataQueryInterfaceApiView
+from .views import LivedataPrimaryDeviceApiView, LivedataQueryInterfaceApiView
 
 urlpatterns = [
     path(
@@ -14,7 +14,7 @@ urlpatterns = [
     ),
     path(
         "managed-device/<uuid:pk>/<str:object_type>/",
-        LivedataManagedDeviceApiView.as_view(),
+        LivedataPrimaryDeviceApiView.as_view(),
         name="livedata-managed-device-api",
     ),
 ]

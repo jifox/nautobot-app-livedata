@@ -2,21 +2,14 @@
 
 Here you will find detailed instructions on how to **install** and **configure** the App within your Nautobot environment.
 
-!!! warning "Developer Note - Remove Me!"
-    Detailed instructions on installing the App. You will need to update this section based on any additional dependencies or prerequisites.
-
 ## Prerequisites
 
-- The app is compatible with Nautobot 2.0.0 and higher.
+- The app is compatible with Nautobot 2.4.0 and higher.
 - Databases supported: PostgreSQL, MySQL
 
-!!! note
-    Please check the [dedicated page](compatibility_matrix.md) for a full compatibility matrix and the deprecation policy.
+### Dependencies
 
-### Access Requirements
-
-!!! warning "Developer Note - Remove Me!"
-    What external systems (if any) it needs access to in order to work.
+- The app `nautobot_plugin_nornir` is required to be installed and configured. See the [Nautobot Plugin Nornir documentation](https://docs.nautobot.com/projects/plugin-nornir/en/stable/) for more details. 
 
 ## Install Guide
 
@@ -44,12 +37,63 @@ Once installed, the app needs to be enabled in your Nautobot configuration. The 
 # In your nautobot_config.py
 PLUGINS = ["nautobot_app_livedata"]
 
-# PLUGINS_CONFIG = {
-#   "nautobot_app_livedata": {
-#     ADD YOUR SETTINGS HERE
-#   }
-# }
+PLUGINS_CONFIG = {
+    "nautobot_app_livedata": {
+        "query_interface_job_name": os.getenv(
+            "LIVEDATA_QUERY_INTERFACE_JOB_NAME", "Livedata Query Interface Job"
+        ),
+        "query_interface_job_description": os.getenv(
+            "LIVEDATA_QUERY_INTERFACE_JOB_DESCRIPTION", "Job to query live data on an interface."
+        ),
+        "query_interface_job_soft_time_limit": int(
+            os.getenv("LIVEDATA_QUERY_INTERFACE_JOB_SOFT_TIME_LIMIT", "30")
+        ),
+        "query_interface_job_task_queue": os.getenv("LIVEDATA_QUERY_INTERFACE_JOB_TASK_QUEUE", None),
+        "query_interface_job_hidden": is_truthy(os.getenv("LIVEDATA_QUERY_INTERFACE_JOB_HIDDEN", "True")),
+        "query_interface_job_has_sensitive_variables": False,
+    }
+}
 ```
+
+The following configuration shows an example of how to configure
+the `nautobot_plugin_nornir` app:
+
+```python
+# In your nautobot_config.py
+PLUGINS.append("nautobot_plugin_nornir")
+PLUGINS_CONFIG.update(  # type: ignore
+    {
+        "nautobot_plugin_nornir": {
+            "allowed_location_types": ["region", "site"],
+            "denied_location_types": ["rack"],
+            "nornir_settings": {
+                "credentials": (
+                    "nautobot_plugin_nornir.plugins.credentials." "nautobot_secrets.CredentialsNautobotSecrets"
+                ),
+                "runner": {
+                    "plugin": "threaded",
+                    "options": {
+                        "num_workers": 20,
+                    },
+                },
+                # "napalm": {
+                #     "extras": {"optional_args": {"global_delay_factor": 5}},
+                # },
+                "jobs": {
+                    "jinja_env": {
+                        "undefined": "jinja2.StrictUndefined",
+                        "trim_blocks": True,
+                        "lstrip_blocks": False,
+                    },
+                },
+            },
+            # "secret_access_type": "GENERIC",
+            #    (default: GENERIC|CONSOLE|GNMI|HTTP|NETCONF|REST|RESTCONF|SNMP|SSH")
+        }
+    }
+)
+```
+
 
 Once the Nautobot configuration is updated, run the Post Upgrade command (`nautobot-server post_upgrade`) to run migrations and clear any cache:
 
@@ -76,6 +120,19 @@ The app behavior can be controlled with the following list of settings:
 
 | Key     | Example | Default | Description                          |
 | ------- | ------ | -------- | ------------------------------------- |
-| `enable_backup` | `True` | `True` | A boolean to represent whether or not to run backup configurations within the app. |
-| `platform_slug_map` | `{"cisco_wlc": "cisco_aireos"}` | `None` | A dictionary in which the key is the platform slug and the value is what netutils uses in any "network_os" parameter. |
-| `per_feature_bar_width` | `0.15` | `0.15` | The width of the table bar within the overview report |
+| `query_interface_job_name` | | "Livedata Query Interface Job" | The unique name of the job that queries live data on an interface. |
+| `query_interface_job_description` | | `"Job to query live data on an interface."` | The description of the job that queries live data on an interface. |
+| `query_interface_job_soft_time_limit` | 30 | 30 | The soft time limit for the job that queries live data on an interface. |
+| `query_interface_job_task_queue` | | None | The task queue for the job that queries live data on an interface. |
+| `query_interface_job_hidden` | True | True | Whether the job that queries live data on an interface is a hidden job. |
+
+
+Environment variables can be used to override the default settings:
+
+| Environment Variable | Key | 
+| -------------------- | --- |
+| `LIVEDATA_QUERY_INTERFACE_JOB_NAME` | `query_interface_job_name` |
+| `LIVEDATA_QUERY_INTERFACE_JOB_DESCRIPTION` | `query_interface_job_description` |
+| `LIVEDATA_QUERY_INTERFACE_JOB_SOFT_TIME_LIMIT` | `query_interface_job_soft_time_limit` |
+| `LIVEDATA_QUERY_INTERFACE_JOB_TASK_QUEUE` | `query_interface_job_task_queue` |
+| `LIVEDATA_QUERY_INTERFACE_JOB_HIDDEN` | `query_interface_job_hidden` |

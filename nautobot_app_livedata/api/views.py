@@ -5,7 +5,7 @@
 from http import HTTPStatus
 from typing import Any, Optional
 
-from django.contrib.auth.mixins import PermissionRequiredMixin
+from nautobot.apps.views import ObjectPermissionRequiredMixin
 from nautobot.dcim.models import Device, Interface
 from nautobot.extras.jobs import RunJobTaskFailed
 from nautobot.extras.models import Job, JobResult
@@ -13,24 +13,32 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
 from nautobot_app_livedata.urls import PLUGIN_SETTINGS
+from nautobot_app_livedata.utilities.primarydevice import get_livedata_commands_for_interface
 
 from .serializers import LivedataSerializer
-from .utils import get_livedata_commands_for_interface
 
 
-class LivedataQueryInterfaceApiView(GenericAPIView, PermissionRequiredMixin):
+class LivedataQueryInterfaceApiView(ObjectPermissionRequiredMixin, GenericAPIView):
     """Livedata Query-Device API Result view.
 
     For more information on implementing jobs, refer to the Nautobot job documentation:
     https://docs.nautobot.com/projects/core/en/stable/development/jobs/
     """
 
-    permission_required = "dcim.can_interact"
-    raise_exception = True
-    # LivedataManagedDeviceSerializer is used to get the managed device
+    # LivedataPrimaryDeviceSerializer is used to get the primary device
     # for the Interface provided in pk.
     serializer_class = LivedataSerializer
     queryset = Interface.objects.all()
+
+    def get_required_permission(self):
+        """Get the required permission for the view.
+
+        Format: app_label.action_model
+
+        Returns:
+            str: The permission required to access the view.
+        """
+        return "dcim.can_interact_device"
 
     def get(self, request: Any, *args: Any, pk: Optional[int] = None, **kwargs: Any) -> Response:
         """Handle GET request for Livedata Query Interface API.
@@ -68,7 +76,7 @@ class LivedataQueryInterfaceApiView(GenericAPIView, PermissionRequiredMixin):
                 status=HTTPStatus.BAD_REQUEST,  # 400
             )
         try:
-            managed_device_info = serializer.validated_data
+            primary_device_info = serializer.validated_data
             interface = Interface.objects.get(pk=pk)
             show_commands_j2_array = get_livedata_commands_for_interface(interface)
         except (ValueError, Interface.DoesNotExist) as error:
@@ -87,11 +95,11 @@ class LivedataQueryInterfaceApiView(GenericAPIView, PermissionRequiredMixin):
 
         job_kwargs = {
             "commands_j2": show_commands_j2_array,
-            "device_id": managed_device_info["device"],
-            "interface_id": managed_device_info["interface"],
-            "managed_device_id": managed_device_info["managed_device"],
+            "device_id": primary_device_info["device"],
+            "interface_id": primary_device_info["interface"],
+            "primary_device_id": primary_device_info["primary_device"],
             "remote_addr": request.META.get("REMOTE_ADDR"),
-            "virtual_chassis_id": managed_device_info["virtual_chassis"],
+            "virtual_chassis_id": primary_device_info["virtual_chassis"],
             "x_forwarded_for": request.META.get("HTTP_X_FORWARDED_FOR"),
             "extra": {"object": f"Query-Intf: {interface.device.name}, {interface.name}"},
         }
@@ -117,23 +125,31 @@ class LivedataQueryInterfaceApiView(GenericAPIView, PermissionRequiredMixin):
             )
 
 
-class LivedataManagedDeviceApiView(GenericAPIView, PermissionRequiredMixin):
-    """Nautobot App Livedata API Managed Device view.
+# @permission_required(get_permission_for_model(Device, "can_interact"), raise_exception=True)
+class LivedataPrimaryDeviceApiView(ObjectPermissionRequiredMixin, GenericAPIView):
+    """Nautobot App Livedata API Primary Device view.
 
     For more information on implementing jobs, refer to the Nautobot job documentation:
     https://docs.nautobot.com/projects/core/en/stable/development/jobs/
     """
 
-    permission_required = "dcim.can_interact"
-    raise_exception = True
-
     serializer_class = LivedataSerializer
     queryset = Device.objects.all()
+
+    def get_required_permission(self):
+        """Get the required permission for the view.
+
+        Format: app_label.action_model
+
+        Returns:
+            str: The permission required to access the view.
+        """
+        return "dcim.can_interact_device"
 
     def get(
         self, request: Any, *args: Any, pk: Optional[int] = None, object_type: Optional[str] = None, **kwargs: Any
     ) -> Response:
-        """Handle GET request for Livedata Managed Device API.
+        """Handle GET request for Livedata Primary Device API.
 
         Args:
             request (HttpRequest): The request object.
@@ -146,18 +162,18 @@ class LivedataManagedDeviceApiView(GenericAPIView, PermissionRequiredMixin):
             Response: The response object. "application/json"
 
                 data = {
-                    "object_type": "The object type to get the managed device for",
+                    "object_type": "The object type to get the primary device for",
                     "pk": "The primary key",
                     "device": "The device ID of the device that is referred in object_type",
                     "interface": "The interface ID if the object type is 'dcim.interface'",
                     "virtual_chassis": "The virtual chassis ID if the object type is 'dcim.virtualchassis'",
-                    "managed_device": "The managed device ID"
+                    "primary_device": "The primary device ID"
                 }
 
         Raises:
             Response: If the user does not have permission to execute 'livedata' on an interface.
             Response: If the serializer is not valid.
-            Response: If the managed device is not found.
+            Response: If the primary device is not found.
         """
         data = request.data
         data["pk"] = pk
@@ -165,12 +181,18 @@ class LivedataManagedDeviceApiView(GenericAPIView, PermissionRequiredMixin):
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
             # Return error response if serializer is not valid
-            return Response(serializer.errors, status=400)
+            return Response(
+                {
+                    "error": "Invalid data provided",
+                    "details": serializer.errors,
+                },
+                status=HTTPStatus.BAD_REQUEST,  # 400
+            )
         try:
             result = serializer.validated_data
         except ValueError as error:
             return Response(
-                f"Failed to get managed device: {error}",
+                f"Failed to get primary device: {error}",
                 status=HTTPStatus.BAD_REQUEST,  # 400
             )
         return Response(data=result, status=HTTPStatus.OK)  # 200

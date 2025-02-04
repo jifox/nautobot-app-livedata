@@ -5,7 +5,7 @@
 from nautobot.dcim.models import Interface
 from rest_framework import serializers
 
-from .utils import GetManagedDevice
+from nautobot_app_livedata.utilities.primarydevice import PrimaryDeviceUtils
 
 
 class LivedataSerializer(serializers.Serializer):
@@ -44,7 +44,7 @@ class LivedataSerializer(serializers.Serializer):
         if "pk" not in attrs:
             raise serializers.ValidationError("The object ID is not defined", code="invalid")
         try:
-            result = GetManagedDevice(attrs["object_type"], attrs["pk"]).to_dict()
+            result = PrimaryDeviceUtils(object_type=attrs["object_type"], pk=attrs["pk"]).to_dict()
             attrs.update(result)
         except ValueError as err:
             raise serializers.ValidationError(str(err), code="invalid") from err

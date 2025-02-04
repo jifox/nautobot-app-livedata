@@ -152,9 +152,7 @@ if "nautobot_app_livedata" not in PLUGINS_CONFIG:
                 ),
                 "query_interface_job_task_queue": os.getenv("LIVEDATA_QUERY_INTERFACE_JOB_TASK_QUEUE", None),
                 "query_interface_job_hidden": is_truthy(os.getenv("LIVEDATA_QUERY_INTERFACE_JOB_HIDDEN", "True")),
-                "query_interface_job_has_sensitive_variables": is_truthy(
-                    os.getenv("LIVEDATA_QUERY_INTERFACE_JOB_HAS_SENSITIVE_VARIABLES", "False")
-                ),
+                "query_interface_job_has_sensitive_variables": False,
             }
         }
     )
