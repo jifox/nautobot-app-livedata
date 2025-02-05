@@ -7,10 +7,12 @@ from nautobot_app_livedata.utilities.contenttype import ContentTypeUtils
 
 # https://docs.nautobot.com/projects/core/en/stable/user-guide/platform-functionality/customfield/
 #
-class CustomFieldUtils:
+class CustomFieldUtils:  # pylint: disable=too-many-instance-attributes
     """Utility functions for working with custom fields."""
 
-    def __init__(self, key_name=None, field_type=None, defaults=None, model_names=None, is_in_database_ready=False):
+    def __init__(  # pylint: disable=too-many-arguments too-many-positional-arguments
+        self, key_name=None, field_type=None, defaults=None, model_names=None, is_in_database_ready=False
+    ):
         """Initialize the CustomFieldUtils."""
         self.is_in_database_ready = is_in_database_ready
         self._field_type = None
@@ -87,7 +89,6 @@ class CustomFieldUtils:
         return (
             f"CustomFieldUtils(key_name={self.key_name}, "
             f"field_type={self.field_type}, "
-            f"defaults={self.defaults}, "
             f"model_name={self.model_names}"
         )
 
@@ -105,7 +106,7 @@ class CustomFieldUtils:
             raise ValueError(
                 f"Invalid field_type '{self.field_type}'. Must be one of {CustomFieldTypeChoices.values()}"
             )
-        CustomField = ContentTypeUtils(full_model_name="extras.customfield").model
+        CustomField = ContentTypeUtils(full_model_name="extras.customfield").model  # pylint: disable=invalid-name
         field, created = CustomField.objects.get_or_create(
             type=self.field_type, key=self.key_name, defaults=self._defaults
         )

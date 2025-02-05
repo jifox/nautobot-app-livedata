@@ -68,8 +68,8 @@ class PrimaryDeviceUtils:
             raise ValueError("Device is not active")
 
     def _get_associated_device(self):
-        Interface = ContentTypeUtils("dcim.interface").model
-        Device = ContentTypeUtils("dcim.device").model
+        Interface = ContentTypeUtils("dcim.interface").model  # pylint: disable=invalid-name
+        Device = ContentTypeUtils("dcim.device").model  # pylint: disable=invalid-name
         if self._object_type == "dcim.interface":
             try:
                 self._interface = Interface.objects.get(pk=self._pk)
@@ -79,12 +79,13 @@ class PrimaryDeviceUtils:
         elif self._object_type == "dcim.device":
             try:
                 self._device = Device.objects.get(pk=self._pk)
-                if not (str(self._device.status) == "Active"):
+                if str(self._device.status) != "Active":
                     raise ValueError(f"Device '{self._device.name}' status is '{self._device.status}' and not 'Active'")
             except Device.DoesNotExist as err:
                 raise ValueError("Device does not exist") from err
         elif self._object_type == "dcim.virtualchassis":
-            from nautobot.dcim.models import VirtualChassis  # Move import here
+            # Importing here to prevent issues during test execution.
+            from nautobot.dcim.models import VirtualChassis  # pylint: disable=import-outside-toplevel
 
             try:
                 self._virtual_chassis = VirtualChassis.objects.get(pk=self._pk)

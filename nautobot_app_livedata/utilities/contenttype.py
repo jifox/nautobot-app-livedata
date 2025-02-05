@@ -4,18 +4,19 @@ from django.apps import apps as global_apps
 from django.db import DEFAULT_DB_ALIAS, router
 
 
-class ContentTypeUtils:
+class ContentTypeUtils:  # pylint: disable=too-many-instance-attributes
     """Utility functions for working with the ContentType model."""
 
     def __init__(self, full_model_name=None, is_in_database_ready=False):
         self.apps = global_apps
         try:
-            self._ContentType = self.get_content_type()
+            self._content_type = self.get_content_type()
         except AttributeError:
-            self._ContentType = None
+            self._content_type = None
         self._app_name = None
         self._content_type_model = None
         self._full_model_name = None
+        self._app_label = None
         self._model_name = None
         self.is_in_database_ready = is_in_database_ready
         self.permission_content_type_model = None
@@ -23,15 +24,15 @@ class ContentTypeUtils:
             self.full_model_name = full_model_name
 
     @property
-    def ContentType(self):
+    def ContentType(self):  # pylint: disable=invalid-name
         """Retrieve the ContentType model.
 
         Returns:
             ContentType: The ContentType model or None if it is not available.
         """
-        if self._ContentType is None:
-            self._ContentType = self.get_content_type()
-        return self._ContentType
+        if self._content_type is None:
+            self._content_type = self.get_content_type()
+        return self._content_type
 
     @property
     def full_model_name(self):
@@ -101,12 +102,8 @@ class ContentTypeUtils:
             self._full_model_name = None
 
     @property
-    def content_type_for_model(self, full_model_name=None):
+    def content_type_for_model(self):
         """Retrieve the ContentType for the model.
-
-        Args:
-            full_model_name (str): The full model name to fetch the ContentType for.
-                Must be in the format 'app_label.model_name'.
 
         Returns:
             ContentType: The ContentType model for the model.
@@ -115,10 +112,8 @@ class ContentTypeUtils:
             ValueError: If the model_name is not in the format 'app_label.model_name'.
             ValueError: If the ContentType for the model is not found.
         """
-        if full_model_name is None and self._full_model_name is None:
+        if self._full_model_name is None:
             raise ValueError("full_model_name is required")
-        if full_model_name is not None:
-            self.full_model_name = full_model_name
         return self._fetch_content_type_for_model()
 
     def get_content_type(self):
@@ -139,18 +134,18 @@ class ContentTypeUtils:
             ValueError: If the ContentType model is not available and is_in_database_ready is False.
         """
         try:
-            self._ContentType = self.apps.get_model("contenttypes", "ContentType")
+            self._content_type = self.apps.get_model("contenttypes", "ContentType")
         except LookupError:
             available = False
         else:
-            available = router.allow_migrate_model(DEFAULT_DB_ALIAS, self._ContentType)
+            available = router.allow_migrate_model(DEFAULT_DB_ALIAS, self._content_type)
         # The ContentType model is not available yet.
         if not available:
             if self.is_in_database_ready:
                 print("get_content_type - ContentType model is not available")
                 return None
             raise ValueError("ContentType model is not available")
-        return self._ContentType
+        return self._content_type
 
     def _fetch_content_type_for_model(self):
         """Fetch the ContentType for the model.
@@ -197,7 +192,7 @@ class ContentTypeUtils:
         try:
             full_model_name = full_model_name.lower()
         except AttributeError:
-            raise ValueError("Model name must be a string")
+            raise ValueError("Model name must be a string")  # pylint: disable=raise-missing-from
         model_info = full_model_name.split(".")
         if len(model_info) != 2:
             raise ValueError("Model name must be in the format 'app_label.model_name'")

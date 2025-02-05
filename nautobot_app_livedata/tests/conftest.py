@@ -49,39 +49,8 @@ def create_db_data():  # pylint: disable=too-many-locals
 
     device_listtmp = []
     device_list = []
-    for dev in Device.objects.all():
-        if not dev.interfaces.exists() or dev.primary_ip4:  # type: ignore
-            # skip devices without interfaces or with a primary IP address
-            continue
-        device_listtmp.append(dev)
-    ip_addresses = IPAddress.objects.filter(ip_version=4)
-    cnt = -1
-    for dev in device_listtmp[:8]:
-        cnt += 1
-        dev.name = f"device-{cnt}"
-        interface = dev.interfaces.first()
-        if cnt in [0, 2, 5]:
-            for ip_v4 in ip_addresses:
-                ip_interfaces = IPAddressToInterface.objects.filter(ip_address=ip_v4)
-                if ip_interfaces.exists():
-                    # Skip if the IP address is already assigned to an interface
-                    continue
-                ip_address_to_interface = IPAddressToInterface.objects.create(
-                    interface=interface,
-                    ip_address=ip_v4,
-                    is_primary=True,
-                )
-                ip_address_to_interface.save()
-                interface.ip_address_assignments.add(ip_address_to_interface)
-                interface.save()
-                dev.primary_ip4 = ip_v4
-                break
-        if cnt == 3:
-            dev.status = status_planned
-        else:
-            dev.status = status_active
-        dev.save()
-        device_list.append(dev)
+    collect_valid_device_entries(device_listtmp)
+    assign_device_ips_and_status(status_active, status_planned, device_listtmp, device_list)
 
     # | index | primary_ip4 | vc member | vc master | vc name             | Status |
     # |-------|-------------|-----------|-----------|---------------------|--------|
@@ -144,6 +113,58 @@ def create_db_data():  # pylint: disable=too-many-locals
     return device_list
 
 
+def assign_device_ips_and_status(status_active, status_planned, device_listtmp, device_list):
+    """Assign IP addresses to devices and set the status.
+
+    Args:
+        status_active (Status): The active status.
+        status_planned (Status): The planned status.
+        device_listtmp (list[dcim.Device]): The list of devices to assign IP addresses and status.
+        device_list (list[dcim.Device]): The list of devices to add the devices to.
+    """
+    ip_addresses = IPAddress.objects.filter(ip_version=4)
+    cnt = -1
+    for dev in device_listtmp[:8]:
+        cnt += 1
+        dev.name = f"device-{cnt}"
+        interface = dev.interfaces.first()
+        if cnt in [0, 2, 5]:
+            for ip_v4 in ip_addresses:
+                ip_interfaces = IPAddressToInterface.objects.filter(ip_address=ip_v4)
+                if ip_interfaces.exists():
+                    # Skip if the IP address is already assigned to an interface
+                    continue
+                ip_address_to_interface = IPAddressToInterface.objects.create(
+                    interface=interface,
+                    ip_address=ip_v4,
+                    is_primary=True,
+                )
+                ip_address_to_interface.save()
+                interface.ip_address_assignments.add(ip_address_to_interface)
+                interface.save()
+                dev.primary_ip4 = ip_v4
+                break
+        if cnt == 3:
+            dev.status = status_planned
+        else:
+            dev.status = status_active
+        dev.save()
+        device_list.append(dev)
+
+
+def collect_valid_device_entries(device_listtmp):
+    """Collect devices with interfaces and without a primary IP address.
+
+    Args:
+        device_listtmp (list[dcim.Device]): The list of devices to add the devices to.
+    """
+    for dev in Device.objects.all():
+        if not dev.interfaces.exists() or dev.primary_ip4:  # type: ignore
+            # skip devices without interfaces or with a primary IP address
+            continue
+        device_listtmp.append(dev)
+
+
 def add_permission(name, actions_list, description, model):
     """Create a permission with the given name, actions and description and assign it to the model_name.
 
@@ -182,7 +203,6 @@ def wait_for_debugger_connection():
 
     E.g.: TEST_REMOTE_DEBUG_ENABLE=True nautobot-server test --keepdb nautobot_app_livedata
     """
-    global remote_test_debug_port  # pylint: disable=global-statement
     if not remote_test_debug_enable:
         return
     import debugpy  # pylint: disable=import-outside-toplevel
@@ -191,4 +211,4 @@ def wait_for_debugger_connection():
         print(f"\nWaiting for debugger to connect on port {remote_test_debug_port}...")
         debugpy.listen(("0.0.0.0", remote_test_debug_port))
         debugpy.wait_for_client()
-        wait_for_debugger_connection._connected = True
+        wait_for_debugger_connection._connected = True  # pylint: disable=protected-access

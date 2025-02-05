@@ -2,6 +2,7 @@
 
 # filepath: livedata/api/views.py
 
+import logging
 from http import HTTPStatus
 from typing import Any, Optional
 
@@ -17,6 +18,29 @@ from nautobot_app_livedata.utilities.primarydevice import get_livedata_commands_
 
 from .serializers import LivedataSerializer
 
+logger = logging.getLogger(__name__)
+
+# Check that napalm is installed
+try:
+    import napalm  # pylint: disable=unused-import # noqa: F401
+except ImportError:
+    raise ImportError(  # pylint: disable=raise-missing-from
+        "ERROR NAPALM is not installed. Please see the documentation for instructions."
+    )
+
+
+# Check that celery worker is installed
+try:
+    from nautobot.core.celery import nautobot_task  # pylint: disable=unused-import,ungrouped-imports # noqa: F401
+
+    CELERY_WORKER = True
+except ImportError as err:
+    print("ERROR in nautobot_app_livedata: Celery is not Installed.")
+    logger.error(  # pylint: disable=raise-missing-from  # type: ignore
+        "ERROR in nautobot_app_livedata: Celery is not Installed."
+    )
+    raise ImportError from err
+
 
 class LivedataQueryInterfaceApiView(ObjectPermissionRequiredMixin, GenericAPIView):
     """Livedata Query-Device API Result view.
@@ -30,7 +54,7 @@ class LivedataQueryInterfaceApiView(ObjectPermissionRequiredMixin, GenericAPIVie
     serializer_class = LivedataSerializer
     queryset = Interface.objects.all()
 
-    def get_required_permission(self):
+    def get_required_permission(self) -> str:
         """Get the required permission for the view.
 
         Format: app_label.action_model
@@ -136,7 +160,7 @@ class LivedataPrimaryDeviceApiView(ObjectPermissionRequiredMixin, GenericAPIView
     serializer_class = LivedataSerializer
     queryset = Device.objects.all()
 
-    def get_required_permission(self):
+    def get_required_permission(self) -> str:
         """Get the required permission for the view.
 
         Format: app_label.action_model

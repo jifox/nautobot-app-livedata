@@ -8,7 +8,7 @@ from .contenttype import ContentTypeUtils
 class PermissionDataObject:
     """Data object for creating permissions."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments too-many-positional-arguments
         self,
         name=None,
         actions_list=None,
@@ -136,7 +136,7 @@ class PermissionDataObject:
         return PermissionDataObject(**data)
 
 
-class PermissionUtils:
+class PermissionUtils:  # pylint: disable=too-many-instance-attributes
     """Utility functions for creating permissions."""
 
     def __init__(self, permission_data_object: PermissionDataObject, is_in_database_ready=False):
@@ -224,6 +224,14 @@ class PermissionUtils:
         self._name = value
 
     def create_permission(self, permission_data_object: PermissionDataObject = None):
+        """Create a permission with the given name, actions and description and assign it to the model_name.
+
+        Args:
+            permission_data_object (PermissionDataObject): The permission data object to create the permission with.
+
+        Raises:
+            ValueError: If the model_name is not in the format 'app_label.model_name'.
+        """
         if permission_data_object is not None:
             self.name = permission_data_object.name
             self.actions_list = permission_data_object.actions_list
