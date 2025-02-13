@@ -1,119 +1,52 @@
 """Utilities for working with custom fields in Nautobot."""
 
-from nautobot.apps.choices import CustomFieldTypeChoices
 
-from nautobot_app_livedata.utilities.contenttype import ContentTypeUtils
+def create_custom_field(db_objects, content_type_objects=None, **kwargs):
+    """Create a custom field with the given key name and field type.
 
+    Args:
+        db_objects (dict): The database objects to use for the creation.
+        key (str): The key name of the custom field.
+        type (str): The CustomFieldTypeChoices type of the custom field.
+        label (str): The label of the custom field.
+        description (str): The description of the custom field.
+        default (str): The default value of the custom field.
+        required (bool): The required status of the custom field.
+        filter_logic (str): (loose|strict) The filter logic of the custom field.
+        weight (int): The weight of the custom field.
+        advanced_ui (bool): The advanced UI status of the custom field. Defaults to True.
+        content_types (list[str]): The model names to assign the custom field to. "app_label.model_name"
+    Raises:
+        ValueError: If the model_name is not in the format 'app_label.model_name'.
+        ValueError: If the field_type is not in CustomFieldTypeChoices.
+    """
+    if content_type_objects is None:
+        content_type_objects = []
+    CustomField = db_objects["CustomField"]  # pylint: disable=invalid-name
+    custom_field_key = kwargs.get("key")
+    custom_field_modified = False
+    try:
+        custom_field = CustomField.objects.get(key=custom_field_key)
+        for key, value in kwargs.items():
+            if getattr(custom_field, key) != value:
+                custom_field_modified = True
+                setattr(custom_field, key, value)
+    except CustomField.DoesNotExist:
+        custom_field_modified = True
+        custom_field = CustomField.objects.create(**kwargs)
+    if custom_field_modified:
+        custom_field.validated_save()
+        custom_field.refresh_from_db()
 
-# https://docs.nautobot.com/projects/core/en/stable/user-guide/platform-functionality/customfield/
-#
-class CustomFieldUtils:  # pylint: disable=too-many-instance-attributes
-    """Utility functions for working with custom fields."""
-
-    def __init__(  # pylint: disable=too-many-arguments too-many-positional-arguments
-        self, key_name=None, field_type=None, defaults=None, model_names=None, is_in_database_ready=False
-    ):
-        """Initialize the CustomFieldUtils."""
-        self.is_in_database_ready = is_in_database_ready
-        self._field_type = None
-        self.field_type = field_type
-        self._key_name = None
-        self.key_name = key_name
-        self._defaults = None
-        self._model_names = None
-        self.model_names = model_names
-        self._assign_to_models = set()
-        if defaults is None:
-            self._defaults = {
-                "label": key_name,
-                "description": None,
-                "default": None,
-                "required": False,
-                "filter_logic": "loose",  # (loose versus exact) determines whether partial or full matching is used.
-                "weight": 100,
-                "advanced_ui": False,
-            }
-        else:
-            self._defaults = defaults
-
-    @property
-    def field_type(self):
-        """Retrieve the field type."""
-        return self._field_type
-
-    @field_type.setter
-    def field_type(self, value):
-        """Set the field type to a value in CustomFieldTypeChoices."""
-        if value not in CustomFieldTypeChoices.values():
-            raise ValueError(f"Invalid field_type '{value}'. Must be one of {CustomFieldTypeChoices.values()}")
-        self._field_type = value
-
-    @property
-    def key_name(self):
-        """Retrieve the key name."""
-        return self._key_name
-
-    @key_name.setter
-    def key_name(self, value):
-        """Set the key name."""
-        if not isinstance(value, str):
-            raise ValueError("key_name must be a string")
-        if not value.isidentifier():
-            raise ValueError(f"Invalid key_name '{value}'. Must be a valid GraphQL identifier.")
-        self._key_name = value
-
-    @property
-    def model_names(self):
-        """Retrieve the model names."""
-        return self._model_names
-
-    @model_names.setter
-    def model_names(self, value):
-        """Set the model names."""
-        if not isinstance(value, list):
-            raise ValueError("model_names must be a list")
-        self._assign_to_models = set()
-        for model_name in value:
-            if not isinstance(model_name, str):
-                raise ValueError("model_name must be a string")
-            if not model_name.count(".") == 1:
-                raise ValueError(f"Invalid model_name '{model_name}'. Must be in the format 'app_label.model_name'.")
-            self._assign_to_models.add(
-                ContentTypeUtils(
-                    full_model_name=model_name, is_in_database_ready=self.is_in_database_ready
-                ).content_type_for_model
-            )
-        self._model_names = value
-
-    def __repr__(self):
-        return (
-            f"CustomFieldUtils(key_name={self.key_name}, "
-            f"field_type={self.field_type}, "
-            f"model_name={self.model_names}"
-        )
-
-    def __str__(self):
-        return f"CustomFieldUtils: {self.key_name}"
-
-    def add_custom_field(self):
-        """Add a custom field with the given key name and field type.
-
-        Raises:
-            ValueError: If the model_name is not in the format 'app_label.model_name'.
-            ValueError: If the field_type is not in CustomFieldTypeChoices.
-        """
-        if self.field_type not in CustomFieldTypeChoices.values():
-            raise ValueError(
-                f"Invalid field_type '{self.field_type}'. Must be one of {CustomFieldTypeChoices.values()}"
-            )
-        CustomField = ContentTypeUtils(full_model_name="extras.customfield").model  # pylint: disable=invalid-name
-        field, created = CustomField.objects.get_or_create(
-            type=self.field_type, key=self.key_name, defaults=self._defaults
-        )
-        if created:
-            field.save()
-
-        if field.content_types.count() == 0:
-            field.content_types.set(self._assign_to_models)
-            field.save()
-        return field
+    if content_type_objects and custom_field.content_types.count() == 0:
+        # Assign the custom field to the given content types.
+        ContentType = db_objects["ContentType"]  # pylint: disable=invalid-name
+        for content_type in content_type_objects:
+            try:
+                custom_field.content_types.add(content_type)
+            except ContentType.DoesNotExist:
+                print(
+                    "WARNING: Could not assign custom field to content type.",
+                    f"\nYou must assign the custom field {custom_field} to a content type {content_type} manually.",
+                )
+        custom_field.validated_save()

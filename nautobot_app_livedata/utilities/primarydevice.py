@@ -51,12 +51,12 @@ class PrimaryDeviceUtils:
         # Set the primary device to the device
         self._primary_device = self._device
 
-        # Check if the desvice has a primary IP address and status is active
-        if not self._primary_device.primary_ip:
+        # Check if the device has a primary IP address and status is active
+        if not self._primary_device.primary_ip:  # type: ignore
             # Try to loop over all devices in the virtual chassis and check if any of them has a primary IP address
-            if self._primary_device.virtual_chassis:
-                self._virtual_chassis = self._primary_device.virtual_chassis
-                for member in self._primary_device.virtual_chassis.members.all():
+            if self._primary_device.virtual_chassis:  # type: ignore
+                self._virtual_chassis = self._primary_device.virtual_chassis  # type: ignore
+                for member in self._primary_device.virtual_chassis.members.all():  # type: ignore
                     if member.primary_ip:
                         self._primary_device = member
                         break
@@ -64,7 +64,7 @@ class PrimaryDeviceUtils:
             else:
                 raise ValueError("Device does not have a primary IP address")
         # Check if the device state is active
-        if str(self._primary_device.status) != "Active":
+        if str(self._primary_device.status) != "Active":  # type: ignore
             raise ValueError("Device is not active")
 
     def _get_associated_device(self):
@@ -73,18 +73,22 @@ class PrimaryDeviceUtils:
         if self._object_type == "dcim.interface":
             try:
                 self._interface = Interface.objects.get(pk=self._pk)
-                self._device = self._interface.device
+                self._device = self._interface.device  # type: ignore
             except Interface.DoesNotExist as err:
                 raise ValueError("Interface does not exist") from err
         elif self._object_type == "dcim.device":
             try:
                 self._device = Device.objects.get(pk=self._pk)
-                if str(self._device.status) != "Active":
-                    raise ValueError(f"Device '{self._device.name}' status is '{self._device.status}' and not 'Active'")
+                if str(self._device.status) != "Active":  # type: ignore
+                    raise ValueError(
+                        (
+                            f"Device '{self._device.name}' "  # type: ignore
+                            f"status is '{self._device.status}' and not 'Active'"  # type: ignore
+                        )
+                    )
             except Device.DoesNotExist as err:
                 raise ValueError("Device does not exist") from err
         elif self._object_type == "dcim.virtualchassis":
-            # Importing here to prevent issues during test execution.
             from nautobot.dcim.models import VirtualChassis  # pylint: disable=import-outside-toplevel
 
             try:

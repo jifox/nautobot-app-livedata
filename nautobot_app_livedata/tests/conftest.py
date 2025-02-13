@@ -8,11 +8,14 @@
 import os
 
 from django.contrib.auth import get_user_model
+from nautobot.core.models import ContentType
 from nautobot.core.settings_funcs import is_truthy
-from nautobot.dcim.models import Device, VirtualChassis
+from nautobot.dcim.models import Device, Platform, VirtualChassis
 from nautobot.extras.models import Status
 from nautobot.ipam.models import IPAddress, IPAddressToInterface
 from nautobot.users.models import ObjectPermission
+
+from nautobot_app_livedata.utilities.permission import create_permission
 
 User = get_user_model()
 
@@ -26,31 +29,42 @@ def create_db_data():  # pylint: disable=too-many-locals
 
     The returned device_list contains the following devices:
 
-    | index | primary_ip4 | vc member | vc master | vc name             | Status |
-    |-------|-------------|-----------|-----------|---------------------|--------|
-    | 0     | yes         | no        | no        |                     | Active |
-    |-------|-------------|-----------|-----------|---------------------|--------|
-    | 1     | no          | no        | no        |                     | Active |
-    |-------|-------------|-----------|-----------|---------------------|--------|
-    | 2     | yes         | yes       | yes       | vc-ip-master        | Active |
-    | 3     | no          | yes       | no        | vc-ip-master        | Planned|
-    | 4     | no          | yes       | no        | vc-ip-master        | Active |
-    |-------|-------------|-----------|-----------|---------------------|--------|
-    | 5     | yes         | yes       | no        | vc-ip-no_master     | Active |
-    | 6     | no          | yes       | no        | vc-ip-no_master     | Active |
-    |-------|-------------|-----------|-----------|---------------------|--------|
-    | 7     | no          | yes       | no        | vc-no_ip-no_master  | Active |
+    | index | primary_ip4 | vc member | vc master | vc name             | Status | Platform | Driver    |
+    |-------|-------------|-----------|-----------|---------------------|--------|----------|-----------|
+    | 0     | yes         | no        | no        |                     | Active | yes      | cisco_ios |
+    |-------|-------------|-----------|-----------|---------------------|--------|----------|-----------|
+    | 1     | no          | no        | no        |                     | Active | yes      | cisco_ios |
+    |-------|-------------|-----------|-----------|---------------------|--------|----------|-----------|
+    | 2     | yes         | yes       | yes       | vc-ip-master        | Active | yes      | cisco_ios |
+    | 3     | no          | yes       | no        | vc-ip-master        | Planned| yes      | cisco_ios |
+    | 4     | no          | yes       | no        | vc-ip-master        | Active | yes      | cisco_ios |
+    |-------|-------------|-----------|-----------|---------------------|--------|----------|-----------|
+    | 5     | yes         | yes       | no        | vc-ip-no_master     | Active | yes      |           |
+    | 6     | no          | yes       | no        | vc-ip-no_master     | Active | no       |           |
+    |-------|-------------|-----------|-----------|---------------------|--------|----------|-----------|
+    | 7     | no          | yes       | no        | vc-no_ip-no_master  | Active | no       |           |
 
     Returns:
         list[dcim.Device]: The list of devices prepared for testing.
     """
-    status_active = Status.objects.get(name="Active")
-    status_planned = Status.objects.get(name="Planned")
+    wait_for_debugger_connection()
 
     device_listtmp = []
     device_list = []
     collect_valid_device_entries(device_listtmp)
-    assign_device_ips_and_status(status_active, status_planned, device_listtmp, device_list)
+    assign_device_ips_and_status(device_listtmp, device_list)
+    assign_platform(device_list)
+    db_objects = {
+        "ContentType": ContentType,
+        "ObjectPermission": ObjectPermission,
+    }
+    create_permission(
+        db_objects=db_objects,
+        name="livedata.interact_with_devices",
+        actions_list=["can_interact"],
+        description="Interact with devices without permission to change device configurations.",
+        full_model_name="dcim.device",
+    )
 
     # | index | primary_ip4 | vc member | vc master | vc name             | Status |
     # |-------|-------------|-----------|-----------|---------------------|--------|
@@ -113,7 +127,7 @@ def create_db_data():  # pylint: disable=too-many-locals
     return device_list
 
 
-def assign_device_ips_and_status(status_active, status_planned, device_listtmp, device_list):
+def assign_device_ips_and_status(device_listtmp, device_list):
     """Assign IP addresses to devices and set the status.
 
     Args:
@@ -122,6 +136,8 @@ def assign_device_ips_and_status(status_active, status_planned, device_listtmp, 
         device_listtmp (list[dcim.Device]): The list of devices to assign IP addresses and status.
         device_list (list[dcim.Device]): The list of devices to add the devices to.
     """
+    status_active = Status.objects.get(name="Active")
+    status_planned = Status.objects.get(name="Planned")
     ip_addresses = IPAddress.objects.filter(ip_version=4)
     cnt = -1
     for dev in device_listtmp[:8]:
@@ -165,6 +181,33 @@ def collect_valid_device_entries(device_listtmp):
         device_listtmp.append(dev)
 
 
+def assign_platform(device_list):
+    """Assign a platform to the devices.
+
+    Args:
+        device_list (list[dcim.Device]): The list of devices to assign the platform to.
+    """
+    cnt = -1
+    for platform in Platform.objects.all():
+        cnt += 1
+        if cnt < 5:
+            platform.custom_field_data["livedata_interface_commands"] = "command1\ncommand2"
+            platform.network_driver = "cisco_ios"
+            platform.save()
+            device_list[cnt].platform = platform
+            device_list[cnt].save()
+        elif cnt == 5:
+            platform.custom_field_data["livedata_interface_commands"] = "command1\ncommand2"
+            platform.network_driver = ""
+            platform.save()
+            device_list[cnt].platform = platform
+            device_list[cnt].save()
+        elif cnt == 6:
+            break
+        elif cnt == 7:
+            break
+
+
 def add_permission(name, actions_list, description, model):
     """Create a permission with the given name, actions and description and assign it to the model_name.
 
@@ -177,18 +220,18 @@ def add_permission(name, actions_list, description, model):
     Raises:
         ValueError: If the model_name is not in the format 'app_label.model_name'.
     """
-    permission, created = ObjectPermission.objects.get_or_create(
+    db_objects = {
+        "ContentType": ContentType,
+        "ObjectPermission": ObjectPermission,
+    }
+    create_permission(
+        db_objects=db_objects,
         name=name,
-        actions=actions_list,
+        actions_list=actions_list,
         description=description,
+        full_model_name=model,
     )
-    if created:
-        # Add the content type to the permission
-        permission.save()
-    if permission.object_types.count() == 0:  # type: ignore
-        permission.object_types.set([model])  # type: ignore
-        permission.save()
-    return permission
+    return ObjectPermission.objects.get(name=name)
 
 
 def wait_for_debugger_connection():

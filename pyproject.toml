@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "nautobot_app_livedata"
 description = "Nautobot App Livedata is a Nautobot app that provides a live view of the network data."
-version = "2.4.0b1"
+version = "2.4.0b2"
 authors = ["Josef Fuchs <josef.fuchs@j-fuchs.at>"]
 license = "Apache-2.0"
 homepage = "https://github.com/jifox/nautobot-app-livedata.git"
@@ -11,7 +11,7 @@ readme = "README.md"
 keywords = ["nautobot", "nautobot-app", "nautobot-plugin"]
 classifiers = [
     "Intended Audience :: Developers",
-    "Development Status :: 5 - Production/Stable",
+    "Development Status :: 4 - Beta",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -91,6 +91,7 @@ ignore = ".venv"
 ignore-paths = [
     ".*third_party.*",
     "nautobot/extras/tests/git_data/02-invalid-files/",
+    "nautobot_app_livedata/tests/*"
 ]
 jobs = 0
 

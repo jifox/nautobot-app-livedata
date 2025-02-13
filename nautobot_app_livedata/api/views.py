@@ -93,7 +93,7 @@ class LivedataQueryInterfaceApiView(ObjectPermissionRequiredMixin, GenericAPIVie
         data = request.data
         data["pk"] = pk
         data["object_type"] = "dcim.interface"
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(data=data)
         if not serializer.is_valid():
             return Response(
                 serializer.errors,
