@@ -30,7 +30,7 @@ include = [
 python = ">=3.9,<3.13"
 # Used for local development
 nautobot = "^2.4.0"
-towncrier = "~23.11.0"
+towncrier = "~24.8.0"
 to-json-schema = "*"
 jsonschema = "^4.7.0"
 nautobot-plugin-nornir = "~2.1.0"
@@ -40,7 +40,12 @@ nautobot-plugin-nornir = "~2.1.0"
 coverage = "6.4.0"
 # Tool for debugging Django
 django-debug-toolbar = "~5.0.1"
+# Alternative to Make, CLI based on `tasks.py`
 invoke = "~2.2.0"
+# Change log management and generation
+towncrier = "~24.8.0"
+# Watch files for celery and mkdocs reload
+watchdog = "~6.0.0"
 ipython = "*"
 toml = "*"
 # Rendering of markdown files to HTML

@@ -1596,24 +1596,6 @@ test = ["jaraco.test (>=5.4)", "pytest (>=6,!=8.1.*)", "zipp (>=3.17)"]
 type = ["pytest-mypy"]
 
 [[package]]
-name = "incremental"
-version = "24.7.2"
-description = "A small library that versions your Python projects."
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "incremental-24.7.2-py3-none-any.whl", hash = "sha256:8cb2c3431530bec48ad70513931a760f446ad6c25e8333ca5d95e24b0ed7b8fe"},
-    {file = "incremental-24.7.2.tar.gz", hash = "sha256:fb4f1d47ee60efe87d4f6f0ebb5f70b9760db2b2574c59c8e8912be4ebd464c9"},
-]
-
-[package.dependencies]
-setuptools = ">=61.0"
-tomli = {version = "*", markers = "python_version < \"3.11\""}
-
-[package.extras]
-scripts = ["click (>=6.0)"]
-
-[[package]]
 name = "inflection"
 version = "0.5.1"
 description = "A port of Ruby on Rails inflector to Python"
@@ -4366,24 +4348,24 @@ files = [
 
 [[package]]
 name = "towncrier"
-version = "23.11.0"
+version = "24.8.0"
 description = "Building newsfiles for your project."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "towncrier-23.11.0-py3-none-any.whl", hash = "sha256:2e519ca619426d189e3c98c99558fe8be50c9ced13ea1fc20a4a353a95d2ded7"},
-    {file = "towncrier-23.11.0.tar.gz", hash = "sha256:13937c247e3f8ae20ac44d895cf5f96a60ad46cfdcc1671759530d7837d9ee5d"},
+    {file = "towncrier-24.8.0-py3-none-any.whl", hash = "sha256:9343209592b839209cdf28c339ba45792fbfe9775b5f9c177462fd693e127d8d"},
+    {file = "towncrier-24.8.0.tar.gz", hash = "sha256:013423ee7eed102b2f393c287d22d95f66f1a3ea10a4baa82d298001a7f18af3"},
 ]
 
 [package.dependencies]
 click = "*"
+importlib-metadata = {version = ">=4.6", markers = "python_version < \"3.10\""}
 importlib-resources = {version = ">=5", markers = "python_version < \"3.10\""}
-incremental = "*"
 jinja2 = "*"
 tomli = {version = "*", markers = "python_version < \"3.11\""}
 
 [package.extras]
-dev = ["furo", "packaging", "sphinx (>=5)", "twisted"]
+dev = ["furo (>=2024.05.06)", "nox", "packaging", "sphinx (>=5)", "twisted"]
 
 [[package]]
 name = "traitlets"
@@ -4651,4 +4633,4 @@ all = []
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.13"
-content-hash = "920a7dbb70653be2fca4022af111e1b34b176e3ade1635d30d4c39bf307605d4"
+content-hash = "1c2c6d6cc8c61c63489d920f66d3b632acee1cdcdbc1faed25e7265f76ff2410"
