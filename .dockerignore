@@ -11,6 +11,7 @@ environments/
 **/__pycache__/
 **/.pytest_cache/
 **/.venv/
+**/.ruff_cache/
 
 
 # Other
@@ -24,3 +25,5 @@ LICENSE
 **/.vscode/
 invoke*.yml
 tasks.py
+media.tgz
+dump.sql

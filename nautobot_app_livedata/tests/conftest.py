@@ -11,7 +11,7 @@ from django.contrib.auth import get_user_model
 from nautobot.core.models import ContentType
 from nautobot.core.settings_funcs import is_truthy
 from nautobot.dcim.models import Device, Platform, VirtualChassis
-from nautobot.extras.models import Status
+from nautobot.extras.models import Job, Status
 from nautobot.ipam.models import IPAddress, IPAddressToInterface
 from nautobot.users.models import ObjectPermission
 
@@ -57,13 +57,28 @@ def create_db_data():  # pylint: disable=too-many-locals
     db_objects = {
         "ContentType": ContentType,
         "ObjectPermission": ObjectPermission,
+        "Device": Device,
+        "Job": Job,
+        "Platform": Platform,
+    }
+    content_typs = {
+        "Device": ContentType.objects.get_for_model(Device),  # type: ignore
+        "Job": ContentType.objects.get_for_model(Job),  # type: ignore
+        "Platform": ContentType.objects.get_for_model(Platform),  # type: ignore
     }
     create_permission(
         db_objects=db_objects,
         name="livedata.interact_with_devices",
         actions_list=["can_interact"],
         description="Interact with devices without permission to change device configurations.",
-        full_model_name="dcim.device",
+        content_type=content_typs["Device"],
+    )
+    create_permission(
+        db_objects=db_objects,
+        name="extras.run_job",
+        actions_list=["run"],
+        description="Run jobs",
+        content_type=content_typs["Job"],
     )
 
     # | index | primary_ip4 | vc member | vc master | vc name             | Status |
@@ -109,21 +124,21 @@ def create_db_data():  # pylint: disable=too-many-locals
     vc.members.add(device_list[7])  # type: ignore
     vc.save()
 
-    # Print out the devices in device_list
-    print(f"\nThere are {len(device_list)} devices in the Device list: ")
-    for dev in device_list:
-        print(
-            f"  {dev.name}:  IP = {dev.primary_ip4 if dev.primary_ip4 else '---'}",
-            ", Virt-Cassis =",
-            dev.virtual_chassis,
-            ", Status =",
-            dev.status,
-        )
-        for interface in dev.interfaces.all():
-            print(f"    - Interface {interface.name}")
-            for ip in interface.ip_addresses.all():
-                print(f"              - IP: {ip.address}")
-        print(" ")
+    # # Print out the devices in device_list
+    # print(f"\nThere are {len(device_list)} devices in the Device list: ")
+    # for dev in device_list:
+    #     print(
+    #         f"  {dev.name}:  IP = {dev.primary_ip4 if dev.primary_ip4 else '---'}",
+    #         ", Virt-Cassis =",
+    #         dev.virtual_chassis,
+    #         ", Status =",
+    #         dev.status,
+    #     )
+    #     for interface in dev.interfaces.all():
+    #         print(f"    - Interface {interface.name}")
+    #         for ip in interface.ip_addresses.all():
+    #             print(f"              - IP: {ip.address}")
+    #     print(" ")
     return device_list
 
 

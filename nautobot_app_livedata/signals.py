@@ -14,15 +14,73 @@ from .utilities.permission import create_permission
 PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_app_livedata"]
 
 
-class AppState:  # pylint: disable=too-few-public-methods
-    """Application state class."""
+class AppDbReadyState:  # pylint: disable=too-few-public-methods
+    """App database ready state."""
 
     def __init__(self):
         self.is_dcim_ready = False
         self.is_nautobot_app_livedata_ready = False
+        self.is_extras_ready = False
+        self._db_objects = None
+        self._content_typs = None
+        self.already_initialized = False
+
+    @property
+    def is_ready(self):
+        """Check if the app is ready."""
+        return (
+            not self.already_initialized
+            and self.is_dcim_ready
+            and self.is_nautobot_app_livedata_ready
+            and self.is_extras_ready
+            and self.try_init_objects()
+        )
+
+    def try_init_objects(self):
+        """Try to initialize the database objects."""
+        if not global_apps:
+            return False
+        if self._db_objects:
+            return True
+        try:
+            db_objects = {
+                "ContentType": global_apps.get_model("contenttypes", "ContentType"),
+                "CustomField": global_apps.get_model("extras", "CustomField"),
+                "Device": global_apps.get_model("dcim", "Device"),
+                "Job": global_apps.get_model("extras", "Job"),
+                "ObjectPermission": global_apps.get_model("users", "ObjectPermission"),
+                "Permission": global_apps.get_model("auth", "Permission"),
+                "Platform": global_apps.get_model("dcim", "Platform"),
+            }
+            content_typs = {
+                "Device": db_objects["ContentType"].objects.get_for_model(db_objects["Device"]),  # type: ignore
+                "Job": db_objects["ContentType"].objects.get_for_model(db_objects["Job"]),  # type: ignore
+                "Platform": db_objects["ContentType"].objects.get_for_model(db_objects["Platform"]),  # type: ignore
+            }
+            for _, db_object in db_objects.items():
+                if db_object.objects is None:
+                    return False
+            for _, content_typ in content_typs.items():
+                if content_typ is None:
+                    return False
+            self._db_objects = db_objects
+            self._content_typs = content_typs
+        except Exception:  # pylint: disable=broad-except
+            return False
+        return True
+
+    @property
+    def db_objects(self):
+        """Get the database objects."""
+        return self._db_objects
+
+    @property
+    def content_typs(self):
+        """Get the content types."""
+        return self._content_typs
 
 
-app_state = AppState()
+app_db_ready_state = AppDbReadyState()
 
 
 @receiver(post_migrate)
@@ -47,67 +105,43 @@ def nautobot_database_ready_callback(sender, **kwargs):  # pylint: disable=unuse
     if not global_apps:
         return
     if "dcim" in repr(sender):
-        app_state.is_dcim_ready = True
+        app_db_ready_state.is_dcim_ready = True
+    if "extras" in repr(sender):
+        app_db_ready_state.is_extras_ready = True
     if "nautobot_app_livedata" in repr(sender):
-        app_state.is_nautobot_app_livedata_ready = True
-
-    is_nautobot_app_livedata_ready = app_state.is_dcim_ready and app_state.is_nautobot_app_livedata_ready
-    if not is_nautobot_app_livedata_ready:
+        app_db_ready_state.is_nautobot_app_livedata_ready = True
+    if not app_db_ready_state.is_ready:
         return
-    try:
-        # Ensure that all needed models are ready and available
-        # Add the models that are needed for the plugin to work here!
-        db_objects = {
-            "ContentType": global_apps.get_model("contenttypes", "ContentType"),
-            "CustomField": global_apps.get_model("extras", "CustomField"),
-            "Device": global_apps.get_model("dcim", "Device"),
-            "Job": global_apps.get_model("extras", "Job"),
-            "ObjectPermission": global_apps.get_model("users", "ObjectPermission"),
-            "Permission": global_apps.get_model("auth", "Permission"),
-            "Platform": global_apps.get_model("dcim", "Platform"),
-        }
-        # Ensure that all content types are ready
-        content_typs = {
-            "Device": db_objects["ContentType"].objects.get_for_model(db_objects["Device"]),  # type: ignore
-            "Job": db_objects["ContentType"].objects.get_for_model(db_objects["Job"]),  # type: ignore
-            "Platform": db_objects["ContentType"].objects.get_for_model(db_objects["Platform"]),  # type: ignore
-        }
-    except Exception:  # pylint: disable=broad-except
-        # just wait for the next signal
-        return
-    for _, db_object in db_objects.items():
-        if db_object.objects is None:
-            return
-
+    app_db_ready_state.already_initialized = True
     # To make NAPALM requests via the Nautobot REST API, a Nautobot user
     # must have assigned a permission granting the 'napalm_read' action for
     # the device object type.
     create_permission(
-        db_objects=db_objects,
+        db_objects=app_db_ready_state.db_objects,  # type: ignore
         name="napalm_read",
         actions_list=["napalm_read"],
         description="Permission to make NAPALM requests via the Nautobot REST API.",
-        full_model_name="dcim.device",
+        content_type=app_db_ready_state.content_typs["Device"],  # type: ignore
     )
 
     # To allow the user to interact with the devices, like query the interfaces,
     # a Nautobot user must have assigned a permission granting the 'can_interact'
     # action for the device object type.
     create_permission(
-        db_objects=db_objects,
+        db_objects=app_db_ready_state.db_objects,  # type: ignore
         name="livedata.interact_with_devices",
         actions_list=["can_interact"],
         description="Interact with devices without permission to change device configurations.",
-        full_model_name="dcim.device",
+        content_type=app_db_ready_state.content_typs["Device"],  # type: ignore
     )
 
     # Create permission to run jobs
     create_permission(
-        db_objects=db_objects,
+        db_objects=app_db_ready_state.db_objects,  # type: ignore
         name="extras.run_job",
         actions_list=["run"],
         description="Run jobs",
-        full_model_name="extras.job",
+        content_type=app_db_ready_state.content_typs["Job"],  # type: ignore
     )
 
     # Add the custom field to the Platform model, which is used to store the
@@ -128,9 +162,9 @@ def nautobot_database_ready_callback(sender, **kwargs):  # pylint: disable=unuse
         "weight": 100,
         "advanced_ui": True,
     }
-    cto = [content_typs["Platform"]]
+    cto = [app_db_ready_state.content_typs["Platform"]]  # type: ignore
     try:
-        create_custom_field(db_objects=db_objects, content_type_objects=cto, **field_data)
+        create_custom_field(db_objects=app_db_ready_state.db_objects, content_type_objects=cto, **field_data)
     except Exception as e:  # pylint: disable=broad-except
         print(f"ERROR: Database-Ready awaiting - {e}")
         return
@@ -158,4 +192,3 @@ def _enable_job(job_name):
             print(f"Database-Ready     - Job '{job_name}' enabled")
     except Job.DoesNotExist:
         print(f"WARNING: Database-Ready     - Job '{job_name}' not found")
-    print(f"Database-Ready     - Job '{job_name}' already enabled")
