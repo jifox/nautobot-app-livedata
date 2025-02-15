@@ -1,7 +1,7 @@
 # Compatibility Matrix
 
-!!! warning "Developer Note - Remove Me!"
-    Explain how the release models of the app and of Nautobot work together, how releases are supported, how features and older releases are deprecated etc.
+The major and minor versions of the Nautobot LiveData plugin are compatible with the major and minor
+versions of Nautobot as shown in the table below.
 
 | Nautobot App Livedata Version | Nautobot First Support Version | Nautobot Last Support Version |
 | ------------- | -------------------- | ------------- |

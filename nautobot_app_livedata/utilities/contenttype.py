@@ -9,10 +9,6 @@ class ContentTypeUtils:  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, full_model_name=None, is_in_database_ready=False):
         self.apps = global_apps
-        try:
-            self._content_type = self.get_content_type()
-        except AttributeError:
-            self._content_type = None
         self._app_name = None
         self._content_type_model = None
         self._full_model_name = None
@@ -21,7 +17,12 @@ class ContentTypeUtils:  # pylint: disable=too-many-instance-attributes
         self.is_in_database_ready = is_in_database_ready
         self.permission_content_type_model = None
         if full_model_name is not None:
-            self.full_model_name = full_model_name
+            self._full_model_name = full_model_name
+        self._app_name, self._model_name = self._split_app_model(full_model_name)
+        try:
+            self._content_type = self.get_content_type()
+        except AttributeError:
+            self._content_type = None
 
     @property
     def ContentType(self):  # pylint: disable=invalid-name
@@ -208,4 +209,4 @@ class ContentTypeUtils:  # pylint: disable=too-many-instance-attributes
         Returns:
             Model: The model.
         """
-        return self.apps.get_model(self._app_name, self._model_name)
+        return self.apps.get_model(self._app_label, self._model_name)  # type: ignore

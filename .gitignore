@@ -8,6 +8,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+**/__pycache__/
 
 # C extensions
 *.so
@@ -305,6 +306,8 @@ invoke.yml
 # Docs
 public
 /compose.yaml
+/nautobot_app_livedata/static/nautobot_app_livedata/docs
+
+# Nautobot overrides
 /dump.sql
 /media.tgz
-/nautobot_app_livedata/static/nautobot_app_livedata/docs

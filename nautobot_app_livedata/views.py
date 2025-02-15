@@ -5,24 +5,31 @@
 from datetime import datetime
 
 from django.utils.timezone import make_aware
-from nautobot.apps import views
+from nautobot.apps.views import ObjectView
 from nautobot.dcim.models import Interface
 
 
-class LivedataInterfaceExtraTabView(views.ObjectView):
+class LivedataInterfaceExtraTabView(ObjectView):
     """Live Data view for results."""
 
     queryset = Interface.objects.all()
     template_name = "nautobot_app_livedata/interface_live_data.html"
 
-    def get_context_data(self, **kwargs):  # pylint: disable=no-member
-        """Get context data for the view."""
+    def get_extra_context(self, request, instance):
+        """Get extra context for the view.
+
+        Args:
+            request (HttpRequest): The request object.
+            instance (Interface): The interface instance.
+
+        Returns:
+            dict: The extra context for the view.
+        """
         now = make_aware(datetime.now())
-
-        context = super().get_context_data(**kwargs)  # type: ignore # pylint: disable=no-member
-        if not context:
-            context = {}
-        context["interface"] = self
-        context["now"] = now.strftime("%Y-%m-%d %H:%M:%S")
-
-        return context
+        extra_context = {}
+        extra_context["interface"] = instance
+        extra_context["now"] = now.strftime("%Y-%m-%d %H:%M:%S")
+        permissions = request.user.get_all_permissions()
+        extra_context["permissions"] = permissions
+        extra_context["has_permission"] = "dcim.can_interact_device" in permissions and "extras.run_job" in permissions
+        return extra_context

@@ -29,9 +29,29 @@ This document describes all new features and changes in the release `2.4`. The f
 - Achieved in this `2.4` release
 - Changes to compatibility with Nautobot and/or other apps, libraries etc.
 
-## [v2.4.0] - 2025-02-01
+## [v2.4.0b2] - 2025-02-13
 
 ### Added
+
+- Tests for the LiveData plugin
+
+### Changed
+
+- Updated the README
+
+### Fixed
+
+- Fixed all the failing tests
+
+### Deprecated
+
+### Removed
+
+## [v2.4.0b01] - 2025-02-01
+
+### Added
+
+- First release of the Nautobot LiveData plugin
 
 ### Changed
 
