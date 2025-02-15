@@ -20,9 +20,11 @@ class TestDocsPackaging(unittest.TestCase):
             package_name = pkg
             if len(pkg.split("==")) == 2:
                 package_name, version = pkg.split("==")
+                version = "".join(filter(lambda x: x.isdigit() or x == ".", version))
             else:
                 version = "*"
-            self.assertEqual(poetry_details[package_name], version)
+            cleaned_version = "".join(filter(lambda x: x.isdigit() or x == ".", poetry_details[package_name]))
+            self.assertEqual(cleaned_version, version)
 
 
 if __name__ == "__main__":

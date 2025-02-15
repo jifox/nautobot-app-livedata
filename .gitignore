@@ -311,3 +311,5 @@ public
 # Nautobot overrides
 /dump.sql
 /media.tgz
+development/docker-compose.override.yml
+temp_notes.txt
