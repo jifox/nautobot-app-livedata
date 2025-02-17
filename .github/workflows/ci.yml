@@ -237,7 +237,7 @@ jobs:
       - name: "Upload binaries to release"
         uses: "svenstaro/upload-release-action@v2"
         with:
-          repo_token: "${{ secrets.NTC_GITHUB_TOKEN }}"  # use GH_NAUTOBOT_BOT_TOKEN for Nautobot Org repos.
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"  # use GH_NAUTOBOT_BOT_TOKEN for Nautobot Org repos.
           file: "dist/*"
           tag: "${{ github.ref }}"
           overwrite: true
@@ -279,6 +279,7 @@ jobs:
       - "publish_gh"
       - "publish_pypi"
     runs-on: "ubuntu-22.04"
+    if: "false"  # Deactivate this job
     env:
       SLACK_WEBHOOK_URL: "${{ secrets.SLACK_WEBHOOK_URL }}"
       SLACK_MESSAGE: >-
