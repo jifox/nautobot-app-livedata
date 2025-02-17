@@ -1,0 +1,2 @@
+#1 Vulnerable OpenSSL included in cryptography wheels
+   fixes weaknesses CWE-392, CWE-1395
