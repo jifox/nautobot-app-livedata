@@ -309,6 +309,7 @@ public
 /nautobot_app_livedata/static/nautobot_app_livedata/docs
 
 # Nautobot overrides
+.backups/
 /dump.sql
 /media.tgz
 development/docker-compose.override.yml
