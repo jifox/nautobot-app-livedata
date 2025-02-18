@@ -143,7 +143,9 @@ The following custom field is added to the platform model:
 
 The custom field is used to store the show commands that are executed on the device. The data is collected via the Netmiko library, which is a multi-vendor library to simplify Paramiko SSH connections to network devices. The data is collected via the `send_command` method of Netmiko, which is using the platform specific show commands to collect the data.
 
-Open the Nautobot Platform model and configure the custom fields with the show commands that are executed on the device:
+Open the Nautobot Platform model and configure the custom fields with the show commands that are executed on the device
+
+Here is an example of the configuration of the custom field:
 
 ![Livedata App Platform Screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-app-platform-custom-fields-edit.png)
 
@@ -160,6 +162,11 @@ The following Jinja2 template variables are available to be used in the show com
 - `{{ intf.number }}` - The interface name without the interface number (e.g. "1/0/10")
 - `{{ obj }}` - The Interface object
 - `{{ timestamp }}` - The current timestamp in the format "YYYY-MM-DD HH:MM:SS"
+
+!!! attention
+    To insert a linebreak that is visible when showing the Platform detail page, add two spaces at the end of each line. The linebreaks are removed when the show commands are executed on the device.
+
+![Livedata Platform Detail Screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-platform-detail.png)
 
 ## Cleanup Job
 
