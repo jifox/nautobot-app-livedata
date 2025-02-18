@@ -13,10 +13,14 @@ To avoid extra work and temporary links, make sure that publishing docs (or merg
 <p align="center">
   <img src="https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/icon-livedata.png" class="logo" height="200px">
   <br>
-  <a href="https://github.com/jifox/nautobot-app-livedata.git/actions"><img src="https://github.com/jifox/nautobot-app-livedata.git/actions/workflows/ci.yml/badge.svg?branch=main"></a>
+  <!-- CI passing badge -->
+  <a href="https://github.com/jifox/nautobot-app-livedata.git/actions"><img src="https://github.com/jifox/nautobot-app-livedata/actions/workflows/ci.yml/badge.svg?branch=main"></a>
+  <!-- docs build status badge -->
   <a href="https://github.com/jifox/projects/livedata/en/latest/"><img src="https://readthedocs.org/projects/nautobot-app-livedata/badge/"></a>
-  <a href="https://pypi.org/project/livedata/"><img src="https://img.shields.io/pypi/v/livedata"></a>
-  <a href="https://pypi.org/project/livedata/"><img src="https://img.shields.io/pypi/dm/livedata"></a>
+  <!-- pypi version Badge -->
+  <a href="https://pypi.org/project/nautobot-app-livedata/"><img src="https://img.shields.io/pypi/v/nautobot-app-livedata"></a>
+  <!-- downloads batch -->
+  <a href="https://pypi.org/project/nautobot-app-livedata/"><img src="https://img.shields.io/pypi/dm/nautobot-app-livedata"></a>
   <br>
   An <a href="https://networktocode.com/nautobot-apps/">App</a> for <a href="https://nautobot.com/">Nautobot</a>.
 </p>
@@ -29,21 +33,9 @@ At the moment, the app is supporting only interface specific data. The data is c
 
 This app addresses the need for dynamic and up-to-date network information, allowing network administrators and engineers to make informed decisions based on the latest data. 
 
-
-!!! warning "Developer Note!"
-    This app is currently in development and is not yet ready for production use.
-
-    The functionality is tested manually and works as expected.
-    Automated tests are not yet in place. 
-    
-    The app is not yet available on PyPI.
-
-
-
 ### Screenshots
 
 - Live Data Output for interfaces
-
 
   ![Livedata output screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-app-output.png)
 
@@ -63,14 +55,6 @@ This app addresses the need for dynamic and up-to-date network information, allo
 More screenshots can be found in the [Using the App](https://github.com/jifox/projects/livedata/en/latest/user/app_use_cases/) page in the documentation. Here's a quick overview of some of the app's added functionality:
 
 ![](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/placeholder.png)
-
-## Try it out!
-
-> Developer Note: Only keep this section if appropriate. Update link to correct sandbox.
-
-This App is installed in the Nautobot Community Sandbox found over at [demo.nautobot.com](https://demo.nautobot.com/)!
-
-> For a full list of all the available always-on sandbox environments, head over to the main page on [networktocode.com](https://www.networktocode.com/nautobot/sandbox-environments/).
 
 ## Documentation
 
