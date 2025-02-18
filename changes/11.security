@@ -1,0 +1,8 @@
+- #17 Update python modules (dependabot)
+  - Bump mkdocs-include-markdown-plugin from 7.1.2 to 7.1.4.
+  - Bump nornir-nautobot from 3.2.0 to 3.3.0
+  - Bump pynautobot from 2.4.2 to 2.6.1
+  - #14 Bump pymarkdownlnt from 0.9.26 to 0.9.28.
+  - #15 Bump coverage from 6.4 to 7.6.12
+  - #16 Bump ruff from 0.8.6 to 0.9.6
+
