@@ -94,7 +94,6 @@ PLUGINS_CONFIG.update(  # type: ignore
 )
 ```
 
-
 Once the Nautobot configuration is updated, run the Post Upgrade command (`nautobot-server post_upgrade`) to run migrations and clear any cache:
 
 ```shell
@@ -112,9 +111,6 @@ sudo systemctl restart nautobot nautobot-worker nautobot-scheduler
 ```
 
 ## App Configuration
-
-!!! warning "Developer Note - Remove Me!"
-    Any configuration required to get the App set up. Edit the table below as per the examples provided.
 
 The app behavior can be controlled with the following list of settings:
 
@@ -136,3 +132,48 @@ Environment variables can be used to override the default settings:
 | `LIVEDATA_QUERY_INTERFACE_JOB_SOFT_TIME_LIMIT` | `query_interface_job_soft_time_limit` |
 | `LIVEDATA_QUERY_INTERFACE_JOB_TASK_QUEUE` | `query_interface_job_task_queue` |
 | `LIVEDATA_QUERY_INTERFACE_JOB_HIDDEN` | `query_interface_job_hidden` |
+
+## Platform Commands
+
+You can configure the show commands to be executed at the platform level. This custom field defines the show commands that are executed on the device.
+
+The following custom field is added to the platform model:
+
+![Livedata App Custom Fields](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-custom-fields.png)
+
+The custom field is used to store the show commands that are executed on the device. The data is collected via the Netmiko library, which is a multi-vendor library to simplify Paramiko SSH connections to network devices. The data is collected via the `send_command` method of Netmiko, which is using the platform specific show commands to collect the data.
+
+Open the Nautobot Platform model and configure the custom fields with the show commands that are executed on the device
+
+Here is an example of the configuration of the custom field:
+
+![Livedata App Platform Screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-app-platform-custom-fields-edit.png)
+
+In the input field **Livedata Interface Commands**, add the show commands that are executed on the device. One command per line.
+
+The commands are executed in the order they are added to the field. The commands are executed via the `send_command` method of Netmiko, which is using the platform specific show commands to collect the data.
+
+The following Jinja2 template variables are available to be used in the show commands:
+- `{{ device_ip }}` - The primary IP address of the primary device
+- `{{ device_name }}` - The device name of the device where the interface is located
+- `{{ intf.abbrev }}` - The abbreviated interface name (e.g. "Gi1/0/10")
+- `{{ intf.name }}` - The interface name (e.g. "GigabitEthernet1/0/10")
+- `{{ intf.name_only }}` - The interface name without the interface number (e.g. "GigabitEthernet")
+- `{{ intf.number }}` - The interface name without the interface number (e.g. "1/0/10")
+- `{{ obj }}` - The Interface object
+- `{{ timestamp }}` - The current timestamp in the format "YYYY-MM-DD HH:MM:SS"
+
+!!! attention
+    To insert a linebreak that is visible when showing the Platform detail page, add two spaces at the end of each line. The linebreaks are removed when the show commands are executed on the device.
+
+![Livedata Platform Detail Screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-platform-detail.png)
+
+## Cleanup Job
+
+The app provides a job to clean up old data. The job can be executed on a regular basis to clean up old data that is stored in the database. The job is executed via the Nautobot Scheduler.
+
+![Livedata App Cleanup Job Results Screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-app-cleanup-job-results.png)
+
+The input field **Days to keep** is used to configure the number of days that the query job results is stored in the database. The data that is older than the configured number of days is deleted from the database.
+
+The job provides a dry-run mode that can be used to test the job before executing it. The dry-run mode will not delete any data from the database but show the number of records that would be deleted.

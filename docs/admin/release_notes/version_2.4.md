@@ -19,5 +19,6 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 ### Fixed
 
 - [#1](https://github.com/jifox/nautobot-app-livedata/issues/1) - Fixed nautobot_database_ready_callback to wait for the database initialization of dependent apps before running the callback. This ensures that the callback is only run once the database is fully initialized and ready for use.
-- [#2](https://github.com/jifox/nautobot-app-livedata/issues/2) - Fixed Read The Docs build error
-- [#2](https://github.com/jifox/nautobot-app-livedata/issues/2) - Fixed the test case for the version check
+- [#2](https://github.com/jifox/nautobot-app-livedata/issues/2)
+  - Fixed Read The Docs build error
+  - Fixed the test case for the version check

@@ -13,10 +13,14 @@ To avoid extra work and temporary links, make sure that publishing docs (or merg
 <p align="center">
   <img src="https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/icon-livedata.png" class="logo" height="200px">
   <br>
-  <a href="https://github.com/jifox/nautobot-app-livedata.git/actions"><img src="https://github.com/jifox/nautobot-app-livedata.git/actions/workflows/ci.yml/badge.svg?branch=main"></a>
-  <a href="https://github.com/jifox/projects/livedata/en/latest/"><img src="https://readthedocs.org/projects/nautobot-app-livedata/badge/"></a>
-  <a href="https://pypi.org/project/livedata/"><img src="https://img.shields.io/pypi/v/livedata"></a>
-  <a href="https://pypi.org/project/livedata/"><img src="https://img.shields.io/pypi/dm/livedata"></a>
+  <!-- CI passing badge -->
+  <a href="https://github.com/jifox/nautobot-app-livedata/actions"><img src="https://github.com/jifox/nautobot-app-livedata/actions/workflows/ci.yml/badge.svg?branch=main"></a>
+  <!-- docs build status badge -->
+  <a href="https://nautobot-app-livedata.readthedocs.io/en/latest/"><img src="https://readthedocs.org/projects/nautobot-app-livedata/badge/"></a>
+  <!-- pypi version Badge -->
+  <a href="https://pypi.org/project/nautobot-app-livedata/"><img src="https://img.shields.io/pypi/v/nautobot-app-livedata"></a>
+  <!-- downloads batch -->
+  <a href="https://pypi.org/project/nautobot-app-livedata/"><img src="https://img.shields.io/pypi/dm/nautobot-app-livedata"></a>
   <br>
   An <a href="https://networktocode.com/nautobot-apps/">App</a> for <a href="https://nautobot.com/">Nautobot</a>.
 </p>
@@ -29,21 +33,9 @@ At the moment, the app is supporting only interface specific data. The data is c
 
 This app addresses the need for dynamic and up-to-date network information, allowing network administrators and engineers to make informed decisions based on the latest data. 
 
-
-!!! warning "Developer Note!"
-    This app is currently in development and is not yet ready for production use.
-
-    The functionality is tested manually and works as expected.
-    Automated tests are not yet in place. 
-    
-    The app is not yet available on PyPI.
-
-
-
 ### Screenshots
 
 - Live Data Output for interfaces
-
 
   ![Livedata output screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-app-output.png)
 
@@ -64,14 +56,6 @@ More screenshots can be found in the [Using the App](https://github.com/jifox/pr
 
 ![](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/placeholder.png)
 
-## Try it out!
-
-> Developer Note: Only keep this section if appropriate. Update link to correct sandbox.
-
-This App is installed in the Nautobot Community Sandbox found over at [demo.nautobot.com](https://demo.nautobot.com/)!
-
-> For a full list of all the available always-on sandbox environments, head over to the main page on [networktocode.com](https://www.networktocode.com/nautobot/sandbox-environments/).
-
 ## Documentation
 
 Full documentation for this App can be found over on the [Nautobot Docs](https://github.com/jifox/) website:
@@ -84,7 +68,7 @@ Full documentation for this App can be found over on the [Nautobot Docs](https:/
 
 ### Contributing to the Documentation
 
-You can find all the Markdown source for the App documentation under the [`docs`](https://github.com/jifox/nautobot-app-livedata.git/tree/develop/docs) folder in this repository. For simple edits, a Markdown capable editor is sufficient: clone the repository and edit away.
+You can find all the Markdown source for the App documentation under the [`docs`](https://github.com/jifox/nautobot-app-livedata/tree/develop/docs) folder in this repository. For simple edits, a Markdown capable editor is sufficient: clone the repository and edit away.
 
 If you need to view the fully-generated documentation site, you can build it with [MkDocs](https://www.mkdocs.org/). A container hosting the documentation can be started using the `invoke` commands (details in the [Development Environment Guide](https://github.com/jifox/projects/livedata/en/latest/dev/dev_environment/#docker-development-environment)) on [http://localhost:8001](http://localhost:8001). Using this container, as your changes to the documentation are saved, they will be automatically rebuilt and any pages currently being viewed will be reloaded in your browser.
 
