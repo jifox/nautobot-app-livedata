@@ -14,9 +14,9 @@ To avoid extra work and temporary links, make sure that publishing docs (or merg
   <img src="https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/icon-livedata.png" class="logo" height="200px">
   <br>
   <!-- CI passing badge -->
-  <a href="https://github.com/jifox/nautobot-app-livedata.git/actions"><img src="https://github.com/jifox/nautobot-app-livedata/actions/workflows/ci.yml/badge.svg?branch=main"></a>
+  <a href="https://github.com/jifox/nautobot-app-livedata/actions"><img src="https://github.com/jifox/nautobot-app-livedata/actions/workflows/ci.yml/badge.svg?branch=main"></a>
   <!-- docs build status badge -->
-  <a href="https://github.com/jifox/projects/livedata/en/latest/"><img src="https://readthedocs.org/projects/nautobot-app-livedata/badge/"></a>
+  <a href="https://nautobot-app-livedata.readthedocs.io/en/latest/"><img src="https://readthedocs.org/projects/nautobot-app-livedata/badge/"></a>
   <!-- pypi version Badge -->
   <a href="https://pypi.org/project/nautobot-app-livedata/"><img src="https://img.shields.io/pypi/v/nautobot-app-livedata"></a>
   <!-- downloads batch -->
@@ -68,7 +68,7 @@ Full documentation for this App can be found over on the [Nautobot Docs](https:/
 
 ### Contributing to the Documentation
 
-You can find all the Markdown source for the App documentation under the [`docs`](https://github.com/jifox/nautobot-app-livedata.git/tree/develop/docs) folder in this repository. For simple edits, a Markdown capable editor is sufficient: clone the repository and edit away.
+You can find all the Markdown source for the App documentation under the [`docs`](https://github.com/jifox/nautobot-app-livedata/tree/develop/docs) folder in this repository. For simple edits, a Markdown capable editor is sufficient: clone the repository and edit away.
 
 If you need to view the fully-generated documentation site, you can build it with [MkDocs](https://www.mkdocs.org/). A container hosting the documentation can be started using the `invoke` commands (details in the [Development Environment Guide](https://github.com/jifox/projects/livedata/en/latest/dev/dev_environment/#docker-development-environment)) on [http://localhost:8001](http://localhost:8001). Using this container, as your changes to the documentation are saved, they will be automatically rebuilt and any pages currently being viewed will be reloaded in your browser.
 
