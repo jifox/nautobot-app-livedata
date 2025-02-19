@@ -177,4 +177,4 @@ The app provides a job to clean up old data. The job can be executed on a regula
 
 The input field **Days to keep** is used to configure the number of days that the query job results is stored in the database. The data that is older than the configured number of days is deleted from the database.
 
-The job provides a dry-run mode that can be used to test the job before executing it. The dry-run mode will not delete any data from the database but show the number of records that would be deleted.
+The job provides a **dry-run** mode that can be used to test the job before executing it. The dry-run mode will not delete any data from the database but show the number of records that would be deleted.
