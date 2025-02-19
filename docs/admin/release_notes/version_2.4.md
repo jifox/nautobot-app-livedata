@@ -16,36 +16,29 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 ### Security
 
 - [#1](https://github.com/jifox/nautobot-app-livedata/issues/1) - Vulnerable OpenSSL included in cryptography wheels fixed weaknesses CWE-392, CWE-1395
-- [#17](https://github.com/jifox/nautobot-app-livedata/issues/17) - Update python modules (dependabot)
-- [#11](https://github.com/jifox/nautobot-app-livedata/issues/11) - - Bump mkdocs-include-markdown-plugin from 7.1.2 to 7.1.4.
-- [#11](https://github.com/jifox/nautobot-app-livedata/issues/11) - - Bump nornir-nautobot from 3.2.0 to 3.3.0
-
 
 ### Added
 
-- [#2](https://github.com/jifox/nautobot-app-livedata/issues/2) - 
-- [#9](https://github.com/jifox/nautobot-app-livedata/issues/9) - #9 Add Dependabot configuration
-- [#26](https://github.com/jifox/nautobot-app-livedata/issues/26) - #26 Automated the Towncrier change fragement creation for Dependabot PRs
+- [#9](https://github.com/jifox/nautobot-app-livedata/issues/9) - Add Dependabot configuration
+- [#26](https://github.com/jifox/nautobot-app-livedata/issues/26) - Automated the Towncrier change fragement creation for Dependabot PRs
 
 ### Changed
 
-- [#2](https://github.com/jifox/nautobot-app-livedata/issues/2) - - #2 Update Documentation
-- [#2](https://github.com/jifox/nautobot-app-livedata/issues/2) - - Updated README.md
-- [#2](https://github.com/jifox/nautobot-app-livedata/issues/2) - - Updated documentation.
-- [#32](https://github.com/jifox/nautobot-app-livedata/issues/32) - #32 Revise App description to be more dynamic
+- [#2](https://github.com/jifox/nautobot-app-livedata/issues/2) - - Update Documentation
+- [#32](https://github.com/jifox/nautobot-app-livedata/issues/32) - Revise App description to be more dynamic
 
 ### Fixed
 
-- [#2](https://github.com/jifox/nautobot-app-livedata/issues/2) - Update Documentation and Fixed build status badges in README.md
-- [#2](https://github.com/jifox/nautobot-app-livedata/issues/2) - Fixed yaml syntax in `.github/dependabot.yml`
+- [#2](https://github.com/jifox/nautobot-app-livedata/issues/2) - Fixed build status badges in README.md and yaml syntax in `.github/dependabot.yml`
 - [#21](https://github.com/jifox/nautobot-app-livedata/issues/21) - Remove trailing spaces from each line of livedata show commands
-- [#29](https://github.com/jifox/nautobot-app-livedata/issues/29) - Updated permissions for the "Live Data" tab view to grant access to superusers
+- [#29](https://github.com/jifox/nautobot-app-livedata/issues/29) - Corrected view permissions for the "Live Data" tab to ensure superusers have access
 
 ### Dependencies
 
 - [#14](https://github.com/jifox/nautobot-app-livedata/issues/14) - Update pymarkdownlnt from 0.9.26 to 0.9.28
 - [#15](https://github.com/jifox/nautobot-app-livedata/issues/15) - Update coverage from 6.4 to 7.6.12
 - [#16](https://github.com/jifox/nautobot-app-livedata/issues/16) - Update ruff from 0.8.6 to 0.9.6
+- [#17](https://github.com/jifox/nautobot-app-livedata/issues/17) - Update mkdocs-include-markdown-plugin from 7.1.2 to 7.1.4.
 - [#22](https://github.com/jifox/nautobot-app-livedata/issues/22) - Update mkdocs-material from 9.5.50 to 9.6.4
 - [#23](https://github.com/jifox/nautobot-app-livedata/issues/23) - Update mkdocstrings from 0.27.0 to 0.28.1
 - [#25](https://github.com/jifox/nautobot-app-livedata/issues/25) - Update griffe from 1.1.1 to 1.5.7
@@ -59,6 +52,4 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 ### Fixed
 
 - [#1](https://github.com/jifox/nautobot-app-livedata/issues/1) - Fixed nautobot_database_ready_callback to wait for the database initialization of dependent apps before running the callback. This ensures that the callback is only run once the database is fully initialized and ready for use.
-- [#2](https://github.com/jifox/nautobot-app-livedata/issues/2)
-  - Fixed Read The Docs build error
-  - Fixed the test case for the version check
+- [#2](https://github.com/jifox/nautobot-app-livedata/issues/2) Fixed Read The Docs build error and also fixed the test case for the version check
