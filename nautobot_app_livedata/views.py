@@ -31,5 +31,10 @@ class LivedataInterfaceExtraTabView(ObjectView):
         extra_context["now"] = now.strftime("%Y-%m-%d %H:%M:%S")
         permissions = request.user.get_all_permissions()
         extra_context["permissions"] = permissions
-        extra_context["has_permission"] = "dcim.can_interact_device" in permissions and "extras.run_job" in permissions
+        if request.user.is_staff or request.user.is_superuser:
+            extra_context["has_permission"] = True
+        else:
+            extra_context["has_permission"] = (
+                "dcim.can_interact_device" in permissions and "extras.run_job" in permissions
+            )
         return extra_context

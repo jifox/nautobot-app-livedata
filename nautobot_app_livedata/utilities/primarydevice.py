@@ -175,5 +175,7 @@ def get_livedata_commands_for_interface(interface) -> List[str]:
     interface_commands = interface.device.platform.custom_field_data[  # type: ignore
         "livedata_interface_commands"
     ].splitlines()
+    # trim trailing whitespace
+    interface_commands = [command.rstrip() for command in interface_commands]
     # Return the commands to be executed
     return interface_commands
