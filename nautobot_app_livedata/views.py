@@ -34,5 +34,7 @@ class LivedataInterfaceExtraTabView(ObjectView):
         if request.user.is_staff or request.user.is_superuser:
             extra_context["has_permission"] = True
         else:
-            extra_context["has_permission"] = "dcim.can_interact_device" in permissions and "extras.run_job" in permissions
+            extra_context["has_permission"] = (
+                "dcim.can_interact_device" in permissions and "extras.run_job" in permissions
+            )
         return extra_context
