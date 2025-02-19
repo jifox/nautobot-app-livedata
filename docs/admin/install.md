@@ -154,6 +154,7 @@ In the input field **Livedata Interface Commands**, add the show commands that a
 The commands are executed in the order they are added to the field. The commands are executed via the `send_command` method of Netmiko, which is using the platform specific show commands to collect the data.
 
 The following Jinja2 template variables are available to be used in the show commands:
+
 - `{{ device_ip }}` - The primary IP address of the primary device
 - `{{ device_name }}` - The device name of the device where the interface is located
 - `{{ intf.abbrev }}` - The abbreviated interface name (e.g. "Gi1/0/10")

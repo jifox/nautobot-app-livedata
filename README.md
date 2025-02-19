@@ -58,7 +58,7 @@ More screenshots can be found in the [Using the App](https://nautobot-app-liveda
 
 ## Documentation
 
-Full documentation for this App can be found over on the [Nautobot Docs](https://github.com/jifox/) website:
+Full documentation for this App can be found over on the [Nautobot-App-Livedtata Docs](https://nautobot-app-livedata.readthedocs.io/en/latest) website:
 
 - [User Guide](https://nautobot-app-livedata.readthedocs.io/en/latest/user/app_overview/) - Overview, Using the App, Getting Started.
 - [Administrator Guide](https://nautobot-app-livedata.readthedocs.io/en/latest/admin/install/) - How to Install, Configure, Upgrade, or Uninstall the App.
