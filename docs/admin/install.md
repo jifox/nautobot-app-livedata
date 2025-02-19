@@ -154,6 +154,7 @@ In the input field **Livedata Interface Commands**, add the show commands that a
 The commands are executed in the order they are added to the field. The commands are executed via the `send_command` method of Netmiko, which is using the platform specific show commands to collect the data.
 
 The following Jinja2 template variables are available to be used in the show commands:
+
 - `{{ device_ip }}` - The primary IP address of the primary device
 - `{{ device_name }}` - The device name of the device where the interface is located
 - `{{ intf.abbrev }}` - The abbreviated interface name (e.g. "Gi1/0/10")
@@ -176,4 +177,4 @@ The app provides a job to clean up old data. The job can be executed on a regula
 
 The input field **Days to keep** is used to configure the number of days that the query job results is stored in the database. The data that is older than the configured number of days is deleted from the database.
 
-The job provides a dry-run mode that can be used to test the job before executing it. The dry-run mode will not delete any data from the database but show the number of records that would be deleted.
+The job provides a **dry-run** mode that can be used to test the job before executing it. The dry-run mode will not delete any data from the database but show the number of records that would be deleted.
