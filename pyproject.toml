@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nautobot_app_livedata"
-description = "Nautobot App Livedata is a Nautobot app that provides a live view of the network data."
+description = "Provides a live view of network data within Nautobot."
 version = "2.4.0b2"
 authors = ["Josef Fuchs <josef.fuchs@j-fuchs.at>"]
 license = "Apache-2.0"
