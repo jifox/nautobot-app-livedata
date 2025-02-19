@@ -14,7 +14,7 @@ Here you will find detailed instructions on how to **install** and **configure**
 ## Install Guide
 
 !!! note
-    Apps can be installed from the [Python Package Index](https://pypi.org/) or locally. See the [Nautobot documentation](https://docs.nautobot.com/projects/core/en/stable/user-guide/administration/installation/app-install/) for more details. The pip package name for this app is [`livedata`](https://pypi.org/project/livedata/).
+    Apps can be installed from the [Python Package Index](https://pypi.org/) or locally. See the [Nautobot documentation](https://docs.nautobot.com/projects/core/en/stable/user-guide/administration/installation/app-install/) for more details. The pip package name for this app is [`nautobot_app_livedata`](https://pypi.org/project/nautobot_app_livedata/).
 
 The app is available as a Python package via PyPI and can be installed with `pip`:
 
@@ -178,3 +178,13 @@ The app provides a job to clean up old data. The job can be executed on a regula
 The input field **Days to keep** is used to configure the number of days that the query job results is stored in the database. The data that is older than the configured number of days is deleted from the database.
 
 The job provides a **dry-run** mode that can be used to test the job before executing it. The dry-run mode will not delete any data from the database but show the number of records that would be deleted.
+
+## Livedata Query Interface Job
+
+The app uses job to query live data on an interface. The hidden job is executed when the interface tab "Live Data" is opened. The job is executed via the Nautobot Worker and therefore is not blocking the user interface.
+
+![Livedata Query Interface Job](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-query-Interface-job.png)
+
+The job name and description can be configured via the Nautobot configuration.
+
+[Back to App Configuration](#app-configuration)
