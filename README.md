@@ -47,14 +47,7 @@ This app addresses the need for dynamic and up-to-date network information, allo
 
   ![Livedata App Cleanup Job Results Screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-app-cleanup-job-results.png)
 
-
-> Developer Note: Add any representative screenshots of the App in action. These images should also be added to the `docs/user/app_use_cases.md` section.
-
-> Developer Note: Place the files in the `docs/images/` folder and link them using only full URLs from GitHub, for example: `![Overview](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/app-overview.png)`. This absolute static linking is required to ensure the README renders properly in GitHub, the docs site, and any other external sites like PyPI.
-
 More screenshots can be found in the [Using the App](https://nautobot-app-livedata.readthedocs.io/en/latest/user/app_use_cases/) page in the documentation. Here's a quick overview of some of the app's added functionality:
-
-![](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/placeholder.png)
 
 ## Documentation
 
