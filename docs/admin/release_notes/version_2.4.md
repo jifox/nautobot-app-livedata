@@ -42,6 +42,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - [#22](https://github.com/jifox/nautobot-app-livedata/issues/22) - Update mkdocs-material from 9.5.50 to 9.6.4
 - [#23](https://github.com/jifox/nautobot-app-livedata/issues/23) - Update mkdocstrings from 0.27.0 to 0.28.1
 - [#25](https://github.com/jifox/nautobot-app-livedata/issues/25) - Update griffe from 1.1.1 to 1.5.7
+- [#32](https://github.com/jifox/nautobot-app-livedata/issues/32) - Update nautobot-plugin-nornir from 2.2.0 to 2.2.1
 
 ## [v2.4.0b1 (2025-02-15)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.0b1)
 
