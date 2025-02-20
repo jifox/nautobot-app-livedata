@@ -148,7 +148,7 @@ def nautobot_database_ready_callback(sender, **kwargs):  # pylint: disable=unuse
     # Commands to display on the Interface page.
     field_data = {
         "key": "livedata_interface_commands",
-        "type": CustomFieldTypeChoices.TYPE_TEXT,
+        "type": CustomFieldTypeChoices.TYPE_MARKDOWN,
         "label": "Livedata Interface Commands",
         "description": (
             "Available variables for show commands. One a line:\n\n"
@@ -160,7 +160,7 @@ def nautobot_database_ready_callback(sender, **kwargs):  # pylint: disable=unuse
         "required": False,
         "filter_logic": "loose",
         "weight": 100,
-        "advanced_ui": True,
+        "advanced_ui": False,
     }
     cto = [app_db_ready_state.content_typs["Platform"]]  # type: ignore
     try:
