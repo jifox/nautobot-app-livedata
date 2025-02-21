@@ -32,6 +32,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - [#2](https://github.com/jifox/nautobot-app-livedata/issues/2) - Fixed build status badges in README.md and yaml syntax in `.github/dependabot.yml`
 - [#21](https://github.com/jifox/nautobot-app-livedata/issues/21) - Remove trailing spaces from each line of livedata show commands
 - [#29](https://github.com/jifox/nautobot-app-livedata/issues/29) - Corrected view permissions for the "Live Data" tab to ensure superusers have access
+- [#37](https://github.com/jifox/nautobot-app-livedata/issues/37) - Updated site_url to point to the documentation URL.
 
 ### Dependencies
 
