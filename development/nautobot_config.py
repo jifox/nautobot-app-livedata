@@ -141,11 +141,9 @@ if "nautobot_app_livedata" not in PLUGINS_CONFIG:
     PLUGINS_CONFIG.update(
         {
             "nautobot_app_livedata": {
-                "query_interface_job_name": os.getenv(
-                    "LIVEDATA_QUERY_INTERFACE_JOB_NAME", "Livedata Query Interface Job"
-                ),
+                "livedata_query_job_name": os.getenv("LIVEDATA_livedata_query_job_name", "Livedata Query Job"),
                 "query_interface_job_description": os.getenv(
-                    "LIVEDATA_QUERY_INTERFACE_JOB_DESCRIPTION", "Job to query live data on an interface."
+                    "LIVEDATA_QUERY_INTERFACE_JOB_DESCRIPTION", "Job to query live data on a device."
                 ),
                 "query_interface_job_soft_time_limit": int(
                     os.getenv("LIVEDATA_QUERY_INTERFACE_JOB_SOFT_TIME_LIMIT", "30")

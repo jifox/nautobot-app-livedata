@@ -39,11 +39,11 @@ PLUGINS = ["nautobot_app_livedata"]
 
 PLUGINS_CONFIG = {
     "nautobot_app_livedata": {
-        "query_interface_job_name": os.getenv(
-            "LIVEDATA_QUERY_INTERFACE_JOB_NAME", "Livedata Query Interface Job"
+        "livedata_query_job_name": os.getenv(
+            "LIVEDATA_livedata_query_job_name", "Livedata Query Job"
         ),
         "query_interface_job_description": os.getenv(
-            "LIVEDATA_QUERY_INTERFACE_JOB_DESCRIPTION", "Job to query live data on an interface."
+            "LIVEDATA_QUERY_INTERFACE_JOB_DESCRIPTION", "Job to query live data on a device."
         ),
         "query_interface_job_soft_time_limit": int(
             os.getenv("LIVEDATA_QUERY_INTERFACE_JOB_SOFT_TIME_LIMIT", "30")
@@ -116,7 +116,7 @@ The app behavior can be controlled with the following list of settings:
 
 | Key     | Example | Default | Description                          |
 | ------- | ------ | -------- | ------------------------------------- |
-| `query_interface_job_name` | | "Livedata Query Interface Job" | The unique name of the job that queries live data on an interface. |
+| `livedata_query_job_name` | | "Livedata Query Job" | The unique name of the job that queries live data on a device. |
 | `query_interface_job_description` | | `"Job to query live data on an interface."` | The description of the job that queries live data on an interface. |
 | `query_interface_job_soft_time_limit` | 30 | 30 | The soft time limit for the job that queries live data on an interface. |
 | `query_interface_job_task_queue` | | None | The task queue for the job that queries live data on an interface. |
@@ -127,7 +127,7 @@ Environment variables can be used to override the default settings:
 
 | Environment Variable | Key | 
 | -------------------- | --- |
-| `LIVEDATA_QUERY_INTERFACE_JOB_NAME` | `query_interface_job_name` |
+| `LIVEDATA_livedata_query_job_name` | `livedata_query_job_name` |
 | `LIVEDATA_QUERY_INTERFACE_JOB_DESCRIPTION` | `query_interface_job_description` |
 | `LIVEDATA_QUERY_INTERFACE_JOB_SOFT_TIME_LIMIT` | `query_interface_job_soft_time_limit` |
 | `LIVEDATA_QUERY_INTERFACE_JOB_TASK_QUEUE` | `query_interface_job_task_queue` |

@@ -2,32 +2,32 @@
 
 # filepath: nautobot_app_livedata/views.py
 
+from abc import ABC, abstractmethod
 from datetime import datetime
 
 from django.utils.timezone import make_aware
 from nautobot.apps.views import ObjectView
-from nautobot.dcim.models import Interface
+from nautobot.dcim.models import Device, Interface
+from django.urls import reverse
 
 
-class LivedataInterfaceExtraTabView(ObjectView):
-    """Live Data view for results."""
+class LivedataExtraTabView(ObjectView, ABC):
+    """Abstract Live Data view for results."""
 
-    queryset = Interface.objects.all()
-    template_name = "nautobot_app_livedata/interface_live_data.html"
-
+    @abstractmethod
     def get_extra_context(self, request, instance):
         """Get extra context for the view.
 
         Args:
             request (HttpRequest): The request object.
-            instance (Interface): The interface instance.
+            instance (Model): The model instance.
 
         Returns:
             dict: The extra context for the view.
         """
         now = make_aware(datetime.now())
         extra_context = {}
-        extra_context["interface"] = instance
+        extra_context["instance"] = instance
         extra_context["now"] = now.strftime("%Y-%m-%d %H:%M:%S")
         permissions = request.user.get_all_permissions()
         extra_context["permissions"] = permissions
@@ -38,3 +38,37 @@ class LivedataInterfaceExtraTabView(ObjectView):
                 "dcim.can_interact_device" in permissions and "extras.run_job" in permissions
             )
         return extra_context
+
+
+class LivedataInterfaceExtraTabView(LivedataExtraTabView):
+    """Live Data view for Interface results."""
+
+    queryset = Interface.objects.all()
+    template_name = "nautobot_app_livedata/interface_live_data.html"  # Updated template name
+
+    def get_extra_context(self, request, instance):
+        extra_context = super().get_extra_context(request, instance)
+        extra_context["interface"] = instance
+        extra_context["object"] = instance
+        return extra_context
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+
+class LivedataDeviceExtraTabView(LivedataExtraTabView):
+    """Live Data view for Device results."""
+
+    queryset = Device.objects.all()
+    template_name = "nautobot_app_livedata/device_live_data.html"  # Updated template name
+
+    def get_extra_context(self, request, instance):
+        extra_context = super().get_extra_context(request, instance)
+        extra_context["device"] = instance
+        extra_context["object"] = instance
+        return extra_context
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context

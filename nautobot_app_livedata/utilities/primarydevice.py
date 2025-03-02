@@ -142,6 +142,44 @@ class PrimaryDeviceUtils:
         return self._primary_device
 
 
+def get_livedata_commands(device, custom_field_key) -> List[str]:
+    """Get the commands to be executed for Livedata on the given device.
+
+    Args:
+        device (dcim.Device): The device to get the commands for.
+        custom_field_key (str): The custom field key to get the commands from.
+
+    Returns:
+        out (List[str]): The commands to be executed for Livedata on the given device.
+
+    Raises:
+        ValueError: If the device.platform does not have a platform set.
+        ValueError: If the device.platform does not have a network driver set.
+        ValueError: If the device.platform does not have the custom field set.
+    """
+    # Check if the device has a platform that supports the commands
+    if device.platform is None:
+        raise ValueError(
+            f"`E3002:` Device {device.name} does not support "
+            "the commands required for Livedata because the platform is not set"
+        )
+    if not device.platform.network_driver:
+        raise ValueError(
+            f"`E3002:` Device {device.name} does not support "
+            "the commands required for Livedata because the network driver is not set"
+        )
+    if custom_field_key not in device.platform.custom_field_data.keys():
+        raise ValueError(
+            f"`E3002:` Device {device.name} does not support the commands "
+            "required for Livedata because the custom field is not set"
+        )
+    commands = device.platform.custom_field_data[custom_field_key].splitlines()
+    # trim trailing whitespace
+    commands = [command.rstrip() for command in commands]
+    # Return the commands to be executed
+    return commands
+
+
 def get_livedata_commands_for_interface(interface) -> List[str]:
     """Get the commands to be executed for Livedata on the given interface.
 
@@ -150,32 +188,17 @@ def get_livedata_commands_for_interface(interface) -> List[str]:
 
     Returns:
         out (List[str]): The commands to be executed for Livedata on the given interface.
-
-    Raises:
-        ValueError: If the device.platform does not have a platform set.
-        ValueError: If the device.platform does not have a network driver set.
-        ValueError: If the device.platform does not have the custom field 'livedata_interface_commands' set.
     """
-    # Check if the device has a platform that supports the commands
-    if interface.device.platform is None:  # type: ignore
-        raise ValueError(
-            f"`E3002:` Device {interface.device.name} does not support "  # type: ignore
-            "the commands required for Livedata because the platform is not set"
-        )
-    if not interface.device.platform.network_driver:  # type: ignore
-        raise ValueError(
-            f"`E3002:` Device {interface.device.name} does not support "  # type: ignore
-            "the commands required for Livedata because the network driver is not set"
-        )
-    if "livedata_interface_commands" not in interface.device.platform.custom_field_data.keys():  # type: ignore
-        raise ValueError(
-            f"`E3002:` Device {interface.device.name} does not support the commands "  # type: ignore
-            "required for Livedata because the custom field 'livedata_interface_commands' is not set"
-        )
-    interface_commands = interface.device.platform.custom_field_data[  # type: ignore
-        "livedata_interface_commands"
-    ].splitlines()
-    # trim trailing whitespace
-    interface_commands = [command.rstrip() for command in interface_commands]
-    # Return the commands to be executed
-    return interface_commands
+    return get_livedata_commands(interface.device, "livedata_interface_commands")
+
+
+def get_livedata_commands_for_device(device) -> List[str]:
+    """Get the commands to be executed for Livedata on the given device.
+
+    Args:
+        device (dcim.Device): The device to get the commands for.
+
+    Returns:
+        out (List[str]): The commands to be executed for Livedata on the given device.
+    """
+    return get_livedata_commands(device, "livedata_device_commands")

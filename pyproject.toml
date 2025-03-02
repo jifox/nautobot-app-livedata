@@ -252,3 +252,9 @@ showcontent = true
 directory = "housekeeping"
 name = "Housekeeping"
 showcontent = true
+
+[tool.yamllint]
+exclude = [
+    ".git/logs/**",
+    ".git/refs/**",
+]

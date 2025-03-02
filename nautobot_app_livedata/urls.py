@@ -22,9 +22,14 @@ router = NautobotUIViewSetRouter()
 urlpatterns = [
     path("docs/", RedirectView.as_view(url=static("nautobot_app_livedata/docs/index.html")), name="docs"),
     path(
-        "interface/<uuid:pk>/interface_detail_tab/",
+        "interfaces/<uuid:pk>/interface_detail_tab/",
         views.LivedataInterfaceExtraTabView.as_view(),
         name="interface_detail_tab",
+    ),
+    path(
+        "devices/<uuid:pk>/device_detail_tab/",
+        views.LivedataDeviceExtraTabView.as_view(),
+        name="device_detail_tab",
     ),
 ]
 
