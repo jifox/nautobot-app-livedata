@@ -17,12 +17,23 @@ env:
 
 jobs:
   create_change_fragment:
+    # yamllint disable-line rule:quoted-strings rule:comments
+    if: github.actor == "dependabot[bot]"
     runs-on: "ubuntu-22.04"
     steps:
-      - name: Invoke workflow without inputs
-        uses: benc-uk/workflow-dispatch@v1
-        with:
-          workflow: create_change_fragment
+      - name: "Checkout repository"
+        uses: "actions/checkout@v2"
+      - name: "Create change fragment"
+        run: |
+          mkdir -p changes
+          echo "Upgrade dependencies" > "changes/${{ github.event.number }}.dependencies"
+      - name: "Commit changes"
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add changes/
+          git commit -m "Add change fragment for Dependabot PR #${{ github.event.number }}"
+          git push
   ruff-format:
     runs-on: "ubuntu-22.04"
     env:
