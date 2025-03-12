@@ -17,6 +17,8 @@ env:
 
 jobs:
   ruff-format:
+    needs:
+      - "create_change_fragment"
     runs-on: "ubuntu-22.04"
     env:
       INVOKE_NAUTOBOT_APP_LIVEDATA_LOCAL: "True"
@@ -30,6 +32,8 @@ jobs:
       - name: "Linting: ruff format"
         run: "poetry run invoke ruff --action format"
   ruff-lint:
+    needs:
+      - "create_change_fragment"
     runs-on: "ubuntu-22.04"
     env:
       INVOKE_NAUTOBOT_APP_LIVEDATA_LOCAL: "True"
@@ -43,6 +47,8 @@ jobs:
       - name: "Linting: ruff"
         run: "poetry run invoke ruff --action lint"
   check-docs-build:
+    needs:
+      - "create_change_fragment"
     runs-on: "ubuntu-22.04"
     env:
       INVOKE_NAUTOBOT_APP_LIVEDATA_LOCAL: "True"
@@ -56,6 +62,8 @@ jobs:
       - name: "Check Docs Build"
         run: "poetry run invoke build-and-check-docs"
   poetry:
+    needs:
+      - name: "create_change_fragment"
     runs-on: "ubuntu-22.04"
     env:
       INVOKE_NAUTOBOT_APP_LIVEDATA_LOCAL: "True"
@@ -69,6 +77,8 @@ jobs:
       - name: "Checking: poetry lock file"
         run: "poetry run invoke lock --check"
   yamllint:
+    needs:
+      - "create_change_fragment"
     runs-on: "ubuntu-22.04"
     env:
       INVOKE_NAUTOBOT_APP_LIVEDATA_LOCAL: "True"
@@ -190,6 +200,8 @@ jobs:
       - name: "Run Tests"
         run: "poetry run invoke unittest"
   changelog:
+    needs:
+      - "create_change_fragment"
     if: >
       contains(fromJson('["develop","ltm-1.6"]'), github.base_ref) &&
       (github.head_ref != 'main') && (!startsWith(github.head_ref, 'release'))
@@ -284,7 +296,7 @@ jobs:
       SLACK_MESSAGE: >-
         *NOTIFICATION: NEW-RELEASE-PUBLISHED*\n
         Repository: <${{ github.server_url }}/${{ github.repository }}|${{ github.repository }}>\n
-        Release: <${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ github.ref_name }}|${{ github.ref_name }}>\n
+        Release: <${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ github.ref_name }} |${{ github.ref_name }}>\n
         Published by: <${{ github.server_url }}/${{ github.actor }}|${{ github.actor }}>
     steps:
       - name: "Send a notification to Slack"

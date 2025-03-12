@@ -194,7 +194,7 @@ def nautobot_database_ready_callback(sender, **kwargs):  # pylint: disable=unuse
         return
 
     # Ensure that the jobs are enabled
-    _enable_job(job_name=PLUGIN_SETTINGS["livedata_query_job_name"])
+    _enable_job(job_name=PLUGIN_SETTINGS["query_job_name"])
     _enable_job(job_name="Livedata Cleanup job results")
 
 

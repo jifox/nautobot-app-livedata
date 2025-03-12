@@ -6,6 +6,9 @@ def create_custom_field(db_objects, content_type_objects=None, **kwargs):
 
     Args:
         db_objects (dict): The database objects to use for the creation.
+        content_types (list[str]): The model names to assign the custom field to. "app_label.model_name"
+
+    Keyword Args:
         key (str): The key name of the custom field.
         type (str): The CustomFieldTypeChoices type of the custom field.
         label (str): The label of the custom field.
@@ -15,7 +18,7 @@ def create_custom_field(db_objects, content_type_objects=None, **kwargs):
         filter_logic (str): (loose|strict) The filter logic of the custom field.
         weight (int): The weight of the custom field.
         advanced_ui (bool): The advanced UI status of the custom field. Defaults to True.
-        content_types (list[str]): The model names to assign the custom field to. "app_label.model_name"
+
     Raises:
         ValueError: If the model_name is not in the format 'app_label.model_name'.
         ValueError: If the field_type is not in CustomFieldTypeChoices.
@@ -52,7 +55,7 @@ def create_custom_field(db_objects, content_type_objects=None, **kwargs):
             except ContentType.DoesNotExist:
                 print(
                     "WARNING: Could not assign custom field to content type.",
-                    f"\nYou must assign the custom field {custom_field} to a content type {content_type} manually.",
+                    f"\nYou must assign the custom field {custom_field} to a content type {content_type} manually!",
                 )
     if added_content_types:
         custom_field.validated_save()

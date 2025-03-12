@@ -93,7 +93,7 @@ if not _TESTING:
         "disable_existing_loggers": False,
         "formatters": {
             "normal": {
-                "format": ("%(asctime)s.%(msecs)03d %(levelname)-7s %(name)s : " "%(message)s"),
+                "format": ("%(asctime)s.%(msecs)03d %(levelname)-7s %(name)s : %(message)s"),
                 "datefmt": "%H:%M:%S",
             },
             "verbose": {
@@ -137,23 +137,23 @@ PLUGINS.append("nautobot_app_livedata")
 if "PLUGINS_CONFIG" not in locals():
     PLUGINS_CONFIG = {}
 
-if "nautobot_app_livedata" not in PLUGINS_CONFIG:
-    PLUGINS_CONFIG.update(
-        {
-            "nautobot_app_livedata": {
-                "livedata_query_job_name": os.getenv("LIVEDATA_livedata_query_job_name", "Livedata Query Job"),
-                "query_interface_job_description": os.getenv(
-                    "LIVEDATA_QUERY_INTERFACE_JOB_DESCRIPTION", "Job to query live data on a device."
-                ),
-                "query_interface_job_soft_time_limit": int(
-                    os.getenv("LIVEDATA_QUERY_INTERFACE_JOB_SOFT_TIME_LIMIT", "30")
-                ),
-                "query_interface_job_task_queue": os.getenv("LIVEDATA_QUERY_INTERFACE_JOB_TASK_QUEUE", None),
-                "query_interface_job_hidden": is_truthy(os.getenv("LIVEDATA_QUERY_INTERFACE_JOB_HIDDEN", "True")),
-                "query_interface_job_has_sensitive_variables": False,
+APP_LIVEDATA_ENABLED = is_truthy(os.getenv("NAUTOBOT_APP_LIVEDATA_ENABLED", "True"))
+if APP_LIVEDATA_ENABLED:
+    if "nautobot_app_livedata" not in PLUGINS_CONFIG:
+        PLUGINS_CONFIG.update(
+            {
+                "nautobot_app_livedata": {
+                    "query_job_name": os.getenv("LIVEDATA_QUERY_JOB_NAME", "Livedata Query Job"),
+                    "query_job_description": os.getenv(
+                        "LIVEDATA_QUERY_JOB_DESCRIPTION", "Job to query live data on a device."
+                    ),
+                    "query_job_soft_time_limit": int(os.getenv("LIVEDATA_QUERY_JOB_SOFT_TIME_LIMIT", "30")),
+                    "query_job_task_queue": os.getenv("LIVEDATA_QUERY_JOB_TASK_QUEUE", None),
+                    "query_job_hidden": is_truthy(os.getenv("LIVEDATA_QUERY_JOB_HIDDEN", "True")),
+                    "query_job_has_sensitive_variables": False,
+                }
             }
-        }
-    )
+        )
 
 
 #
@@ -162,7 +162,7 @@ if "nautobot_app_livedata" not in PLUGINS_CONFIG:
 # see: https://docs.nautobot.com/projects/plugin-nornir/en/latest/admin/install/#install-guide
 #
 
-NORNIR_ENABLED = is_truthy(os.getenv("NAUTOBOT_NORNIR_ENABLED", "True"))
+NORNIR_ENABLED = is_truthy(os.getenv("NAUTOBOT_NORNIR_ENABLED", "True")) or APP_LIVEDATA_ENABLED
 if NORNIR_ENABLED:
     if "nautobot_plugin_nornir" not in PLUGINS:
         # Append 'nautobot_plugin_nornir' to PLUGINS

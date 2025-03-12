@@ -56,11 +56,11 @@ class LivedataQueryJob(Job):  # pylint: disable=too-many-instance-attributes
     class Meta:  # pylint: disable=too-few-public-methods
         """Metadata for the Livedata Query Interface Job."""
 
-        name = PLUGIN_SETTINGS.get("livedata_query_job_name")
-        description = PLUGIN_SETTINGS.get("query_interface_job_description")
+        name = PLUGIN_SETTINGS.get("query_job_name")
+        description = PLUGIN_SETTINGS.get("query_job_description")
         has_sensitive_variables = False
-        hidden = PLUGIN_SETTINGS.get("query_interface_job_hidden")
-        soft_time_limit = PLUGIN_SETTINGS.get("query_interface_job_soft_time_limit")
+        hidden = PLUGIN_SETTINGS.get("query_job_hidden")
+        soft_time_limit = PLUGIN_SETTINGS.get("query_job_soft_time_limit")
         enabled = True
 
     def __init__(self, *args, **kwargs):
@@ -387,7 +387,7 @@ class LivedataCleanupJobResultsJob(Job):
         cutoff_date = timezone.now() - timezone.timedelta(days=days_to_keep)
         job_results = JobResult.objects.filter(
             date_done__lt=cutoff_date,
-            job_model__name=PLUGIN_SETTINGS["livedata_query_job_name"],
+            job_model__name=PLUGIN_SETTINGS["query_job_name"],
             status="SUCCESS",
         )
         cleanup_job_results = JobResult.objects.filter(

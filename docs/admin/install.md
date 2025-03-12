@@ -16,6 +16,8 @@ Here you will find detailed instructions on how to **install** and **configure**
 !!! note
     Apps can be installed from the [Python Package Index](https://pypi.org/) or locally. See the [Nautobot documentation](https://docs.nautobot.com/projects/core/en/stable/user-guide/administration/installation/app-install/) for more details. The pip package name for this app is [`nautobot_app_livedata`](https://pypi.org/project/nautobot_app_livedata/).
 
+### Installation Steps
+
 The app is available as a Python package via PyPI and can be installed with `pip`:
 
 ```shell
@@ -28,6 +30,8 @@ To ensure Nautobot App Livedata is automatically re-installed during future upgr
 echo "nautobot_app_livedata" >> local_requirements.txt
 ```
 
+### Configuration
+
 Once installed, the app needs to be enabled in your Nautobot configuration. The following block of code below shows the additional configuration required to be added to your `nautobot_config.py` file:
 
 - Append `"nautobot_app_livedata"` to the `PLUGINS` list.
@@ -39,24 +43,23 @@ PLUGINS = ["nautobot_app_livedata"]
 
 PLUGINS_CONFIG = {
     "nautobot_app_livedata": {
-        "livedata_query_job_name": os.getenv(
-            "LIVEDATA_livedata_query_job_name", "Livedata Query Job"
+        "query_job_name": os.getenv("LIVEDATA_QUERY_JOB_NAME", "Livedata Query Job"),
+        "query_job_description": os.getenv(
+            "LIVEDATA_QUERY_JOB_DESCRIPTION", "Job to query live data on a device."
         ),
-        "query_interface_job_description": os.getenv(
-            "LIVEDATA_QUERY_INTERFACE_JOB_DESCRIPTION", "Job to query live data on a device."
+        "query_job_soft_time_limit": int(
+            os.getenv("LIVEDATA_QUERY_JOB_SOFT_TIME_LIMIT", "30")
         ),
-        "query_interface_job_soft_time_limit": int(
-            os.getenv("LIVEDATA_QUERY_INTERFACE_JOB_SOFT_TIME_LIMIT", "30")
-        ),
-        "query_interface_job_task_queue": os.getenv("LIVEDATA_QUERY_INTERFACE_JOB_TASK_QUEUE", None),
-        "query_interface_job_hidden": is_truthy(os.getenv("LIVEDATA_QUERY_INTERFACE_JOB_HIDDEN", "True")),
-        "query_interface_job_has_sensitive_variables": False,
+        "query_job_task_queue": os.getenv("LIVEDATA_QUERY_JOB_TASK_QUEUE", None),
+        "query_job_hidden": is_truthy(os.getenv("LIVEDATA_QUERY_JOB_HIDDEN", "True")),
+        "query_job_has_sensitive_variables": False,
     }
 }
 ```
 
-The following configuration shows an example of how to configure
-the `nautobot_plugin_nornir` app:
+### Example Configuration for `nautobot_plugin_nornir`
+
+The following configuration shows an example of how to configure the [nautobot_plugin_nornir](https://docs.nautobot.com/projects/plugin-nornir/en/latest) app:
 
 ```python
 # In your nautobot_config.py
@@ -94,6 +97,8 @@ PLUGINS_CONFIG.update(  # type: ignore
 )
 ```
 
+### Post Installation Steps
+
 Once the Nautobot configuration is updated, run the Post Upgrade command (`nautobot-server post_upgrade`) to run migrations and clear any cache:
 
 ```shell
@@ -115,43 +120,44 @@ sudo systemctl restart nautobot nautobot-worker nautobot-scheduler
 The app behavior can be controlled with the following list of settings:
 
 | Key     | Example | Default | Description                          |
-| ------- | ------ | -------- | ------------------------------------- |
-| `livedata_query_job_name` | | "Livedata Query Job" | The unique name of the job that queries live data on a device. |
-| `query_interface_job_description` | | `"Job to query live data on an interface."` | The description of the job that queries live data on an interface. |
-| `query_interface_job_soft_time_limit` | 30 | 30 | The soft time limit for the job that queries live data on an interface. |
-| `query_interface_job_task_queue` | | None | The task queue for the job that queries live data on an interface. |
-| `query_interface_job_hidden` | True | True | Whether the job that queries live data on an interface is a hidden job. |
+| ------- | ------- | ------- | ------------------------------------- |
+| `query_job_name` | | "Livedata Query Job" | The unique name of the job that queries live data. |
+| `query_job_description` | | `"Job to query live data."` | The description of the job that queries live data. |
+| `query_job_soft_time_limit` | 30 | 30 | The soft time limit for the job that queries live data. |
+| `query_job_task_queue` | | None | The task queue for the job that queries live data. |
+| `query_job_hidden` | True | True | Whether the job that queries live data is a hidden job. |
 
+### Environment Variables
 
 Environment variables can be used to override the default settings:
 
 | Environment Variable | Key | 
 | -------------------- | --- |
-| `LIVEDATA_livedata_query_job_name` | `livedata_query_job_name` |
-| `LIVEDATA_QUERY_INTERFACE_JOB_DESCRIPTION` | `query_interface_job_description` |
-| `LIVEDATA_QUERY_INTERFACE_JOB_SOFT_TIME_LIMIT` | `query_interface_job_soft_time_limit` |
-| `LIVEDATA_QUERY_INTERFACE_JOB_TASK_QUEUE` | `query_interface_job_task_queue` |
-| `LIVEDATA_QUERY_INTERFACE_JOB_HIDDEN` | `query_interface_job_hidden` |
+| `LIVEDATA_QUERY_JOB_NAME` | `query_interface_job_name` |
+| `LIVEDATA_QUERY_JOB_DESCRIPTION` | `query_job_description` |
+| `LIVEDATA_QUERY_JOB_SOFT_TIME_LIMIT` | `query_job_soft_time_limit` |
+| `LIVEDATA_QUERY_JOB_TASK_QUEUE` | `query_job_task_queue` |
+| `LIVEDATA_QUERY_JOB_HIDDEN` | `query_job_hidden` |
 
 ## Platform Commands
 
-You can configure the show commands to be executed at the platform level. This custom field defines the show commands that are executed on the device.
+You can configure the show commands to be executed at the platform level. The custom fields are used to store the show commands that are executed on the device. 
 
-The following custom field is added to the platform model:
+![Custom Fields Table](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-custom-fields-table.png)
 
-![Livedata App Custom Fields](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-custom-fields.png)
+The [nautobot-plugin-nornir](https://docs.nautobot.com/projects/plugin-nornir/en/latest/) uses Kirk Byers' [Netmiko](https://github.com/ktbyers/netmiko) library to collect data. Data is collected using the `send_command` method with platform-specific show commands.
 
-The custom field is used to store the show commands that are executed on the device. The data is collected via the Netmiko library, which is a multi-vendor library to simplify Paramiko SSH connections to network devices. The data is collected via the `send_command` method of Netmiko, which is using the platform specific show commands to collect the data.
+Open the Nautobot Platform model and configure the custom fields with the show commands that are executed on the device.
 
-Open the Nautobot Platform model and configure the custom fields with the show commands that are executed on the device
+### Example Platform Configuration
 
-Here is an example of the configuration of the custom field:
+Here is an example of the platform configuration:
 
-![Livedata App Platform Screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-app-platform-custom-fields-edit.png)
+![Platform Detail Form](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-platform-detail.png)
 
-In the input field **Livedata Interface Commands**, add the show commands that are executed on the device. One command per line.
+In the input field **Livedata Interface Commands**, add the show commands for interfaces that are executed on the device. One command per line.
 
-The commands are executed in the order they are added to the field. The commands are executed via the `send_command` method of Netmiko, which is using the platform specific show commands to collect the data.
+The commands are executed in the order they are added to the field.
 
 The following Jinja2 template variables are available to be used in the show commands:
 
@@ -165,7 +171,7 @@ The following Jinja2 template variables are available to be used in the show com
 - `{{ timestamp }}` - The current timestamp in the format "YYYY-MM-DD HH:MM:SS"
 
 !!! attention
-    To insert a linebreak that is visible when showing the Platform detail page, add two spaces at the end of each line. The linebreaks are removed when the show commands are executed on the device.
+    To insert a linebreak that is visible when showing the Platform detail page, add **two spaces at the end of each line**. The linebreaks are removed when the show commands are executed on the device.
 
 ![Livedata Platform Detail Screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-platform-detail.png)
 
@@ -173,18 +179,20 @@ The following Jinja2 template variables are available to be used in the show com
 
 The app provides a job to clean up old data. The job can be executed on a regular basis to clean up old data that is stored in the database. The job is executed via the Nautobot Scheduler.
 
-![Livedata App Cleanup Job Results Screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-app-cleanup-job-results.png)
+![ Cleanup Job Results Screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-app-cleanup-job-results.png)
 
 The input field **Days to keep** is used to configure the number of days that the query job results is stored in the database. The data that is older than the configured number of days is deleted from the database.
 
 The job provides a **dry-run** mode that can be used to test the job before executing it. The dry-run mode will not delete any data from the database but show the number of records that would be deleted.
 
-## Livedata Query Interface Job
+## Livedata Query Job
 
-The app uses job to query live data on an interface. The hidden job is executed when the interface tab "Live Data" is opened. The job is executed via the Nautobot Worker and therefore is not blocking the user interface.
+The app uses a job to query live data on an interface. The hidden job is executed when the interface tab "Live Data" is opened. The job is executed via the Nautobot Worker and therefore is not blocking the user interface.
 
-![Livedata Query Interface Job](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-query-Interface-job.png)
+![Livedata Query Job](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-query-job.png)
 
-The job name and description can be configured via the Nautobot configuration.
+The job name and description can be configured via envirnment variables.
+
+Here you can also define the time limit and the soft time limit for the job. The soft time limit is the time limit that is used to determine if the job is taking too long to execute. The job is then terminated if the soft time limit is reached.
 
 [Back to App Configuration](#app-configuration)

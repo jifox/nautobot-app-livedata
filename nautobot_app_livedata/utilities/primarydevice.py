@@ -40,34 +40,19 @@ class PrimaryDeviceUtils:
         self._primary_device = None
         self._get_primary_device()
 
-    def _get_primary_device(self):
-        """Get the primary device for the given object type and ID."""
-        self._get_associated_device()
-
-        # Check if device is None
-        if self._device is None:
-            raise ValueError("Device not found")
-
-        # Set the primary device to the device
-        self._primary_device = self._device
-
-        # Check if the device has a primary IP address and status is active
-        if not self._primary_device.primary_ip:  # type: ignore
-            # Try to loop over all devices in the virtual chassis and check if any of them has a primary IP address
-            if self._primary_device.virtual_chassis:  # type: ignore
-                self._virtual_chassis = self._primary_device.virtual_chassis  # type: ignore
-                for member in self._primary_device.virtual_chassis.members.all():  # type: ignore
-                    if member.primary_ip:
-                        self._primary_device = member
-                        break
-                    raise ValueError("Device does not have a primary IP address")
-            else:
-                raise ValueError("Device does not have a primary IP address")
-        # Check if the device state is active
-        if str(self._primary_device.status) != "Active":  # type: ignore
-            raise ValueError("Device is not active")
+    def to_dict(self):
+        """Cast the PrimaryDeviceUtils object to a dictionary."""
+        return {
+            "object_type": self._object_type,
+            "pk": self._pk,
+            "device": self._device.id if self._device else None,
+            "interface": self._interface.id if self._interface else None,
+            "virtual_chassis": self._virtual_chassis.id if self._virtual_chassis else None,
+            "primary_device": self._primary_device.id if self._primary_device else None,
+        }
 
     def _get_associated_device(self):
+        """Get the associated device for the given object type and ID."""
         Interface = ContentTypeUtils("dcim.interface").model  # pylint: disable=invalid-name
         Device = ContentTypeUtils("dcim.device").model  # pylint: disable=invalid-name
         if self._object_type == "dcim.interface":
@@ -102,16 +87,32 @@ class PrimaryDeviceUtils:
         else:
             raise ValueError("Invalid object type")
 
-    def to_dict(self):
-        """Cast the PrimaryDeviceUtils object to a dictionary."""
-        return {
-            "object_type": self._object_type,
-            "pk": self._pk,
-            "device": self._device.pk if self._device else None,
-            "interface": self._interface.pk if self._interface else None,
-            "virtual_chassis": self._virtual_chassis.pk if self._virtual_chassis else None,
-            "primary_device": self._primary_device.pk if self._primary_device else None,
-        }
+    def _get_primary_device(self):
+        """Get the primary device for the given object type and ID."""
+        self._get_associated_device()
+
+        # Check if device is None
+        if self._device is None:
+            raise ValueError("Device not found")
+
+        # Set the primary device to the device
+        self._primary_device = self._device
+
+        # Check if the device has a primary IP address and status is active
+        if not self._primary_device.primary_ip:  # type: ignore
+            # Try to loop over all devices in the virtual chassis and check if any of them has a primary IP address
+            if self._primary_device.virtual_chassis:  # type: ignore
+                self._virtual_chassis = self._primary_device.virtual_chassis  # type: ignore
+                for member in self._primary_device.virtual_chassis.members.all():  # type: ignore
+                    if member.primary_ip:
+                        self._primary_device = member
+                        break
+                    raise ValueError("Device does not have a primary IP address")
+            else:
+                raise ValueError("Device does not have a primary IP address")
+        # Check if the device state is active
+        if str(self._primary_device.status) != "Active":  # type: ignore
+            raise ValueError("Device status is not 'Active'")
 
     @property
     def device(self):
@@ -122,11 +123,6 @@ class PrimaryDeviceUtils:
     def interface(self):
         """Return the interface that was given as input."""
         return self._interface
-
-    @property
-    def virtual_chassis(self):
-        """Return the virtual chassis that was given as input."""
-        return self._virtual_chassis
 
     @property
     def primary_device(self):
@@ -140,6 +136,11 @@ class PrimaryDeviceUtils:
         if self._primary_device is None:
             self._get_primary_device()
         return self._primary_device
+
+    @property
+    def virtual_chassis(self):
+        """Return the virtual chassis that was given as input."""
+        return self._virtual_chassis
 
 
 def get_livedata_commands(device, custom_field_key) -> List[str]:
@@ -171,25 +172,13 @@ def get_livedata_commands(device, custom_field_key) -> List[str]:
     if custom_field_key not in device.platform.custom_field_data.keys():
         raise ValueError(
             f"`E3002:` Device {device.name} does not support the commands "
-            "required for Livedata because the custom field is not set"
+            f"required for Livedata because the custom field  {custom_field_key} doesn't exist."
         )
     commands = device.platform.custom_field_data[custom_field_key].splitlines()
     # trim trailing whitespace
     commands = [command.rstrip() for command in commands]
     # Return the commands to be executed
     return commands
-
-
-def get_livedata_commands_for_interface(interface) -> List[str]:
-    """Get the commands to be executed for Livedata on the given interface.
-
-    Args:
-        interface (dcim.Interface): The interface to get the commands for.
-
-    Returns:
-        out (List[str]): The commands to be executed for Livedata on the given interface.
-    """
-    return get_livedata_commands(interface.device, "livedata_interface_commands")
 
 
 def get_livedata_commands_for_device(device) -> List[str]:
@@ -202,3 +191,15 @@ def get_livedata_commands_for_device(device) -> List[str]:
         out (List[str]): The commands to be executed for Livedata on the given device.
     """
     return get_livedata_commands(device, "livedata_device_commands")
+
+
+def get_livedata_commands_for_interface(interface) -> List[str]:
+    """Get the commands to be executed for Livedata on the given interface.
+
+    Args:
+        interface (dcim.Interface): The interface to get the commands for.
+
+    Returns:
+        out (List[str]): The commands to be executed for Livedata on the given interface.
+    """
+    return get_livedata_commands(interface.device, "livedata_interface_commands")

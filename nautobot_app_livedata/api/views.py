@@ -126,10 +126,10 @@ class LivedataQueryApiView(ObjectPermissionRequiredMixin, GenericAPIView, ABC):
                 status=status,
             )
 
-        job = Job.objects.filter(name=PLUGIN_SETTINGS["livedata_query_job_name"]).first()
+        job = Job.objects.filter(name=PLUGIN_SETTINGS["query_job_name"]).first()
         if job is None:
             return Response(
-                f"{PLUGIN_SETTINGS['livedata_query_job_name']} not found",
+                f"{PLUGIN_SETTINGS['query_job_name']} not found",
                 status=HTTPStatus.NOT_FOUND,  # 404
             )
 
@@ -148,7 +148,7 @@ class LivedataQueryApiView(ObjectPermissionRequiredMixin, GenericAPIView, ABC):
             jobres = JobResult.enqueue_job(
                 job,
                 user=request.user,
-                task_queue=PLUGIN_SETTINGS["query_interface_job_task_queue"],
+                task_queue=PLUGIN_SETTINGS["query_job_task_queue"],
                 **job_kwargs,
             )
 
@@ -160,7 +160,7 @@ class LivedataQueryApiView(ObjectPermissionRequiredMixin, GenericAPIView, ABC):
 
         except RunJobTaskFailed as error:
             return Response(
-                f"Failed to run {PLUGIN_SETTINGS['livedata_query_job_name']}: {error}",
+                f"Failed to run {PLUGIN_SETTINGS['query_job_name']}: {error}",
                 status=HTTPStatus.INTERNAL_SERVER_ERROR,  # 500
             )
 

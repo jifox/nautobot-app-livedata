@@ -35,17 +35,21 @@ This app addresses the need for dynamic and up-to-date network information, allo
 
 ### Screenshots
 
-- Live Data Output for interfaces
+- Live Data Interface Output for interfaces
 
   ![Livedata output screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-app-output.png)
 
+- Live Data Device Output for devices
+
+  ![Livedata output screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-device-output.png)
+
 - Configure the show commands to be executed on Platform level:
 
-  ![Livedata App Platform Screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-app-platform-custom-fields-edit.png)
+  ![ Platform Screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-platform-detail.png)
 
 - Job to clean up old data:
 
-  ![Livedata App Cleanup Job Results Screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-app-cleanup-job-results.png)
+  ![ Cleanup Job Results Screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-app-cleanup-job-results.png)
 
 More screenshots can be found in the [Using the App](https://nautobot-app-livedata.readthedocs.io/en/latest/user/app_use_cases/) page in the documentation. Here's a quick overview of some of the app's added functionality:
 

@@ -8,7 +8,6 @@ from datetime import datetime
 from django.utils.timezone import make_aware
 from nautobot.apps.views import ObjectView
 from nautobot.dcim.models import Device, Interface
-from django.urls import reverse
 
 
 class LivedataExtraTabView(ObjectView, ABC):

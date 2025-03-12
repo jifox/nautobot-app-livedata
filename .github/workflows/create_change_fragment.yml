@@ -16,12 +16,10 @@ jobs:
     steps:
       - name: "Checkout repository"
         uses: "actions/checkout@v2"
-
       - name: "Create change fragment"
         run: |
           mkdir -p changes
-          echo "Upgrade dependencies" > "changes/${{ github.event.number }}.dependabot"
-
+          echo "Upgrade dependencies" > "changes/${{ github.event.number }}.dependencies"
       - name: "Commit changes"
         run: |
           git config --global user.name "github-actions[bot]"
