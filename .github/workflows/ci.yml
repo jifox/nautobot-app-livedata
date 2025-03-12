@@ -17,6 +17,7 @@ env:
 
 jobs:
   create_change_format:
+    runs-on: "ubuntu-22.04"
     steps:
       - name: Invoke workflow without inputs
         uses: benc-uk/workflow-dispatch@v1
