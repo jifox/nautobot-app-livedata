@@ -16,13 +16,13 @@ env:
   APP_NAME: "nautobot_app_livedata"
 
 jobs:
-  create_change_format:
+  create_change_fragment:
     runs-on: "ubuntu-22.04"
     steps:
       - name: Invoke workflow without inputs
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: create_change_format
+          workflow: create_change_fragment
   ruff-format:
     runs-on: "ubuntu-22.04"
     env:
