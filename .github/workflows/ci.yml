@@ -18,7 +18,7 @@ env:
 jobs:
   create_change_fragment:
     # yamllint disable-line rule:quoted-strings rule:comments
-    if: github.actor == "dependabot[bot]"
+    if: ${{ github.actor == 'dependabot[bot]' }}
     runs-on: "ubuntu-22.04"
     steps:
       - name: "Checkout repository"
