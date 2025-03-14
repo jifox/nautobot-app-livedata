@@ -1,12 +1,14 @@
 """Live Data view for results."""
 
 # filepath: nautobot_app_livedata/views.py
-
+import logging
 from datetime import datetime
 
 from django.utils.timezone import make_aware
 from nautobot.apps.views import ObjectView
 from nautobot.dcim.models import Device, Interface
+
+logger = logging.getLogger("nautobot_app_livedata")
 
 
 class LivedataExtraTabView(ObjectView):
@@ -36,16 +38,6 @@ class LivedataExtraTabView(ObjectView):
             )
         return extra_context
 
-    def get_context_data(self, **kwargs):
-        """Get the context data for the view.
-
-        Returns:
-            dict: The context data for the view.
-        """
-
-        context = super().get_context_data(**kwargs)  # pylint: disable=no-member
-        return context
-
 
 class LivedataInterfaceExtraTabView(LivedataExtraTabView):
     """Live Data view for Interface results."""
@@ -59,15 +51,6 @@ class LivedataInterfaceExtraTabView(LivedataExtraTabView):
         extra_context["object"] = instance
         return extra_context
 
-    def get_context_data(self, **kwargs):
-        """Get the context data for the view.
-
-        Returns:
-            dict: The context data for the view.
-        """
-        context = super().get_context_data(**kwargs) if hasattr(super(), "get_context_data") else {}
-        return context
-
 
 class LivedataDeviceExtraTabView(LivedataExtraTabView):
     """Live Data view for Device results."""
@@ -80,7 +63,3 @@ class LivedataDeviceExtraTabView(LivedataExtraTabView):
         extra_context["device"] = instance
         extra_context["object"] = instance
         return extra_context
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context

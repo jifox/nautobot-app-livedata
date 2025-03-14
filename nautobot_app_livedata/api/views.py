@@ -22,7 +22,7 @@ from nautobot_app_livedata.utilities.primarydevice import (
 
 from .serializers import LivedataSerializer
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("nautobot_app_livedata")
 
 # Check that napalm is installed
 try:
@@ -120,9 +120,10 @@ class LivedataQueryApiView(ObjectPermissionRequiredMixin, GenericAPIView, ABC):
             instance = self.get_queryset().get(pk=pk)
             show_commands_j2_array = self.get_commands(instance)
         except (ValueError, self.get_queryset().model.DoesNotExist) as error:
+            logger.error("Error during Livedata Query API: %s", error)
             status = HTTPStatus.BAD_REQUEST if isinstance(error, ValueError) else HTTPStatus.NOT_FOUND
             return Response(
-                f"Error during Livedata Query API: {error}",
+                "An error occurred during the Livedata Query API request.",
                 status=status,
             )
 
@@ -157,10 +158,11 @@ class LivedataQueryApiView(ObjectPermissionRequiredMixin, GenericAPIView, ABC):
                 data={"jobresult_id": jobres.id},
                 status=HTTPStatus.OK,  # 200
             )
-
         except RunJobTaskFailed as error:
+            logger.error("Failed to run %s: %s", PLUGIN_SETTINGS["query_job_name"], error)
+
             return Response(
-                f"Failed to run {PLUGIN_SETTINGS['query_job_name']}: {error}",
+                "An internal error has occurred while running the job.",
                 status=HTTPStatus.INTERNAL_SERVER_ERROR,  # 500
             )
 

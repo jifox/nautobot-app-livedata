@@ -155,6 +155,16 @@ if APP_LIVEDATA_ENABLED:
             }
         )
 
+    if not _TESTING:
+        LOGGING["loggers"].update(
+            {
+                "nautobot_app_livedata": {
+                    "handlers": ["verbose_console" if DEBUG else "normal_console"],
+                    "level": LOG_LEVEL,
+                },
+            }
+        )
+
 
 #
 # App: Nautobot Plugin Nornir
