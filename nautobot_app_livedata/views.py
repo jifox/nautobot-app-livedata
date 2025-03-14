@@ -2,7 +2,6 @@
 
 # filepath: nautobot_app_livedata/views.py
 
-from abc import ABC, abstractmethod
 from datetime import datetime
 
 from django.utils.timezone import make_aware
@@ -10,10 +9,9 @@ from nautobot.apps.views import ObjectView
 from nautobot.dcim.models import Device, Interface
 
 
-class LivedataExtraTabView(ObjectView, ABC):
+class LivedataExtraTabView(ObjectView):
     """Abstract Live Data view for results."""
 
-    @abstractmethod
     def get_extra_context(self, request, instance):
         """Get extra context for the view.
 
@@ -38,6 +36,16 @@ class LivedataExtraTabView(ObjectView, ABC):
             )
         return extra_context
 
+    def get_context_data(self, **kwargs):
+        """Get the context data for the view.
+
+        Returns:
+            dict: The context data for the view.
+        """
+
+        context = super().get_context_data(**kwargs)  # pylint: disable=no-member
+        return context
+
 
 class LivedataInterfaceExtraTabView(LivedataExtraTabView):
     """Live Data view for Interface results."""
@@ -52,7 +60,12 @@ class LivedataInterfaceExtraTabView(LivedataExtraTabView):
         return extra_context
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        """Get the context data for the view.
+
+        Returns:
+            dict: The context data for the view.
+        """
+        context = super().get_context_data(**kwargs) if hasattr(super(), "get_context_data") else {}
         return context
 
 
