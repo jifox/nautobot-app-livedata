@@ -7,21 +7,20 @@ on: # yamllint disable-line rule:truthy rule:comments
       - "opened"
     branches:
       - "main"
+      - "develop"
 
 jobs:
   create_change_fragment:
     # yamllint disable-line rule:quoted-strings rule:comments
-    if: github.actor == "dependabot[bot]"
+    if: ${{ github.actor == "dependabot[bot]" }}
     runs-on: "ubuntu-latest"
     steps:
       - name: "Checkout repository"
         uses: "actions/checkout@v2"
-
       - name: "Create change fragment"
         run: |
           mkdir -p changes
-          echo "Upgrade dependencies" > "changes/${{ github.event.number }}.dependabot"
-
+          echo "Upgrade dependencies" > "changes/${{ github.event.number }}.dependencies"
       - name: "Commit changes"
         run: |
           git config --global user.name "github-actions[bot]"

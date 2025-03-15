@@ -1,0 +1,109 @@
+{% extends 'dcim/device.html' %}
+{% load helpers %}
+{% load static %}
+
+{% block content %}
+<div class="panel panel-default">
+    <div class="panel-heading" style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 class="panel-title" style="display: flex; align-items: center;">Device Live Data
+            {% if has_permission != False %}
+                <img id="id_wait_for_jobexecution" src="{% static 'img/ajax-loader.gif' %}" alt="Loading..." style="width: 1.5em; height: 1.5em; vertical-align: left; margin-left: 20px;">
+            {% endif %}
+        </h3>
+        {% if has_permission != False %}
+            <div id="id_livedata-info" style="margin-left: 20px;">
+                Fetching live data from the device. Please wait...
+            </div>
+        {% endif %}
+    </div>
+    <div class="panel-body">
+        <input type="hidden" id="jobresult-pk" name="jobresult-pk" value="">
+        <input type="hidden" id="jobresult-response" name="jobresult-response" value="">
+        <input type="hidden" id="results" name="results" value="">
+        {% if has_permission == True %}
+            <div id="id_refresh_live_interface_data"></div>
+        {% else %}
+            <div class="alert alert-warning" role="alert">
+                <p>Permission denied to fetch live data.</p>
+                <p>Ask your administrator to grant permission to fetch live data</p>
+                <ul>
+                    <li>dcim.can_interact</li>
+                    <li>extras.run_job</li>
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+{{ block.super }}
+{% if has_permission != False %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const csrftoken = '{{ csrf_token }}';
+            var jobresultPk = document.getElementById("jobresult-pk").value;
+
+            if (jobresultPk === "") {
+                fetch("{% url 'plugins-api:nautobot_app_livedata-api:livedata-query-device-api' pk=object.pk %}", {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    jobresultPk = data.jobresult_id;
+                    document.getElementById("jobresult-pk").value = data.jobresult_id;
+                    document.getElementById("id_livedata-info").innerHTML = `
+                        <div class="text-right">
+                            <a href='/extras/job-results/${data.jobresult_id}/' target='_blank' class="btn btn-info btn-sm">
+                                Show Job Result
+                            </a>
+                        </div>`;
+                })
+                .catch(error => console.error('Error fetching live data:', error));
+            }
+
+            // Timer to check jobresult-pk and fetch job result
+            const intervalId = setInterval(function() {
+                if (document.getElementById("jobresult-pk").value === "") {
+                    return;
+                }
+                const jobresultPk = document.getElementById("jobresult-pk").value;
+                if (jobresultPk) {
+                    fetch(`/api/extras/job-results/${jobresultPk}/`, {
+                        method: 'GET',
+                        headers: {
+                            'X-CSRFToken': csrftoken,
+                        },
+                    })
+                    .then(response => response.json())
+                    .then(jobResultData => {
+                        if (jobResultData.status.value === "SUCCESS") {
+                            document.getElementById("jobresult-response").value = JSON.stringify(jobResultData);
+                            if (jobResultData.result) {
+                                let resultContent = "";
+                                jobResultData.result.forEach(result => {
+                                    resultContent += `<p><pre><strong style="font-size: 1.4em;">${result.command}</strong><br><span style="font-size: 1.2em;">${result.stdout}</span></pre>`;
+                                    if (result.stderr) {
+                                        resultContent += `<pre><strong style="font-size: 1.4em;>Error: </strong><span style="font-size: 1.2em;">${result.stderr}</span></pre>`;
+                                    }
+                                });
+                                document.getElementById("id_wait_for_jobexecution").style.display = 'none';
+                                document.getElementById("id_refresh_live_interface_data").innerHTML = resultContent;
+                                clearInterval(intervalId);  // Disable the interval after displaying the content
+                            }
+                        }
+                        if (jobResultData.status.value === "FAILED") {
+                            document.getElementById("id_refresh_live_interface_data").innerHTML = `<p>Failed to fetch live data.</p>`;
+                            clearInterval(intervalId);  // Disable the interval after displaying the content
+                        }
+                    })
+                    .catch(error => console.error('Error fetching job result:', error));
+                }
+            }, 3000); // Check every 3 seconds
+        });
+    </script>
+{% endif %}
+{% endblock %}

@@ -25,8 +25,17 @@ name = GROUP_NAME = APP_NAME  # pylint: disable=invalid-name
 
 InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
 
+# Constants for repeated strings
+PRIMARY_DEVICE_ID = "primary_device_id"
+INTERFACE_ID = "interface_id"
+CALL_OBJECT_TYPE = "call_object_type"
+COMMANDS_J2 = "commands_j2"
+REMOTE_ADDR = "remote_addr"
+X_FORWARDED_FOR = "x_forwarded_for"
+VIRTUAL_CHASSIS_ID = "virtual_chassis_id"
 
-class LivedataQueryInterfaceJob(Job):  # pylint: disable=too-many-instance-attributes
+
+class LivedataQueryJob(Job):  # pylint: disable=too-many-instance-attributes
     """Job to query live data on an interface.
 
     For more information on implementing jobs, refer to the Nautobot job documentation:
@@ -47,11 +56,11 @@ class LivedataQueryInterfaceJob(Job):  # pylint: disable=too-many-instance-attri
     class Meta:  # pylint: disable=too-few-public-methods
         """Metadata for the Livedata Query Interface Job."""
 
-        name = PLUGIN_SETTINGS.get("query_interface_job_name")
-        description = PLUGIN_SETTINGS.get("query_interface_job_description")
+        name = PLUGIN_SETTINGS.get("query_job_name")
+        description = PLUGIN_SETTINGS.get("query_job_description")
         has_sensitive_variables = False
-        hidden = PLUGIN_SETTINGS.get("query_interface_job_hidden")
-        soft_time_limit = PLUGIN_SETTINGS.get("query_interface_job_soft_time_limit")
+        hidden = PLUGIN_SETTINGS.get("query_job_hidden")
+        soft_time_limit = PLUGIN_SETTINGS.get("query_job_soft_time_limit")
         enabled = True
 
     def __init__(self, *args, **kwargs):
@@ -74,6 +83,7 @@ class LivedataQueryInterfaceJob(Job):  # pylint: disable=too-many-instance-attri
         self.device_ip = None  # The primary IP address of the primary device
         self.execution_timestamp = None  # The current timestamp in the format "YYYY-MM-DD HH:MM:SS"
         self.now = None  # The current timestamp
+        self.call_object_type = None  # The object type of the call
 
     def parse_commands(self, commands_j2):
         """Replace jinja2 variables in the commands with the interface-specific context.
@@ -90,7 +100,6 @@ class LivedataQueryInterfaceJob(Job):  # pylint: disable=too-many-instance-attri
             autoescape=False,  # noqa: S701 # no HTML is involved
             undefined=jinja2.StrictUndefined,
         )
-
         # Create a context with interface-specific variables
         context = {
             "intf_name": self.intf_name,
@@ -102,6 +111,7 @@ class LivedataQueryInterfaceJob(Job):  # pylint: disable=too-many-instance-attri
             "device_ip": self.device_ip,
             "obj": self.interface,
             "timestamp": self.execution_timestamp,
+            "call_object_type": self.call_object_type,
         }
 
         # Render each command with the context
@@ -127,43 +137,38 @@ class LivedataQueryInterfaceJob(Job):  # pylint: disable=too-many-instance-attri
             ValueError: If the commands_j2 is not provided.
             ValueError: If the interface with the provided interface_id is not found.
             ValueError: If the primary device with the provided primary_device_id is not found.
+            ValueError: If the call_object_type is not provided.
         """
         super().before_start(task_id, args, kwargs)
-        self.callername = self.user.username  # type: ignore
-        # PrimaryDevice is the device that is manageabe
-
-        self.now = make_aware(datetime.now())
-
-        # Initialize the job-specific variables
+        self._initialize_variables(kwargs)
         self._initialize_interface(kwargs)
         self._initialize_primary_device(kwargs)
-        self.device_name = self.primary_device.name
-        self.device_ip = self.primary_device.primary_ip.address  # type: ignore
         self._initialize_device(kwargs)
         self._initialize_virtual_chassis(kwargs)
-        if "user" in kwargs:
-            self.user = kwargs.get("user")  # type: ignore
-        if "remote_addr" in kwargs:
-            self.remote_addr = kwargs.get("remote_addr")
-        if "x_forwarded_for" in kwargs:
-            self.x_forwarded_for = kwargs.get("x_forwarded_for")
-        # Initialize the show commands
-        if "commands_j2" not in kwargs:
-            raise ValueError("commands_j2 is required.")
-        self.intf_name = self.interface.name
-        self.intf_name_only, self.intf_number = split_interface(self.intf_name)
-        self.intf_abbrev = abbreviated_interface_name(self.interface.name)
-        self.commands = self.parse_commands(kwargs.get("commands_j2"))
+        self._initialize_commands(kwargs)
         self.execution_timestamp = self.now.strftime("%Y-%m-%d %H:%M:%S")
+
+    def _initialize_variables(self, kwargs):
+        """Initialize common variables."""
+        self.callername = self.user.username  # type: ignore
+        self.now = make_aware(datetime.now())
+        self.remote_addr = kwargs.get(REMOTE_ADDR)
+        self.x_forwarded_for = kwargs.get(X_FORWARDED_FOR)
+        self.call_object_type = kwargs.get(CALL_OBJECT_TYPE)
+        if not self.call_object_type:
+            raise ValueError(f"{CALL_OBJECT_TYPE} is required.")
 
     def _initialize_virtual_chassis(self, kwargs):
         """Initialize the virtual chassis object if applicable."""
-        if "virtual_chassis_id" in kwargs:
-            virtual_chassis_id = kwargs.get("virtual_chassis_id")
+        if VIRTUAL_CHASSIS_ID in kwargs:
+            virtual_chassis_id = kwargs.get(VIRTUAL_CHASSIS_ID)
             if virtual_chassis_id:
                 self.virtual_chassis = VirtualChassis.objects.get(pk=virtual_chassis_id)
+            else:
+                if self.device.virtual_chassis:
+                    self.virtual_chassis = self.device.virtual_chassis
 
-    def _initialize_device(self, kwargs):
+    def _initialize_device(self, kwargs):  # pylint: disable=possibly-used-before-assignment
         """Initialize the device object."""
         if "device_id" in kwargs:
             device_id = kwargs.get("device_id")
@@ -175,23 +180,35 @@ class LivedataQueryInterfaceJob(Job):  # pylint: disable=too-many-instance-attri
 
     def _initialize_primary_device(self, kwargs):
         """Initialize the primary device object."""
-        if "primary_device_id" not in kwargs:
+        if PRIMARY_DEVICE_ID not in kwargs:
             primary_device_id = PrimaryDeviceUtils("dcim.interface", self.interface.id).primary_device.id
         else:
-            primary_device_id = kwargs.get("primary_device_id")
+            primary_device_id = kwargs.get(PRIMARY_DEVICE_ID)
         try:
             self.primary_device = Device.objects.get(pk=primary_device_id)
+            self.device_ip = self.primary_device.primary_ip.address  # type: ignore
         except Device.DoesNotExist:
             raise ValueError(f"Primary Device with ID {primary_device_id} not found.")  # pylint: disable=raise-missing-from
 
     def _initialize_interface(self, kwargs):
         """Initialize the interface object."""
-        if "interface_id" not in kwargs:
-            raise ValueError("Interface_id is required.")
-        try:
-            self.interface = Interface.objects.get(pk=kwargs.get("interface_id"))
-        except Interface.DoesNotExist as error:
-            raise ValueError(f"Interface with ID {kwargs.get('interface_id')} not found.") from error
+        if kwargs.get(CALL_OBJECT_TYPE) == "dcim.interface":
+            if INTERFACE_ID not in kwargs:
+                raise ValueError("Interface_id is required.")
+            try:
+                self.interface = Interface.objects.get(pk=kwargs.get(INTERFACE_ID))
+            except Interface.DoesNotExist as error:
+                raise ValueError(f"Interface with ID {kwargs.get(INTERFACE_ID)} not found.") from error
+
+    def _initialize_commands(self, kwargs):
+        """Initialize the commands to be executed."""
+        if COMMANDS_J2 not in kwargs:
+            raise ValueError(f"{COMMANDS_J2} is required.")
+        if self.call_object_type == "dcim.interface":
+            self.intf_name = self.interface.name
+            self.intf_name_only, self.intf_number = split_interface(self.intf_name)
+            self.intf_abbrev = abbreviated_interface_name(self.interface.name)
+        self.commands = self.parse_commands(kwargs.get(COMMANDS_J2))
 
     # If both before_start() and run() are successful, the on_success() method
     # will be called next, if implemented.
@@ -231,6 +248,9 @@ class LivedataQueryInterfaceJob(Job):  # pylint: disable=too-many-instance-attri
             virtual_chassis_id (int): The virtual chassis ID.
             x_forwarded_for (str): The forwarded address.
             *args: Additional arguments.
+            extras (Dict): Additional information
+                - object_type (str): The object type.
+                - call_object_type (str): The call object type.
             **kwargs: Additional keyword arguments.
 
         Returns:
@@ -256,8 +276,10 @@ class LivedataQueryInterfaceJob(Job):  # pylint: disable=too-many-instance-attri
             "now": now,
             "caller": callername,
             "interface": self.interface,
+            "intf": self.interface,
             "device_name": self.device_name,
             "device_ip": self.primary_device.primary_ip.address,  # type: ignore
+            "call_object_type": self.call_object_type,
         }
 
         inventory = {
@@ -365,7 +387,7 @@ class LivedataCleanupJobResultsJob(Job):
         cutoff_date = timezone.now() - timezone.timedelta(days=days_to_keep)
         job_results = JobResult.objects.filter(
             date_done__lt=cutoff_date,
-            job_model__name=PLUGIN_SETTINGS["query_interface_job_name"],
+            job_model__name=PLUGIN_SETTINGS["query_job_name"],
             status="SUCCESS",
         )
         cleanup_job_results = JobResult.objects.filter(
@@ -390,5 +412,5 @@ class LivedataCleanupJobResultsJob(Job):
         return job_results_feedback
 
 
-print("Registering Jobs: LivedataQueryInterfaceJob, LivedataCleanupJobResultsJob")
-register_jobs(LivedataQueryInterfaceJob, LivedataCleanupJobResultsJob)
+print("Registering Jobs: LivedataQueryJob, LivedataCleanupJobResultsJob")
+register_jobs(LivedataQueryJob, LivedataCleanupJobResultsJob)

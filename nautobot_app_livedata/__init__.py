@@ -19,7 +19,7 @@ class LivedataConfig(NautobotAppConfig):
     author = "Josef Fuchs"
     description = "Nautobot App Livedata is a Nautobot app that provides a live view of the network data.."
     required_settings = [
-        "query_interface_job_name",
+        "query_job_name",
     ]
     min_version = "2.4.0"
     max_version = "2.9999"
