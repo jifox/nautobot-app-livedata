@@ -10,6 +10,41 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Major features or milestones
 - Changes to compatibility with Nautobot and/or other apps, libraries etc.
 
+
+## [v2.4.0b2 (2025-02-19)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.0b2)
+
+### Security
+
+- [#1](https://github.com/jifox/nautobot-app-livedata/issues/1) - Vulnerable OpenSSL included in cryptography wheels fixed weaknesses CWE-392, CWE-1395
+
+### Added
+
+- [#9](https://github.com/jifox/nautobot-app-livedata/issues/9) - Add Dependabot configuration
+- [#26](https://github.com/jifox/nautobot-app-livedata/issues/26) - Automated the Towncrier change fragement creation for Dependabot PRs
+
+### Changed
+
+- [#2](https://github.com/jifox/nautobot-app-livedata/issues/2) - - Update Documentation
+- [#32](https://github.com/jifox/nautobot-app-livedata/issues/32) - Revise App description to be more dynamic
+
+### Fixed
+
+- [#2](https://github.com/jifox/nautobot-app-livedata/issues/2) - Fixed build status badges in README.md and yaml syntax in `.github/dependabot.yml`
+- [#21](https://github.com/jifox/nautobot-app-livedata/issues/21) - Remove trailing spaces from each line of livedata show commands
+- [#29](https://github.com/jifox/nautobot-app-livedata/issues/29) - Corrected view permissions for the "Live Data" tab to ensure superusers have access
+- [#37](https://github.com/jifox/nautobot-app-livedata/issues/37) - Updated site_url to point to the documentation URL.
+
+### Dependencies
+
+- [#14](https://github.com/jifox/nautobot-app-livedata/issues/14) - Update pymarkdownlnt from 0.9.26 to 0.9.28
+- [#15](https://github.com/jifox/nautobot-app-livedata/issues/15) - Update coverage from 6.4 to 7.6.12
+- [#16](https://github.com/jifox/nautobot-app-livedata/issues/16) - Update ruff from 0.8.6 to 0.9.6
+- [#17](https://github.com/jifox/nautobot-app-livedata/issues/17) - Update mkdocs-include-markdown-plugin from 7.1.2 to 7.1.4.
+- [#22](https://github.com/jifox/nautobot-app-livedata/issues/22) - Update mkdocs-material from 9.5.50 to 9.6.4
+- [#23](https://github.com/jifox/nautobot-app-livedata/issues/23) - Update mkdocstrings from 0.27.0 to 0.28.1
+- [#25](https://github.com/jifox/nautobot-app-livedata/issues/25) - Update griffe from 1.1.1 to 1.5.7
+- [#32](https://github.com/jifox/nautobot-app-livedata/issues/32) - Update nautobot-plugin-nornir from 2.2.0 to 2.2.1
+
 ## [v2.4.0b1 (2025-02-15)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.0b1)
 
 ### Added
@@ -19,5 +54,4 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 ### Fixed
 
 - [#1](https://github.com/jifox/nautobot-app-livedata/issues/1) - Fixed nautobot_database_ready_callback to wait for the database initialization of dependent apps before running the callback. This ensures that the callback is only run once the database is fully initialized and ready for use.
-- [#2](https://github.com/jifox/nautobot-app-livedata/issues/2) - Fixed Read The Docs build error
-- [#2](https://github.com/jifox/nautobot-app-livedata/issues/2) - Fixed the test case for the version check
+- [#2](https://github.com/jifox/nautobot-app-livedata/issues/2) Fixed Read The Docs build error and also fixed the test case for the version check
