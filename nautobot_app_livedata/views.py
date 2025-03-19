@@ -1,8 +1,8 @@
 """Live Data view for results."""
 
 # filepath: nautobot_app_livedata/views.py
-import logging
 from datetime import datetime
+import logging
 
 from django.utils.timezone import make_aware
 from nautobot.apps.views import ObjectView

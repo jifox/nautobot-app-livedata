@@ -20,7 +20,7 @@ Choose your own adventure:
 
 ### Update Requirements
 
-Every minor version release should refresh `poetry.lock`, so that it lists the most recent stable release of each package. To do this:
+Every minor version release should refresh `poetry lock`, so that it lists the most recent stable release of each package. To do this:
 
 0. Run `poetry update --dry-run` to have Poetry automatically tell you what package updates are available and the versions it would upgrade to. This requires an existing environment created from the lock file (i.e. via `poetry install`).
 1. Review each requirement's release notes for any breaking or otherwise noteworthy changes.

@@ -2,9 +2,9 @@
 
 from datetime import datetime
 
-import jinja2
 from django.utils import timezone
 from django.utils.timezone import make_aware
+import jinja2
 from nautobot.apps.jobs import DryRunVar, IntegerVar, Job, register_jobs
 from nautobot.dcim.models import Device, Interface, VirtualChassis
 from nautobot.extras.models import JobResult

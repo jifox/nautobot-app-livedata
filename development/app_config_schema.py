@@ -1,15 +1,15 @@
 """App Config Schema Generator and Validator."""
 
-import json
 from importlib import import_module
+import json
 from os import getenv
 from pathlib import Path
 from urllib.parse import urlparse
 
-import jsonschema
-import toml
 from django.conf import settings
+import jsonschema
 from to_json_schema.to_json_schema import SchemaBuilder
+import toml
 
 
 def _enrich_object_schema(schema, defaults, required):

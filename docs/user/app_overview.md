@@ -1,30 +1,28 @@
-# App Overview
+# Nautobot App LiveData Overview
 
-This document provides an overview of the App including critical information and important considerations when applying it to your Nautobot environment.
-
-!!! note
-    Throughout this documentation, the terms "app" and "plugin" will be used interchangeably.
+The Nautobot App LiveData provides real-time data from network devices that are supported by [Netmiko](https://github.com/ktbyers/netmiko). This app is designed to address the need for dynamic and up-to-date network information, allowing network administrators and engineers to make informed decisions based on the latest data.
 
 ## Description
 
+The app supports collecting and displaying interface- and device-specific data from network devices. Data is collected using platform-specific show commands configured in the Nautobot Platform model and presented in the interface's and device's 'Live Data' tab. Additionally, the app includes a cleanup job to remove old data from the database.
 
 ## Audience (User Personas) - Who should use this App?
 
-!!! warning "Developer Note - Remove Me!"
-    Who is this meant for/ who is the common user of this app?
+This app is intended for network administrators and engineers who require real-time data from network devices to make informed decisions. It is particularly useful for those who need dynamic and up-to-date network information.
 
 ## Authors and Maintainers
 
-!!! warning "Developer Note - Remove Me!"
-    Add the team and/or the main individuals maintaining this project. Include historical maintainers as well.
+The Nautobot App LiveData is maintained by the Nautobot community. Contributions and maintenance are managed by the core development team and community contributors.
 
 ## Nautobot Features Used
 
-!!! warning "Developer Note - Remove Me!"
-    What is shown today in the Installed Apps page in Nautobot. What parts of Nautobot does it interact with, what does it add etc. ?
+- **Custom Fields**: The app uses custom fields to store platform-specific show commands.
+- **Jobs**: The app includes jobs for querying live data and cleaning up old data.
+- **Plugins**: The app is installed and configured as a Nautobot plugin.
 
 ### Extras
 
-!!! warning "Developer Note - Remove Me!"
-    Custom Fields - things like which CFs are created by this app?
-    Jobs - are jobs, if so, which ones, installed by this app?
+- **Custom Fields**: The app creates custom fields for storing show commands on the platform level.
+- **Jobs**: The app installs the following jobs:
+  - `Livedata Query Job`: Queries live data on an interface.
+  - `Cleanup Job`: Cleans up old data stored in the database.
