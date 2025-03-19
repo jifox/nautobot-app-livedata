@@ -2,9 +2,9 @@
 
 # filepath: livedata/api/views.py
 
-import logging
 from abc import ABC, abstractmethod
 from http import HTTPStatus
+import logging
 from typing import Any, Optional
 
 from nautobot.apps.views import ObjectPermissionRequiredMixin
