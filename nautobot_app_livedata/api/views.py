@@ -120,7 +120,7 @@ class LivedataQueryApiView(ObjectPermissionRequiredMixin, GenericAPIView, ABC):
             instance = self.get_queryset().get(pk=pk)
             show_commands_j2_array = self.get_commands(instance)
         except (ValueError, self.get_queryset().model.DoesNotExist) as error:
-            logger.error(f"Error during Livedata Query API: {error}")
+            logger.error("Error during Livedata Query API: %s", error)
             status = HTTPStatus.BAD_REQUEST if isinstance(error, ValueError) else HTTPStatus.NOT_FOUND
             return Response(
                 "An error occurred during the Livedata Query API request.",
@@ -159,7 +159,7 @@ class LivedataQueryApiView(ObjectPermissionRequiredMixin, GenericAPIView, ABC):
                 status=HTTPStatus.OK,  # 200
             )
         except RunJobTaskFailed as error:
-            logger.error(f"Failed to run {PLUGIN_SETTINGS['query_job_name']}: {error}")
+            logger.error("Failed to run %s: %s", PLUGIN_SETTINGS["query_job_name"], error)
 
             return Response(
                 "An internal error has occurred while running the job.",
