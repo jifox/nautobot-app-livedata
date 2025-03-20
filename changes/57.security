@@ -1,2 +1,0 @@
-Fixed Information exposure through an exception (Weakness CWE-209, CWE-497).
-Fixed Github Action Workflow does not contain permissions (Weakness CWE-275).

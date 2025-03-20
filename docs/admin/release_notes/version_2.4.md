@@ -10,22 +10,52 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Major features or milestones
 - Changes to compatibility with Nautobot and/or other apps, libraries etc.
 
+## [v2.4.0 (2025-03-20)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.0)
 
 ## [v2.4.0b2 (2025-02-19)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.0b2)
 
 ### Security
 
+- [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Fixed Information exposure through an exception (Weakness CWE-209, CWE-497).
+- [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Fixed Github Action Workflow does not contain permissions (Weakness CWE-275).
+
 - [#1](https://github.com/jifox/nautobot-app-livedata/issues/1) - Vulnerable OpenSSL included in cryptography wheels fixed weaknesses CWE-392, CWE-1395
 
 ### Added
+
+- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - Added a "Live Data" Tab to the Device Details page.
 
 - [#9](https://github.com/jifox/nautobot-app-livedata/issues/9) - Add Dependabot configuration
 - [#26](https://github.com/jifox/nautobot-app-livedata/issues/26) - Automated the Towncrier change fragement creation for Dependabot PRs
 
 ### Changed
 
+- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - The following environment variable names are changed
+- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - 
+- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - - LIVEDATA_QUERY_JOB_NAME was previously LIVEDATA_INTERFACE_QUERY_JOB_NAME
+- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - - LIVEDATA_QUERY_JOB_DESCRIPTION was previously LIVEDATA_QUERY_INTERFACE_JOB_DESCRIPTION
+- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - - LIVEDATA_QUERY_JOB_SOFT_TIME_LIMIT was previously LIVEDATA_QUERY_INTERFACE_JOB_SOFT_TIME_LIMIT
+- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - - LIVEDATA_QUERY_JOB_TASK_QUEUE was previously LIVEDATA_QUERY_INTERFACE_JOB_TASK_QUEUE
+- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - - LIVEDATA_QUERY_JOB_HIDDEN was previously LIVEDATA_QUERY_INTERFACE_JOB_HIDDEN
+- [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Changed - Updating urllib3 (1.26.20 -> 2.3.0)
+- [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Changed - Updating httpcore (0.17.3 -> 1.0.7)
+- [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Changed - Updating httpx (0.24.1 -> 0.27.0)
+- [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Changed - Updating pynautobot (2.0.1 -> 2.6.1)
+- [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Changed - Updating nornir-nautobot (3.1.0 -> 3.3.1)
+- [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Changed - Updating nautobot-plugin-nornir (2.2.0 -> 2.2.1)
+
 - [#2](https://github.com/jifox/nautobot-app-livedata/issues/2) - - Update Documentation
 - [#32](https://github.com/jifox/nautobot-app-livedata/issues/32) - Revise App description to be more dynamic
+
+### Removed
+
+- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - The following environment variable names are removed
+- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - 
+- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - - `LIVEDATA_INTERFACE_QUERY_JOB_NAME` use `LIVEDATA_QUERY_JOB_NAME` instead
+- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - - `LIVEDATA_QUERY_INTERFACE_JOB_DESCRIPTION` use `LIVEDATA_QUERY_JOB_DESCRIPTION` instead
+- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - - `LIVEDATA_QUERY_INTERFACE_JOB_SOFT_TIME_LIMIT` use `LIVEDATA_QUERY_JOB_SOFT_TIME_LIMIT` instead
+- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - - `LIVEDATA_QUERY_INTERFACE_JOB_TASK_QUEUE` use `LIVEDATA_QUERY_JOB_TASK_QUEUE`
+- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - - `LIVEDATA_QUERY_INTERFACE_JOB_HIDDEN` use `LIVEDATA_QUERY_JOB_HIDDEN`
 
 ### Fixed
 
@@ -53,5 +83,6 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - Github CI workflow for dependabot
 - [#1](https://github.com/jifox/nautobot-app-livedata/issues/1) - Fixed nautobot_database_ready_callback to wait for the database initialization of dependent apps before running the callback. This ensures that the callback is only run once the database is fully initialized and ready for use.
 - [#2](https://github.com/jifox/nautobot-app-livedata/issues/2) Fixed Read The Docs build error and also fixed the test case for the version check

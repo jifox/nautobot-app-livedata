@@ -412,5 +412,4 @@ class LivedataCleanupJobResultsJob(Job):
         return job_results_feedback
 
 
-print("Registering Jobs: LivedataQueryJob, LivedataCleanupJobResultsJob")
 register_jobs(LivedataQueryJob, LivedataCleanupJobResultsJob)
