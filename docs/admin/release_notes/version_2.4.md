@@ -23,6 +23,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- [#12](https://github.com/jifox/nautobot-app-livedata/issues/12) - Changed - Bump docker/build-push-action (5 -> 6)
+- [#40](https://github.com/jifox/nautobot-app-livedata/issues/40) - Changed - Bump actions/checkout (2 -> 4)
 - [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - The following environment variable names are changed
 - [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - 
 - [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - - LIVEDATA_QUERY_JOB_NAME was previously LIVEDATA_INTERFACE_QUERY_JOB_NAME
@@ -36,6 +38,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Changed - Updating pynautobot (2.0.1 -> 2.6.1)
 - [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Changed - Updating nornir-nautobot (3.1.0 -> 3.3.1)
 - [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Changed - Updating nautobot-plugin-nornir (2.2.0 -> 2.2.1)
+- [#58](https://github.com/jifox/nautobot-app-livedata/issues/58) - Changed - Downgrade mkdocs-material (9.6.4 -> 9.5.50)
 
 ### Removed
 
