@@ -12,21 +12,14 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [v2.4.0 (2025-03-20)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.0)
 
-## [v2.4.0b2 (2025-02-19)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.0b2)
-
 ### Security
 
 - [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Fixed Information exposure through an exception (Weakness CWE-209, CWE-497).
 - [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Fixed Github Action Workflow does not contain permissions (Weakness CWE-275).
 
-- [#1](https://github.com/jifox/nautobot-app-livedata/issues/1) - Vulnerable OpenSSL included in cryptography wheels fixed weaknesses CWE-392, CWE-1395
-
 ### Added
 
 - [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - Added a "Live Data" Tab to the Device Details page.
-
-- [#9](https://github.com/jifox/nautobot-app-livedata/issues/9) - Add Dependabot configuration
-- [#26](https://github.com/jifox/nautobot-app-livedata/issues/26) - Automated the Towncrier change fragement creation for Dependabot PRs
 
 ### Changed
 
@@ -44,9 +37,6 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Changed - Updating nornir-nautobot (3.1.0 -> 3.3.1)
 - [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Changed - Updating nautobot-plugin-nornir (2.2.0 -> 2.2.1)
 
-- [#2](https://github.com/jifox/nautobot-app-livedata/issues/2) - - Update Documentation
-- [#32](https://github.com/jifox/nautobot-app-livedata/issues/32) - Revise App description to be more dynamic
-
 ### Removed
 
 - [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - The following environment variable names are removed
@@ -56,6 +46,23 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - - `LIVEDATA_QUERY_INTERFACE_JOB_SOFT_TIME_LIMIT` use `LIVEDATA_QUERY_JOB_SOFT_TIME_LIMIT` instead
 - [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - - `LIVEDATA_QUERY_INTERFACE_JOB_TASK_QUEUE` use `LIVEDATA_QUERY_JOB_TASK_QUEUE`
 - [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - - `LIVEDATA_QUERY_INTERFACE_JOB_HIDDEN` use `LIVEDATA_QUERY_JOB_HIDDEN`
+
+
+## [v2.4.0b2 (2025-02-19)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.0b2)
+
+### Security
+
+- [#1](https://github.com/jifox/nautobot-app-livedata/issues/1) - Vulnerable OpenSSL included in cryptography wheels fixed weaknesses CWE-392, CWE-1395
+
+### Added
+
+- [#9](https://github.com/jifox/nautobot-app-livedata/issues/9) - Add Dependabot configuration
+- [#26](https://github.com/jifox/nautobot-app-livedata/issues/26) - Automated the Towncrier change fragement creation for Dependabot PRs
+
+### Changed
+
+- [#2](https://github.com/jifox/nautobot-app-livedata/issues/2) - - Update Documentation
+- [#32](https://github.com/jifox/nautobot-app-livedata/issues/32) - Revise App description to be more dynamic
 
 ### Fixed
 
