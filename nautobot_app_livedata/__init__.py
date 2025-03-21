@@ -3,7 +3,7 @@
 # Metadata is inherited from Nautobot. If not including Nautobot in the environment, this should be added
 from importlib import metadata
 
-from nautobot.apps import NautobotAppConfig, nautobot_database_ready
+from nautobot.apps import nautobot_database_ready, NautobotAppConfig
 
 from .signals import nautobot_database_ready_callback  # pylint: disable=unused-import, wrong-import-position
 
@@ -19,7 +19,7 @@ class LivedataConfig(NautobotAppConfig):
     author = "Josef Fuchs"
     description = "Nautobot App Livedata is a Nautobot app that provides a live view of the network data.."
     required_settings = [
-        "query_interface_job_name",
+        "query_job_name",
     ]
     min_version = "2.4.0"
     max_version = "2.9999"

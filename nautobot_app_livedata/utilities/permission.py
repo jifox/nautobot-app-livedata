@@ -26,7 +26,7 @@ def create_permission(db_objects: dict, name: str, actions_list: list, descripti
             description=description,
         )
         permission.validated_save()
-    if permission.object_types.count() == 0 or not permission.object_types.filter(id=content_type.id).exists():  # type: ignore
+    if permission.object_types.count() == 0 or not permission.object_types.filter(id=content_type.id).exists():
         try:
             permission.object_types.add(content_type)  # type: ignore
             permission.validated_save()

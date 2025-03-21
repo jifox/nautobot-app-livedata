@@ -4,13 +4,18 @@
 
 from django.urls import path
 
-from .views import LivedataPrimaryDeviceApiView, LivedataQueryInterfaceApiView
+from .views import LivedataPrimaryDeviceApiView, LivedataQueryDeviceApiView, LivedataQueryInterfaceApiView
 
 urlpatterns = [
     path(
         "intf/<uuid:pk>/",  # interface_id
         LivedataQueryInterfaceApiView.as_view(),
         name="livedata-query-intf-api",
+    ),
+    path(
+        "device/<uuid:pk>/",  # device_id
+        LivedataQueryDeviceApiView.as_view(),
+        name="livedata-query-device-api",
     ),
     path(
         "managed-device/<uuid:pk>/<str:object_type>/",

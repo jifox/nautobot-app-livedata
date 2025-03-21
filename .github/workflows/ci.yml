@@ -1,5 +1,8 @@
 ---
 name: "CI"
+permissions:
+  contents: read
+  pull-requests: write
 concurrency:  # Cancel any existing runs of this workflow for this same PR
   group: "${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: true
@@ -16,6 +19,24 @@ env:
   APP_NAME: "nautobot_app_livedata"
 
 jobs:
+  create_change_fragment:
+    # yamllint disable-line rule:quoted-strings rule:comments
+    if: ${{ github.actor == 'dependabot[bot]' }}
+    runs-on: "ubuntu-22.04"
+    steps:
+      - name: "Checkout repository"
+        uses: "actions/checkout@v4"
+      - name: "Create change fragment"
+        run: |
+          mkdir -p changes
+          echo "Upgrade dependencies" > "changes/${{ github.event.number }}.dependencies"
+      - name: "Commit changes"
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add changes/
+          git commit -m "Add change fragment for Dependabot PR #${{ github.event.number }}"
+          git push
   ruff-format:
     runs-on: "ubuntu-22.04"
     env:
@@ -111,7 +132,7 @@ jobs:
         id: "buildx"
         uses: "docker/setup-buildx-action@v3"
       - name: "Build"
-        uses: "docker/build-push-action@v5"
+        uses: "docker/build-push-action@v6"
         with:
           builder: "${{ steps.buildx.outputs.name }}"
           context: "./"
@@ -168,7 +189,7 @@ jobs:
         id: "buildx"
         uses: "docker/setup-buildx-action@v3"
       - name: "Build"
-        uses: "docker/build-push-action@v5"
+        uses: "docker/build-push-action@v6"
         with:
           builder: "${{ steps.buildx.outputs.name }}"
           context: "./"
@@ -291,7 +312,7 @@ jobs:
         # ENVs cannot be used directly in job.if. This is a workaround to check
         # if SLACK_WEBHOOK_URL is present.
         if: "env.SLACK_WEBHOOK_URL != ''"
-        uses: "slackapi/slack-github-action@v1"
+        uses: "slackapi/slack-github-action@v2"
         with:
           payload: |
             {

@@ -13,9 +13,9 @@ limitations under the License.
 """
 
 import os
+from pathlib import Path
 import re
 import sys
-from pathlib import Path
 from time import sleep
 
 from invoke.collection import Collection

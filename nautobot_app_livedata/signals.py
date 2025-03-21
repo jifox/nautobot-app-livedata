@@ -169,8 +169,32 @@ def nautobot_database_ready_callback(sender, **kwargs):  # pylint: disable=unuse
         print(f"ERROR: Database-Ready awaiting - {e}")
         return
 
+    # Add the custom field to the Platform model, which is used to store the
+    # Commands to display on the Interface page.
+    field_data = {
+        "key": "livedata_device_commands",
+        "type": CustomFieldTypeChoices.TYPE_MARKDOWN,
+        "label": "Livedata Device Commands",
+        "description": (
+            "Available variables for show commands. One a line:\n\n"
+            "- {{ **obj** }}: the **Device** object\n"
+            "- {{ **device_**xxx }}: **ip, name**\n"
+        ),
+        "default": "",
+        "required": False,
+        "filter_logic": "loose",
+        "weight": 110,
+        "advanced_ui": False,
+    }
+    cto = [app_db_ready_state.content_typs["Platform"]]  # type: ignore
+    try:
+        create_custom_field(db_objects=app_db_ready_state.db_objects, content_type_objects=cto, **field_data)
+    except Exception as e:  # pylint: disable=broad-except
+        print(f"ERROR: Database-Ready awaiting - {e}")
+        return
+
     # Ensure that the jobs are enabled
-    _enable_job(job_name=PLUGIN_SETTINGS["query_interface_job_name"])
+    _enable_job(job_name=PLUGIN_SETTINGS["query_job_name"])
     _enable_job(job_name="Livedata Cleanup job results")
 
 

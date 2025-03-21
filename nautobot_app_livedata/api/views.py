@@ -2,8 +2,9 @@
 
 # filepath: livedata/api/views.py
 
-import logging
+from abc import ABC, abstractmethod
 from http import HTTPStatus
+import logging
 from typing import Any, Optional
 
 from nautobot.apps.views import ObjectPermissionRequiredMixin
@@ -14,11 +15,14 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
 from nautobot_app_livedata.urls import PLUGIN_SETTINGS
-from nautobot_app_livedata.utilities.primarydevice import get_livedata_commands_for_interface
+from nautobot_app_livedata.utilities.primarydevice import (
+    get_livedata_commands_for_device,
+    get_livedata_commands_for_interface,
+)
 
 from .serializers import LivedataSerializer
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("nautobot_app_livedata")
 
 # Check that napalm is installed
 try:
@@ -42,17 +46,29 @@ except ImportError as err:
     raise ImportError from err
 
 
-class LivedataQueryInterfaceApiView(ObjectPermissionRequiredMixin, GenericAPIView):
-    """Livedata Query-Device API Result view.
+class LivedataQueryApiView(ObjectPermissionRequiredMixin, GenericAPIView, ABC):
+    """Abstract Livedata Query API view."""
 
-    For more information on implementing jobs, refer to the Nautobot job documentation:
-    https://docs.nautobot.com/projects/core/en/stable/development/jobs/
-    """
-
-    # LivedataPrimaryDeviceSerializer is used to get the primary device
-    # for the Interface provided in pk.
     serializer_class = LivedataSerializer
-    queryset = Interface.objects.all()
+
+    @abstractmethod
+    def get_object_type(self) -> str:
+        """Get the object type for the view.
+
+        Returns:
+            str: The object type.
+        """
+
+    @abstractmethod
+    def get_commands(self, instance) -> list:
+        """Get the commands to be executed for the given instance.
+
+        Args:
+            instance (Model): The model instance.
+
+        Returns:
+            list: The commands to be executed.
+        """
 
     def get_required_permission(self) -> str:
         """Get the required permission for the view.
@@ -64,10 +80,10 @@ class LivedataQueryInterfaceApiView(ObjectPermissionRequiredMixin, GenericAPIVie
         """
         return "dcim.can_interact_device"
 
-    def get(self, request: Any, *args: Any, pk: Optional[int] = None, **kwargs: Any) -> Response:
-        """Handle GET request for Livedata Query Interface API.
+    def get(self, request: Any, *args: Any, pk=None, **kwargs: Any) -> Response:
+        """Handle GET request for Livedata Query API.
 
-        The get method is used to enqueue the Livedata Query Interface Job.
+        The get method is used to enqueue the Livedata Query Job.
 
         To access the JobResult object, use the jobresult_id returned in the response
         and make a GET request to the JobResult endpoint.
@@ -77,7 +93,7 @@ class LivedataQueryInterfaceApiView(ObjectPermissionRequiredMixin, GenericAPIVie
 
         Args:
             request (Request): The request object.
-            pk (uuid): The primary key of the Interface object.
+            pk (uuid): The primary key of the model instance.
             *args: Additional positional arguments.
             **kwargs: Additional keyword arguments.
 
@@ -85,14 +101,14 @@ class LivedataQueryInterfaceApiView(ObjectPermissionRequiredMixin, GenericAPIVie
             jobresult_id: The job result ID of the job that was enqueued.
 
         Raises:
-            Response: If the user does not have permission to execute 'livedata' on an interface.
+            Response: If the user does not have permission to execute 'livedata' on the instance.
             Response: If the serializer is not valid.
             Response: If the job Livedata Api-Job is not found.
             Response: If the job failed to run.
         """
         data = request.data
         data["pk"] = pk
-        data["object_type"] = "dcim.interface"
+        data["object_type"] = self.get_object_type()
         serializer = self.get_serializer(data=data)
         if not serializer.is_valid():
             return Response(
@@ -101,38 +117,39 @@ class LivedataQueryInterfaceApiView(ObjectPermissionRequiredMixin, GenericAPIVie
             )
         try:
             primary_device_info = serializer.validated_data
-            interface = Interface.objects.get(pk=pk)
-            show_commands_j2_array = get_livedata_commands_for_interface(interface)
-        except (ValueError, Interface.DoesNotExist) as error:
+            instance = self.get_queryset().get(pk=pk)
+            show_commands_j2_array = self.get_commands(instance)
+        except (ValueError, self.get_queryset().model.DoesNotExist) as error:
+            logger.error("Error during Livedata Query API: %s", error)
             status = HTTPStatus.BAD_REQUEST if isinstance(error, ValueError) else HTTPStatus.NOT_FOUND
             return Response(
-                f"Error during Livedata Query Interface API: {error}",
+                "An error occurred during the Livedata Query API request.",
                 status=status,
             )
 
-        job = Job.objects.filter(name=PLUGIN_SETTINGS["query_interface_job_name"]).first()
+        job = Job.objects.filter(name=PLUGIN_SETTINGS["query_job_name"]).first()
         if job is None:
             return Response(
-                f"{PLUGIN_SETTINGS['query_interface_job_name']} not found",
+                f"{PLUGIN_SETTINGS['query_job_name']} not found",
                 status=HTTPStatus.NOT_FOUND,  # 404
             )
 
         job_kwargs = {
             "commands_j2": show_commands_j2_array,
             "device_id": primary_device_info["device"],
-            "interface_id": primary_device_info["interface"],
+            "interface_id": primary_device_info.get("interface"),
             "primary_device_id": primary_device_info["primary_device"],
             "remote_addr": request.META.get("REMOTE_ADDR"),
-            "virtual_chassis_id": primary_device_info["virtual_chassis"],
+            "virtual_chassis_id": primary_device_info.get("virtual_chassis"),
             "x_forwarded_for": request.META.get("HTTP_X_FORWARDED_FOR"),
-            "extra": {"object": f"Query-Intf: {interface.device.name}, {interface.name}"},
+            "call_object_type": data["object_type"],
         }
 
         try:
             jobres = JobResult.enqueue_job(
                 job,
                 user=request.user,
-                task_queue=PLUGIN_SETTINGS["query_interface_job_task_queue"],
+                task_queue=PLUGIN_SETTINGS["query_job_task_queue"],
                 **job_kwargs,
             )
 
@@ -141,12 +158,65 @@ class LivedataQueryInterfaceApiView(ObjectPermissionRequiredMixin, GenericAPIVie
                 data={"jobresult_id": jobres.id},
                 status=HTTPStatus.OK,  # 200
             )
-
         except RunJobTaskFailed as error:
+            logger.error("Failed to run %s: %s", PLUGIN_SETTINGS["query_job_name"], error)
+
             return Response(
-                f"Failed to run {PLUGIN_SETTINGS['query_interface_job_name']}: {error}",
+                "An internal error has occurred while running the job.",
                 status=HTTPStatus.INTERNAL_SERVER_ERROR,  # 500
             )
+
+
+class LivedataQueryInterfaceApiView(LivedataQueryApiView):
+    """Livedata Query Interface API view."""
+
+    serializer_class = LivedataSerializer
+    queryset = Interface.objects.all()
+
+    def get_object_type(self) -> str:
+        """Get the object type for the view.
+
+        Returns:
+            str: The object type.
+        """
+        return "dcim.interface"
+
+    def get_commands(self, instance) -> list:
+        """Get the commands to be executed for the given interface.
+
+        Args:
+            instance (Interface): The interface instance.
+
+        Returns:
+            list: The commands to be executed.
+        """
+        return get_livedata_commands_for_interface(instance)
+
+
+class LivedataQueryDeviceApiView(LivedataQueryApiView):
+    """Livedata Query Device API view."""
+
+    serializer_class = LivedataSerializer
+    queryset = Device.objects.all()
+
+    def get_object_type(self) -> str:
+        """Get the object type for the view.
+
+        Returns:
+            str: The object type.
+        """
+        return "dcim.device"
+
+    def get_commands(self, instance) -> list:
+        """Get the commands to be executed for the given device.
+
+        Args:
+            instance (Device): The device instance.
+
+        Returns:
+            list: The commands to be executed.
+        """
+        return get_livedata_commands_for_device(instance)
 
 
 # @permission_required(get_permission_for_model(Device, "can_interact"), raise_exception=True)
