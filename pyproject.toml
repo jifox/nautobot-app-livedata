@@ -39,7 +39,7 @@ nautobot-plugin-nornir = "~2.2.0"
 # Test code coverage measurement - pinned to 6.4.0 to resolve https://github.com/nedbat/coveragepy/issues/1420
 coverage = "6.4.0"
 # Tool for debugging Django
-django-debug-toolbar = "~5.0.1"
+django-debug-toolbar = ">=5.0.1,<5.2.0"
 # Alternative to Make, CLI based on `tasks.py`
 invoke = "~2.2.0"
 # Change log management and generation
