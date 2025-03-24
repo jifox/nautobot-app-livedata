@@ -89,7 +89,7 @@ pymarkdownlnt = "~0.9.28"
 # Combination linter and code formatter
 ruff = "~0.8.6"
 # YAML linting
-yamllint = "~1.35.1"
+yamllint = ">=1.35.1,<1.38.0"
 debugpy = "^1.8.12"
 # Random data generation
 factory-boy = "~3.3.3"
