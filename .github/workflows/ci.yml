@@ -128,6 +128,7 @@ jobs:
         run: echo "NAUTOBOT_GIT_REF=v${{ matrix.nautobot-version }}" >> $GITHUB_ENV
       - name: "Clone Nautobot at correct tag"
         run: |
+          mkdir -p /source/nautobot
           git clone --branch v${{ matrix.nautobot-version }} https://github.com/nautobot/nautobot.git /source/nautobot
       - name: "Install Nautobot from local clone"
         run: |
