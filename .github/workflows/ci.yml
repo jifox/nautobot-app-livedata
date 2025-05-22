@@ -113,7 +113,7 @@ jobs:
       fail-fast: true
       matrix:
         python-version: ["3.11"]
-        nautobot-version: ["v2.4.8"]
+        nautobot-version: ["2.4.8"]
     env:
       INVOKE_NAUTOBOT_APP_LIVEDATA_PYTHON_VER: "${{ matrix.python-version }}"
       INVOKE_NAUTOBOT_APP_LIVEDATA_NAUTOBOT_VER: "${{ matrix.nautobot-version }}"
@@ -124,9 +124,12 @@ jobs:
         uses: "networktocode/gh-action-setup-poetry-environment@v6"
         with:
           poetry-version: "1.8.5"
+      - name: "Set Nautobot git ref for fallback"
+        run: echo "NAUTOBOT_GIT_REF=v${{ matrix.nautobot-version }}" >> $GITHUB_ENV
       - name: "Constrain Nautobot version and regenerate lock file"
         env:
           INVOKE_NAUTOBOT_APP_LIVEDATA_LOCAL: "true"
+          NAUTOBOT_GIT_REF: ${{ env.NAUTOBOT_GIT_REF }}
         run: "poetry run invoke lock --constrain-nautobot-ver --constrain-python-ver"
       - name: "Set up Docker Buildx"
         id: "buildx"
