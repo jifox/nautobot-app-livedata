@@ -160,7 +160,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.8"]
+        python-version: ["3.9"]
         db-backend: ["postgresql"]
         nautobot-version: ["stable"]
         include:
