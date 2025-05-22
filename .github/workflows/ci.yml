@@ -128,10 +128,10 @@ jobs:
         run: echo "NAUTOBOT_GIT_REF=v${{ matrix.nautobot-version }}" >> $GITHUB_ENV
       - name: "Clone Nautobot at correct tag"
         run: |
-          git clone --branch v${{ matrix.nautobot-version }} https://github.com/nautobot/nautobot.git /tmp/nautobot
+          git clone --branch v${{ matrix.nautobot-version }} https://github.com/nautobot/nautobot.git /source/nautobot
       - name: "Install Nautobot from local clone"
         run: |
-          poetry add /tmp/nautobot
+          poetry add /source/nautobot
       - name: "Regenerate lock file"
         run: |
           poetry lock
@@ -190,10 +190,10 @@ jobs:
           poetry-version: "1.8.5"
       - name: "Clone Nautobot at correct tag"
         run: |
-          git clone --branch v${{ matrix.nautobot-version }} https://github.com/nautobot/nautobot.git /tmp/nautobot
+          git clone --branch v${{ matrix.nautobot-version }} https://github.com/nautobot/nautobot.git /source/nautobot
       - name: "Install Nautobot from local clone"
         run: |
-          poetry add /tmp/nautobot
+          poetry add /source/nautobot
       - name: "Regenerate lock file"
         run: |
           poetry lock
