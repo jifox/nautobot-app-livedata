@@ -128,7 +128,6 @@ jobs:
         run: echo "NAUTOBOT_GIT_REF=v${{ matrix.nautobot-version }}" >> $GITHUB_ENV
       - name: "Clone Nautobot at correct tag"
         run: |
-          mkdir -p /source/nautobot
           git clone --branch v${{ matrix.nautobot-version }} https://github.com/nautobot/nautobot.git /source/nautobot
       - name: "Install Nautobot from local clone"
         run: |
@@ -189,15 +188,10 @@ jobs:
         uses: "networktocode/gh-action-setup-poetry-environment@v6"
         with:
           poetry-version: "1.8.5"
-      - name: "Clone Nautobot at correct tag"
-        run: |
-          git clone --branch v${{ matrix.nautobot-version }} https://github.com/nautobot/nautobot.git /source/nautobot
-      - name: "Install Nautobot from local clone"
-        run: |
-          poetry add /source/nautobot
-      - name: "Regenerate lock file"
-        run: |
-          poetry lock
+      - name: "Constrain Nautobot version and regenerate lock file"
+        env:
+          INVOKE_{{ cookiecutter.app_name.upper() }}_LOCAL: "true"
+        run: "poetry run invoke lock --constrain-nautobot-ver --constrain-python-ver"
       - name: "Set up Docker Buildx"
         id: "buildx"
         uses: "docker/setup-buildx-action@v3"

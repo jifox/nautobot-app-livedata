@@ -230,40 +230,12 @@ def _get_docker_nautobot_version(context, nautobot_ver=None, python_ver=None):
         "check": (
             "If enabled, check for outdated dependencies in the poetry.lock file, "
             "instead of generating a new one. (default: disabled)"
-        ),
-        "constrain_nautobot_ver": (
-            "Run 'poetry add nautobot@[version] --lock' to generate the lockfile, "
-            "where [version] is the version installed in the Dockerfile's base image. "
-            "Generally intended to be used in CI and not for local development. (default: disabled)"
-        ),
-        "constrain_python_ver": (
-            "When using `constrain_nautobot_ver`, further constrain the nautobot version "
-            "to python_ver so that poetry doesn't complain about python version incompatibilities. "
-            "Generally intended to be used in CI and not for local development. (default: disabled)"
-        ),
+        )
     }
 )
-def lock(context, check=False, constrain_nautobot_ver=False, constrain_python_ver=False):
-    """Generate poetry.lock file."""
-    if constrain_nautobot_ver:
-        docker_nautobot_version = _get_docker_nautobot_version(context)
-        command = f"poetry add --lock nautobot@{docker_nautobot_version}"
-        if constrain_python_ver:
-            command += f" --python {context.nautobot_app_livedata.python_ver}"
-        try:
-            run_command(context, command, hide=True)
-            output = run_command(context, command, hide=True)
-            print(output.stdout, end="")
-            print(output.stderr, file=sys.stderr, end="")
-        except UnexpectedExit:
-            print("Unable to add Nautobot dependency with version constraint, falling back to git branch.")
-            command = f"poetry add --lock git+https://github.com/nautobot/nautobot.git#{context.nautobot_app_livedata.nautobot_ver}"
-            if constrain_python_ver:
-                command += f" --python {context.nautobot_app_livedata.python_ver}"
-            run_command(context, command)
-    else:
-        command = f"poetry {'check' if check else 'lock --no-update'}"
-        run_command(context, command)
+def lock(context, check=False):
+    """Generate poetry.lock inside the container."""
+    run_command(context, f"poetry {'check' if check else 'lock --no-update'}")
 
 
 # ------------------------------------------------------------------------------
