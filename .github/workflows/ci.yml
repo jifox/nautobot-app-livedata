@@ -146,8 +146,8 @@ jobs:
             NAUTOBOT_VER=${{ matrix.nautobot-version }}
             PYTHON_VER=${{ matrix.python-version }}
             CI=true
-      # - name: "Copy credentials"
-      #   run: "cp development/creds.example.env development/creds.env"
+      - name: "Copy credentials"
+        run: "cp development/creds.example.env development/creds.env"
       - name: "Linting: pylint"
         run: "poetry run invoke pylint"
       - name: "Checking: App Config"
