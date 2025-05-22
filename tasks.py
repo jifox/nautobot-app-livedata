@@ -15,6 +15,7 @@ limitations under the License.
 import os
 from pathlib import Path
 import re
+import sys
 from time import sleep
 
 from invoke.collection import Collection
@@ -262,6 +263,7 @@ def lock(context, check=False, constrain_nautobot_ver=False, constrain_python_ve
     else:
         command = f"poetry {'check' if check else 'lock --no-update'}"
         run_command(context, command)
+
 
 # ------------------------------------------------------------------------------
 # START / STOP / DEBUG
