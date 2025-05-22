@@ -15,11 +15,10 @@ limitations under the License.
 import os
 from pathlib import Path
 import re
-import sys
 from time import sleep
 
 from invoke.collection import Collection
-from invoke.exceptions import Exit, UnexpectedExit
+from invoke.exceptions import Exit
 from invoke.tasks import task as invoke_task
 
 
