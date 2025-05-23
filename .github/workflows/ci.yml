@@ -185,7 +185,7 @@ jobs:
         run: "cp development/creds.example.env development/creds.env"
       - name: "Constrain Nautobot version and regenerate lock file"
         env:
-          INVOKE_{{ cookiecutter.app_name.upper() }}_LOCAL: "true"
+          INVOKE_NAUTOBOT_APP_LIVEDATA_NAUTOBOT_LOCAL: "true"
         run: "poetry run invoke lock --constrain-nautobot-ver --constrain-python-ver"
       - name: "Set up Docker Buildx"
         id: "buildx"
