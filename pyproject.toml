@@ -40,7 +40,7 @@ h11 = "^0.16.0"
 # Test code coverage measurement - pinned to 6.4.0 to resolve https://github.com/nedbat/coveragepy/issues/1420
 coverage = "6.4.0"
 # Tool for debugging Django
-django-debug-toolbar = "~5.0.1"
+django-debug-toolbar = ">=5.0.1,<5.3.0"
 # Alternative to Make, CLI based on `tasks.py`
 invoke = "~2.2.0"
 # Change log management and generation
