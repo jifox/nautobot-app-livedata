@@ -1,1 +1,2 @@
-Supported python Versions set to ">=3.9.2,<3.13"
+Bump mkdocs-material from 9.5.50 to 9.6.14
+Bump debugpy from 1.8.12 to 1.8.14
