@@ -1500,13 +1500,13 @@ colorama = ">=0.4"
 
 [[package]]
 name = "h11"
-version = "0.14.0"
+version = "0.16.0"
 description = "A pure-Python, bring-your-own-I/O implementation of HTTP/1.1"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "h11-0.14.0-py3-none-any.whl", hash = "sha256:e3fe4ac4b851c468cc8363d500db52c2ead036020723024a109d37346efaa761"},
-    {file = "h11-0.14.0.tar.gz", hash = "sha256:8f19fbbe99e72420ff35c00b27a34cb9937e902a8b810e2c88300c6f0a3b699d"},
+    {file = "h11-0.16.0-py3-none-any.whl", hash = "sha256:63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86"},
+    {file = "h11-0.16.0.tar.gz", hash = "sha256:4e35b956cf45792e4caa5885e69fba00bdbc6ffafbfa020300e549b208ee5ff1"},
 ]
 
 [[package]]
@@ -1522,39 +1522,40 @@ files = [
 
 [[package]]
 name = "httpcore"
-version = "0.17.3"
+version = "1.0.9"
 description = "A minimal low-level HTTP client."
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "httpcore-0.17.3-py3-none-any.whl", hash = "sha256:c2789b767ddddfa2a5782e3199b2b7f6894540b17b16ec26b2c4d8e103510b87"},
-    {file = "httpcore-0.17.3.tar.gz", hash = "sha256:a6f30213335e34c1ade7be6ec7c47f19f50c56db36abef1a9dfa3815b1cb3888"},
+    {file = "httpcore-1.0.9-py3-none-any.whl", hash = "sha256:2d400746a40668fc9dec9810239072b40b4484b640a8c38fd654a024c7a1bf55"},
+    {file = "httpcore-1.0.9.tar.gz", hash = "sha256:6e34463af53fd2ab5d807f399a9b45ea31c3dfa2276f15a2c3f00afff6e176e8"},
 ]
 
 [package.dependencies]
-anyio = ">=3.0,<5.0"
 certifi = "*"
-h11 = ">=0.13,<0.15"
-sniffio = "==1.*"
+h11 = ">=0.16"
 
 [package.extras]
+asyncio = ["anyio (>=4.0,<5.0)"]
 http2 = ["h2 (>=3,<5)"]
 socks = ["socksio (==1.*)"]
+trio = ["trio (>=0.22.0,<1.0)"]
 
 [[package]]
 name = "httpx"
-version = "0.24.1"
+version = "0.27.0"
 description = "The next generation HTTP client."
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "httpx-0.24.1-py3-none-any.whl", hash = "sha256:06781eb9ac53cde990577af654bd990a4949de37a28bdb4a230d434f3a30b9bd"},
-    {file = "httpx-0.24.1.tar.gz", hash = "sha256:5853a43053df830c20f8110c5e69fe44d035d850b2dfe795e196f00fdb774bdd"},
+    {file = "httpx-0.27.0-py3-none-any.whl", hash = "sha256:71d5465162c13681bff01ad59b2cc68dd838ea1f10e51574bac27103f00c91a5"},
+    {file = "httpx-0.27.0.tar.gz", hash = "sha256:a0cb88a46f32dc874e04ee956e4c2764aba2aa228f650b06788ba6bda2962ab5"},
 ]
 
 [package.dependencies]
+anyio = "*"
 certifi = "*"
-httpcore = ">=0.15.0,<0.18.0"
+httpcore = "==1.*"
 idna = "*"
 sniffio = "*"
 
@@ -2682,24 +2683,25 @@ nornir = ">=3,<4"
 
 [[package]]
 name = "nornir-nautobot"
-version = "3.1.0"
+version = "3.3.1"
 description = "Nornir Nautobot"
 optional = false
-python-versions = ">=3.8,<4.0"
+python-versions = "<3.13,>=3.9"
 files = [
-    {file = "nornir_nautobot-3.1.0-py3-none-any.whl", hash = "sha256:23197181c17fa6de503679490d04fdc7315133ec5ddc9b549eb0794af9da418f"},
-    {file = "nornir_nautobot-3.1.0.tar.gz", hash = "sha256:5bc58d83650fb87aec456358205d455aaa5289345e2bc18f32d6bfa421eec63c"},
+    {file = "nornir_nautobot-3.3.1-py3-none-any.whl", hash = "sha256:4eaf84adc6143637a93d114952bc1636e7705fb244a6012c042e2cb185ff3e47"},
+    {file = "nornir_nautobot-3.3.1.tar.gz", hash = "sha256:aedd282b59f1faab2b732b08290e1bff317c5453e9b81afb622819d67b55b613"},
 ]
 
 [package.dependencies]
-httpx = ">=0.24.1,<0.25.0"
+httpx = ">=0.23.0,<=0.27.0"
 netutils = ">=1.6.0,<2.0.0"
 nornir = ">=3.0.0,<4.0.0"
 nornir-jinja2 = ">=0.2.0,<0.3.0"
 nornir-napalm = ">=0.4.0,<1.0.0"
 nornir-netmiko = ">=1,<2"
+nornir-scrapli = ">=2025.1.30,<2026.0.0"
 nornir-utils = ">=0,<1"
-pynautobot = ">=2.0.0rc2"
+pynautobot = ">=2.0.2"
 requests = ">=2.25.1,<3.0.0"
 
 [package.extras]
@@ -2718,6 +2720,32 @@ files = [
 
 [package.dependencies]
 netmiko = ">=4.0.0,<5.0.0"
+
+[[package]]
+name = "nornir-scrapli"
+version = "2025.1.30"
+description = "Scrapli's plugin for Nornir"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "nornir_scrapli-2025.1.30-py3-none-any.whl", hash = "sha256:be178b13257ece024a01c97c798973622138bc780fa607fe8bed70d0dbf2914a"},
+    {file = "nornir_scrapli-2025.1.30.tar.gz", hash = "sha256:b36bbfcf3678e695d54c0df673f9cf662dbd737d9e13170893cd4ed833c7b410"},
+]
+
+[package.dependencies]
+nornir = ">=3.0.0"
+nornir_utils = ">=0.1.0"
+ntc_templates = ">=1.1.0"
+scrapli = ">=2022.01.30"
+scrapli_cfg = ">=2022.01.30"
+scrapli_community = ">=2021.01.30"
+scrapli_netconf = ">=2022.01.30"
+textfsm = ">=1.1.0"
+
+[package.extras]
+dev = ["black (>=23.3.0,<25.0.0)", "darglint (>=1.8.1,<2.0.0)", "genie (>=20.2)", "isort (>=5.10.1,<6.0.0)", "mypy (>1.0.0,<2.0.0)", "nox (==2024.4.15)", "pyats (>=20.2)", "pydocstyle (>=6.1.1,<7.0.0)", "pylint (>=3.0.0,<4.0.0)", "pytest (>=7.0.0,<8.0.0)", "pytest-cov (>=3.0.0,<5.0.0)", "toml (>=0.10.2,<1.0.0)"]
+docs = ["mdx-gh-links (>=0.2,<1.0)", "mkdocs (>=1.2.3,<2.0.0)", "mkdocs-gen-files (>=0.4.0,<1.0.0)", "mkdocs-literate-nav (>=0.5.0,<1.0.0)", "mkdocs-material (>=8.1.6,<10.0.0)", "mkdocs-material-extensions (>=1.0.3,<2.0.0)", "mkdocs-section-index (>=0.3.4,<1.0.0)", "mkdocstrings[python] (>=0.19.0,<1.0.0)"]
+genie = ["genie (>=20.2)", "pyats (>=20.2)"]
 
 [[package]]
 name = "nornir-utils"
@@ -2769,7 +2797,7 @@ name = "packaging"
 version = "25.0"
 description = "Core utilities for Python packages"
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.7"
 files = [
     {file = "packaging-25.0-py3-none-any.whl", hash = "sha256:29572ef2b1f17581046b3a2227d5c611fb25ec70ca1ba8554b24b0e69331a484"},
     {file = "packaging-25.0.tar.gz", hash = "sha256:d443872c98d677bf60f6a1f2f8c1cb748e8fe762d2bf9d3148b5599295b0fc4f"},
@@ -3323,16 +3351,17 @@ tests = ["hypothesis (>=3.27.0)", "pytest (>=3.2.1,!=3.3.0)"]
 
 [[package]]
 name = "pynautobot"
-version = "2.0.1"
+version = "2.2.1"
 description = "Nautobot API client library"
 optional = false
-python-versions = ">=3.8,<4.0"
+python-versions = "<4.0.0,>=3.8.1"
 files = [
-    {file = "pynautobot-2.0.1-py3-none-any.whl", hash = "sha256:14f9f05ef4c9f8918a56e4892c3badd3c25679aaf5cc6292adcebd7e1ba419c7"},
-    {file = "pynautobot-2.0.1.tar.gz", hash = "sha256:de8bf725570baa5bee3a47e2a0de01605ab97e852e5f534b3d8e54a4ed6e2043"},
+    {file = "pynautobot-2.2.1-py3-none-any.whl", hash = "sha256:52d3d0581f25fc1157dce666fb8b4e0fc0491dfab02d1b72fd78aca4a9258be7"},
+    {file = "pynautobot-2.2.1.tar.gz", hash = "sha256:0fa0fc2cbac8372d7cdf1d1e0abc396842760bf4934e31aba8517ab2171f2828"},
 ]
 
 [package.dependencies]
+packaging = ">=23.2,<24.0"
 requests = ">=2.30.0,<3.0.0"
 urllib3 = ">=1.21.1,<1.27"
 
@@ -3932,6 +3961,93 @@ files = [
 
 [package.dependencies]
 paramiko = "*"
+
+[[package]]
+name = "scrapli"
+version = "2025.1.30"
+description = "Fast, flexible, sync/async, Python 3.7+ screen scraping client specifically for network devices"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "scrapli-2025.1.30-py3-none-any.whl", hash = "sha256:f71ca4e96b56ad245f34269dc3eedf168aca54eb7b1ba96ad0c965c2b76f807e"},
+    {file = "scrapli-2025.1.30.tar.gz", hash = "sha256:3426a38b5dd6a4c67749c30f14102c04a4a43d3da17710b46fec7e53409b340e"},
+]
+
+[package.extras]
+asyncssh = ["asyncssh (>=2.2.1,<3.0.0)"]
+community = ["scrapli_community (>=2021.01.30)"]
+dev = ["asyncssh (>=2.2.1,<3.0.0)", "black (>=23.3.0,<25.0.0)", "darglint (>=1.8.1,<2.0.0)", "genie (>=20.2)", "isort (>=5.10.1,<6.0.0)", "mypy (>=1.4.1,<2.0.0)", "nox (==2024.4.15)", "ntc-templates (>=1.1.0,<8.0.0)", "paramiko (>=2.6.0,<4.0.0)", "pyats (>=20.2)", "pydocstyle (>=6.1.1,<7.0.0)", "pyfakefs (>=5.4.1,<6.0.0)", "pylint (>=3.0.0,<4.0.0)", "pytest (>=7.0.0,<8.0.0)", "pytest-asyncio (>=0.17.0,<1.0.0)", "pytest-cov (>=3.0.0,<5.0.0)", "scrapli-cfg (==2023.7.30)", "scrapli-replay (==2023.7.30)", "scrapli_community (>=2021.01.30)", "ssh2-python (>=0.23.0,<2.0.0)", "textfsm (>=1.1.0,<2.0.0)", "toml (>=0.10.2,<1.0.0)", "ttp (>=0.5.0,<1.0.0)", "types-paramiko (>=2.8.6,<4.0.0)"]
+dev-darwin = ["asyncssh (>=2.2.1,<3.0.0)", "black (>=23.3.0,<25.0.0)", "darglint (>=1.8.1,<2.0.0)", "genie (>=20.2)", "isort (>=5.10.1,<6.0.0)", "mypy (>=1.4.1,<2.0.0)", "nox (==2024.4.15)", "ntc-templates (>=1.1.0,<8.0.0)", "paramiko (>=2.6.0,<4.0.0)", "pyats (>=20.2)", "pydocstyle (>=6.1.1,<7.0.0)", "pyfakefs (>=5.4.1,<6.0.0)", "pylint (>=3.0.0,<4.0.0)", "pytest (>=7.0.0,<8.0.0)", "pytest-asyncio (>=0.17.0,<1.0.0)", "pytest-cov (>=3.0.0,<5.0.0)", "scrapli-cfg (==2023.7.30)", "scrapli-replay (==2023.7.30)", "scrapli_community (>=2021.01.30)", "textfsm (>=1.1.0,<2.0.0)", "toml (>=0.10.2,<1.0.0)", "ttp (>=0.5.0,<1.0.0)", "types-paramiko (>=2.8.6,<4.0.0)"]
+docs = ["mdx-gh-links (>=0.2,<1.0)", "mkdocs (>=1.2.3,<2.0.0)", "mkdocs-gen-files (>=0.4.0,<1.0.0)", "mkdocs-literate-nav (>=0.5.0,<1.0.0)", "mkdocs-material (>=8.1.6,<10.0.0)", "mkdocs-material-extensions (>=1.0.3,<2.0.0)", "mkdocs-section-index (>=0.3.4,<1.0.0)", "mkdocstrings[python] (>=0.19.0,<1.0.0)"]
+genie = ["genie (>=20.2)", "pyats (>=20.2)"]
+paramiko = ["paramiko (>=2.6.0,<4.0.0)"]
+ssh2 = ["ssh2-python (>=0.23.0,<2.0.0)"]
+textfsm = ["ntc-templates (>=1.1.0,<8.0.0)", "textfsm (>=1.1.0,<2.0.0)"]
+ttp = ["ttp (>=0.5.0,<1.0.0)"]
+
+[[package]]
+name = "scrapli-cfg"
+version = "2025.1.30"
+description = "Network device configuration management with scrapli"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "scrapli_cfg-2025.1.30-py3-none-any.whl", hash = "sha256:aaf0c5f52ed06ba0ffefa860ab947c96b663c98a96f38b90eac567d46906fdf4"},
+    {file = "scrapli_cfg-2025.1.30.tar.gz", hash = "sha256:7ed3b5743116d35d7d65f86d06dd7e74fcc509e1c8df6ddebffdeb7cebed13e8"},
+]
+
+[package.dependencies]
+scrapli = ">=2022.01.30a2"
+
+[package.extras]
+asyncssh = ["asyncssh (>=2.2.1,<3.0.0)"]
+dev = ["asyncssh (>=2.2.1,<3.0.0)", "black (>=23.3.0,<25.0.0)", "darglint (>=1.8.1,<2.0.0)", "isort (>=5.10.1,<6.0.0)", "mypy (>=1.4.1,<2.0.0)", "nox (==2024.4.15)", "paramiko (>=2.6.0,<4.0.0)", "pydocstyle (>=6.1.1,<7.0.0)", "pyfakefs (>=5.4.1,<6.0.0)", "pylint (>=3.0.0,<4.0.0)", "pytest (>=7.0.0,<8.0.0)", "pytest-asyncio (>=0.17.0,<1.0.0)", "pytest-cov (>=3.0.0,<5.0.0)", "scrapli-replay (==2023.7.30)", "ssh2-python (>=0.23.0,<2.0.0)", "toml (>=0.10.2,<1.0.0)"]
+dev-darwin = ["asyncssh (>=2.2.1,<3.0.0)", "black (>=23.3.0,<25.0.0)", "darglint (>=1.8.1,<2.0.0)", "isort (>=5.10.1,<6.0.0)", "mypy (>=1.4.1,<2.0.0)", "nox (==2024.4.15)", "paramiko (>=2.6.0,<4.0.0)", "pydocstyle (>=6.1.1,<7.0.0)", "pyfakefs (>=5.4.1,<6.0.0)", "pylint (>=3.0.0,<4.0.0)", "pytest (>=7.0.0,<8.0.0)", "pytest-asyncio (>=0.17.0,<1.0.0)", "pytest-cov (>=3.0.0,<5.0.0)", "scrapli-replay (==2023.7.30)", "toml (>=0.10.2,<1.0.0)"]
+docs = ["mdx-gh-links (>=0.2,<1.0)", "mkdocs (>=1.2.3,<2.0.0)", "mkdocs-gen-files (>=0.4.0,<1.0.0)", "mkdocs-literate-nav (>=0.5.0,<1.0.0)", "mkdocs-material (>=8.1.6,<10.0.0)", "mkdocs-material-extensions (>=1.0.3,<2.0.0)", "mkdocs-section-index (>=0.3.4,<1.0.0)", "mkdocstrings[python] (>=0.19.0,<1.0.0)"]
+paramiko = ["paramiko (>=2.6.0,<4.0.0)"]
+ssh2 = ["ssh2-python (>=0.23.0,<2.0.0)"]
+
+[[package]]
+name = "scrapli-community"
+version = "2025.1.30"
+description = "Easily add support for 'non-core' platforms to scrapli"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "scrapli_community-2025.1.30-py3-none-any.whl", hash = "sha256:dc4d02193ec3bb14cec9e04ab0d48fc59d575e1ccedac92fb4b8bbd6f3b6726f"},
+    {file = "scrapli_community-2025.1.30.tar.gz", hash = "sha256:5357d1e471879203f648948adf114d8155a69ca1242060504d9b92f54f79d119"},
+]
+
+[package.dependencies]
+scrapli = ">=2021.07.30a1"
+
+[package.extras]
+dev = ["black (>=23.3.0,<25.0.0)", "darglint (>=1.8.1,<2.0.0)", "isort (>=5.10.1,<6.0.0)", "mypy (>=1.4.1,<2.0.0)", "nox (==2024.4.15)", "pydocstyle (>=6.1.1,<7.0.0)", "pylint (>=3.0.0,<4.0.0)", "pytest (>=7.0.0,<8.0.0)", "pytest-cov (>=3.0.0,<5.0.0)", "toml (>=0.10.2,<1.0.0)"]
+dev-darwin = ["black (>=23.3.0,<25.0.0)", "darglint (>=1.8.1,<2.0.0)", "isort (>=5.10.1,<6.0.0)", "mypy (>=1.4.1,<2.0.0)", "nox (==2024.4.15)", "pydocstyle (>=6.1.1,<7.0.0)", "pylint (>=3.0.0,<4.0.0)", "pytest (>=7.0.0,<8.0.0)", "pytest-cov (>=3.0.0,<5.0.0)", "toml (>=0.10.2,<1.0.0)"]
+docs = ["mdx-gh-links (>=0.2,<1.0)", "mkdocs (>=1.2.3,<2.0.0)", "mkdocs-gen-files (>=0.4.0,<1.0.0)", "mkdocs-literate-nav (>=0.5.0,<1.0.0)", "mkdocs-material (>=8.1.6,<10.0.0)", "mkdocs-material-extensions (>=1.0.3,<2.0.0)", "mkdocs-section-index (>=0.3.4,<1.0.0)", "mkdocstrings[python] (>=0.19.0,<1.0.0)"]
+
+[[package]]
+name = "scrapli-netconf"
+version = "2025.1.30"
+description = "Fast, flexible, sync/async, Python 3.7+ NETCONF client built on scrapli"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "scrapli_netconf-2025.1.30-py3-none-any.whl", hash = "sha256:009041515d9d75d6e3748730bc920b350eb6ab86c6890e44495ca00de3e86cd9"},
+    {file = "scrapli_netconf-2025.1.30.tar.gz", hash = "sha256:06813455dda9bd27d99734a3f689b4259ccab625141fc41126495ccad705d248"},
+]
+
+[package.dependencies]
+lxml = ">=4.5.1"
+scrapli = ">=2022.07.30"
+
+[package.extras]
+asyncssh = ["asyncssh (>=2.2.1,<3.0.0)"]
+dev = ["asyncssh (>=2.2.1,<3.0.0)", "black (>=23.3.0,<25.0.0)", "darglint (>=1.8.1,<2.0.0)", "isort (>=5.10.1,<6.0.0)", "mypy (>=1.4.1,<2.0.0)", "nox (==2024.4.15)", "paramiko (>=2.6.0,<4.0.0)", "pydocstyle (>=6.1.1,<7.0.0)", "pylint (>=3.0.0,<4.0.0)", "pytest (>=7.0.0,<8.0.0)", "pytest-asyncio (>=0.17.0,<1.0.0)", "pytest-cov (>=3.0.0,<5.0.0)", "ssh2-python (>=0.23.0,<2.0.0)", "toml (>=0.10.2,<1.0.0)"]
+dev-darwin = ["asyncssh (>=2.2.1,<3.0.0)", "black (>=23.3.0,<25.0.0)", "darglint (>=1.8.1,<2.0.0)", "isort (>=5.10.1,<6.0.0)", "mypy (>=1.4.1,<2.0.0)", "nox (==2024.4.15)", "paramiko (>=2.6.0,<4.0.0)", "pydocstyle (>=6.1.1,<7.0.0)", "pylint (>=3.0.0,<4.0.0)", "pytest (>=7.0.0,<8.0.0)", "pytest-asyncio (>=0.17.0,<1.0.0)", "pytest-cov (>=3.0.0,<5.0.0)", "toml (>=0.10.2,<1.0.0)"]
+docs = ["mdx-gh-links (>=0.2,<1.0)", "mkdocs (>=1.2.3,<2.0.0)", "mkdocs-gen-files (>=0.4.0,<1.0.0)", "mkdocs-literate-nav (>=0.5.0,<1.0.0)", "mkdocs-material (>=8.1.6,<10.0.0)", "mkdocs-material-extensions (>=1.0.3,<2.0.0)", "mkdocs-section-index (>=0.3.4,<1.0.0)", "mkdocstrings[python] (>=0.19.0,<1.0.0)"]
+paramiko = ["paramiko (>=2.6.0,<4.0.0)"]
+ssh2 = ["ssh2-python (>=0.23.0,<2.0.0)"]
 
 [[package]]
 name = "setuptools"
