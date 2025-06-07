@@ -76,7 +76,7 @@ mkdocs-redirects = "~1.2.2"
 # Automatically handle index pages for docs sections
 mkdocs-section-index = "~0.3.10"
 # Automatic documentation from sources, for MkDocs
-mkdocstrings = ">=0.29,<0.30"
+mkdocstrings = "~0.29.1"
 # Python-specific extension to mkdocstrings
 mkdocstrings-python = "~1.13.0"
 
