@@ -98,8 +98,7 @@ if not _TESTING:
             },
             "verbose": {
                 "format": (
-                    "%(asctime)s.%(msecs)03d %(levelname)-7s %(name)-20s %(filename)-15s "
-                    "%(funcName)30s() : %(message)s"
+                    "%(asctime)s.%(msecs)03d %(levelname)-7s %(name)-20s %(filename)-15s %(funcName)30s() : %(message)s"
                 ),
                 "datefmt": "%H:%M:%S",
             },
@@ -187,7 +186,7 @@ if NORNIR_ENABLED:
                     "denied_location_types": ["rack"],
                     "nornir_settings": {
                         "credentials": (
-                            "nautobot_plugin_nornir.plugins.credentials." "nautobot_secrets.CredentialsNautobotSecrets"
+                            "nautobot_plugin_nornir.plugins.credentials.nautobot_secrets.CredentialsNautobotSecrets"
                         ),
                         "runner": {
                             "plugin": "threaded",

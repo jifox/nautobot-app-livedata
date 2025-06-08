@@ -810,7 +810,7 @@ def autoformat(context):
 @task(
     help={
         "action": (
-            "Available values are `['lint', 'format']`. " "Can be used multiple times. (default: `['lint', 'format']`)"
+            "Available values are `['lint', 'format']`. Can be used multiple times. (default: `['lint', 'format']`)"
         ),
         "target": "File or directory to inspect, repeatable (default: all files in the project will be inspected)",
         "fix": "Automatically fix selected actions. May not be able to fix all issues found. (default: False)",
