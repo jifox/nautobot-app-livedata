@@ -106,7 +106,7 @@ First, create a release branch off of `develop` (`git switch -c release-1.4.2 de
 
 > You will need to have the project's poetry environment built at this stage, as the towncrier command runs **locally only**. If you don't have it, run `poetry install` first.
 
-Generate release notes with `invoke generate-release-notes --version 1.4.2` and answer `yes` to the prompt `Is it okay if I remove those files? [Y/n]:`. This will update the release notes in `docs/admin/release_notes/version_X.Y.md`, stage that file in git, and `git rm` all the fragments that have now been incorporated into the release notes.
+Generate release notes with `poetry shell`, `DJANGO_SETTINGS_MODULE=nautobot.core.settings poetry run towncrier build --version 1.4.2` and answer `yes` to the prompt `Is it okay if I remove those files? [Y/n]:`. This will update the release notes in `docs/admin/release_notes/version_X.Y.md`, stage that file in git, and `git rm` all the fragments that have now been incorporated into the release notes.
 
 There are two possibilities:
 

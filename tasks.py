@@ -251,7 +251,6 @@ def lock(context, check=False, constrain_nautobot_ver=False, constrain_python_ve
         if constrain_python_ver:
             command += f" --python {context.nautobot_app_livedata.python_ver}"
         try:
-            run_command(context, command, hide=True)
             output = run_command(context, command, hide=True)
             print(output.stdout, end="")
             print(output.stderr, file=sys.stderr, end="")
@@ -811,7 +810,7 @@ def autoformat(context):
 @task(
     help={
         "action": (
-            "Available values are `['lint', 'format']`. " "Can be used multiple times. (default: `['lint', 'format']`)"
+            "Available values are `['lint', 'format']`. Can be used multiple times. (default: `['lint', 'format']`)"
         ),
         "target": "File or directory to inspect, repeatable (default: all files in the project will be inspected)",
         "fix": "Automatically fix selected actions. May not be able to fix all issues found. (default: False)",
