@@ -11,7 +11,12 @@ from nautobot.apps.choices import CustomFieldTypeChoices
 from .utilities.customfield import create_custom_field
 from .utilities.permission import create_permission
 
-PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_app_livedata"]
+
+def get_plugin_settings():
+    """Get the plugin settings."""
+    if "nautobot_app_livedata" not in settings.PLUGINS_CONFIG:
+        raise RuntimeError("Plugin 'nautobot_app_livedata' is not configured in settings.")
+    return settings.PLUGINS_CONFIG["nautobot_app_livedata"]
 
 
 class AppDbReadyState:  # pylint: disable=too-few-public-methods
@@ -194,7 +199,7 @@ def nautobot_database_ready_callback(sender, **kwargs):  # pylint: disable=unuse
         return
 
     # Ensure that the jobs are enabled
-    _enable_job(job_name=PLUGIN_SETTINGS["query_job_name"])
+    _enable_job(job_name=get_plugin_settings()["query_job_name"])
     _enable_job(job_name="Livedata Cleanup job results")
 
 

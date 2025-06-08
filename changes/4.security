@@ -1,1 +1,0 @@
-Bump h11 from 0.14.0 to 0.16.0 (h11 accepts some malformed Chunked-Encoding bodies)

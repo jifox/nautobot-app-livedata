@@ -10,6 +10,41 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Major features or milestones
 - Changes to compatibility with Nautobot and/or other apps, libraries etc.
 
+## [v2.4.1a0 (2025-06-08)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.1a0)
+
+No significant changes.
+
+### Security
+
+- [#4](https://github.com/jifox/nautobot-app-livedata/issues/4) - Bump h11 from 0.14.0 to 0.16.0 (h11 accepts some malformed Chunked-Encoding bodies)
+- [#6](https://github.com/jifox/nautobot-app-livedata/issues/6) - Bump setuptools from 76.1.0 to 78.1.1 (CVE-2022-40897)
+
+### Changed
+
+- [#75](https://github.com/jifox/nautobot-app-livedata/issues/75) - Bump mkdocs-material from 9.5.50 to 9.6.14
+- [#75](https://github.com/jifox/nautobot-app-livedata/issues/75) - Bump debugpy from 1.8.12 to 1.8.14
+
+### Fixed
+
+- [#6](https://github.com/jifox/nautobot-app-livedata/issues/6) - ci.yml to use valid nautobot version un unittest.
+
+### Dependencies
+
+- [#69](https://github.com/jifox/nautobot-app-livedata/issues/69) - Bump mkdocstrings from 0.27.0 to 0.29.1
+- [#75](https://github.com/jifox/nautobot-app-livedata/issues/75) - Supported python Versions set to ">=3.9.2,<3.13"
+- [#89](https://github.com/jifox/nautobot-app-livedata/issues/89) - Bump ruff from 0.8.6 to 0.11.12
+
+# v2.4 Release Notes
+
+This document describes all new features and changes in the release. The format is based on [Keep a
+Changelog](https://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic
+Versioning](https://semver.org/spec/v2.0.0.html).
+
+## Release Overview
+
+- Major features or milestones
+- Changes to compatibility with Nautobot and/or other apps, libraries etc.
+
 ## [v2.4.0 (2025-03-20)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.0)
 
 ### Security

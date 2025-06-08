@@ -221,7 +221,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.towncrier]
 package = "nautobot_app_livedata"
 directory = "changes"
-filename = "docs/admin/release-notes/version-2.4.md"
+filename = "docs/admin/release_notes/version_2.4.md"
 template = "development/towncrier_template.j2"
 start_string = "<!-- towncrier release notes start -->"
 issue_format = "[#{issue}](https://github.com/jifox/nautobot-app-livedata/issues/{issue})"
