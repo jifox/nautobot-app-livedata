@@ -175,6 +175,21 @@ The following Jinja2 template variables are available to be used in the show com
 
 ![Livedata Platform Detail Screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-platform-detail.png)
 
+### Filter Syntax for Platform Commands
+
+You can append a filter command to the end of a device command using the `!!` delimiter. The string following `!!` specifies the filter operation to be applied to the command output.
+
+**Examples:**
+
+- `show logging | i {{intf_number}} !!EXACT:{{intf_number}}!!` — Filters the output to contain only lines that contain the interface number as a whole word (e.g., matches ` Gi1/0/1`, `1/0/1  `, `^1/0/1 `, `1/0/1$` but not `11/0/1`, `1/0/11`, `foo1/0/1bar`).
+- `show logging !!LAST:100!!` — Returns only the last 100 lines of the output.
+
+**Supported Filters:**
+- `!!EXACT:<pattern>!!` — Only lines that contain `<pattern>` as a whole word (ignoring leading/trailing whitespace, not matching substrings within other numbers or words)
+- `!!LAST:<N>!!` — Only the last N lines
+
+This feature provides a consistent filtering mechanism across all supported platforms, reducing the need for custom scripts or manual output parsing.
+
 ## Cleanup Job
 
 The app provides a job to clean up old data. The job can be executed on a regular basis to clean up old data that is stored in the database. The job is executed via the Nautobot Scheduler.
