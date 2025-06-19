@@ -22,10 +22,11 @@ def apply_output_filter(output: str, filter_instruction: str) -> str:
         regex = re.compile(rf"(^|\s){re.escape(pattern)}(\s|$)")
         return "\n".join(line for line in output.splitlines() if regex.search(line.strip()))
     if filter_instruction.startswith("LAST:"):
+        n_str = filter_instruction[len("LAST:") :]
         try:
-            n = int(filter_instruction[len("LAST:") :])
-            return "\n".join(output.splitlines()[-n:])
-        except Exception:
+            n = int(n_str)
+        except ValueError:
             return output
+        return "\n".join(output.splitlines()[-n:])
     # Unknown filter, return output unchanged
     return output
