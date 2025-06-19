@@ -19,6 +19,7 @@ from nautobot_app_livedata.utilities.primarydevice import PrimaryDeviceUtils
 
 from .nornir_plays.processor import ProcessLivedata
 from .urls import APP_NAME, PLUGIN_SETTINGS
+from .utilities.output_filter import apply_output_filter
 
 # Groupname: Livedata
 name = GROUP_NAME = APP_NAME  # pylint: disable=invalid-name
@@ -33,6 +34,9 @@ COMMANDS_J2 = "commands_j2"
 REMOTE_ADDR = "remote_addr"
 X_FORWARDED_FOR = "x_forwarded_for"
 VIRTUAL_CHASSIS_ID = "virtual_chassis_id"
+DEVICE_ID = "device_id"
+JOB_NAME_CLEANUP = "livedata_cleanup_job_results"
+JOB_STATUS_SUCCESS = "SUCCESS"
 
 
 class LivedataQueryJob(Job):  # pylint: disable=too-many-instance-attributes
@@ -146,7 +150,6 @@ class LivedataQueryJob(Job):  # pylint: disable=too-many-instance-attributes
         self._initialize_device(kwargs)
         self._initialize_virtual_chassis(kwargs)
         self._initialize_commands(kwargs)
-        self.execution_timestamp = self.now.strftime("%Y-%m-%d %H:%M:%S")
 
     def _initialize_variables(self, kwargs):
         """Initialize common variables."""
@@ -157,6 +160,11 @@ class LivedataQueryJob(Job):  # pylint: disable=too-many-instance-attributes
         self.call_object_type = kwargs.get(CALL_OBJECT_TYPE)
         if not self.call_object_type:
             raise ValueError(f"{CALL_OBJECT_TYPE} is required.")
+        # Defensive: ensure self.now is not None
+        if self.now:
+            self.execution_timestamp = self.now.strftime("%Y-%m-%d %H:%M:%S")
+        else:
+            self.execution_timestamp = None
 
     def _initialize_virtual_chassis(self, kwargs):
         """Initialize the virtual chassis object if applicable."""
@@ -165,15 +173,19 @@ class LivedataQueryJob(Job):  # pylint: disable=too-many-instance-attributes
             if virtual_chassis_id:
                 self.virtual_chassis = VirtualChassis.objects.get(pk=virtual_chassis_id)
             else:
-                if self.device.virtual_chassis:
+                if self.device and hasattr(self.device, "virtual_chassis") and self.device.virtual_chassis:
                     self.virtual_chassis = self.device.virtual_chassis
 
     def _initialize_device(self, kwargs):  # pylint: disable=possibly-used-before-assignment
         """Initialize the device object."""
-        if "device_id" in kwargs:
-            device_id = kwargs.get("device_id")
+        if DEVICE_ID in kwargs:
+            device_id = kwargs.get(DEVICE_ID)
         else:
-            device_id = self.interface.device.id  # type: ignore
+            device_id = (
+                self.interface.device.id  # type: ignore[attr-defined]
+                if self.interface and hasattr(self.interface, "device")
+                else None
+            )
         if device_id:
             self.device = Device.objects.get(pk=device_id)
             self.device_name = self.device.name
@@ -181,14 +193,20 @@ class LivedataQueryJob(Job):  # pylint: disable=too-many-instance-attributes
     def _initialize_primary_device(self, kwargs):
         """Initialize the primary device object."""
         if PRIMARY_DEVICE_ID not in kwargs:
-            primary_device_id = PrimaryDeviceUtils("dcim.interface", self.interface.id).primary_device.id
+            if self.interface and hasattr(self.interface, "id"):
+                primary_device_id = (
+                    PrimaryDeviceUtils("dcim.interface", str(self.interface.id)).primary_device.id  # type: ignore
+                )
+            else:
+                primary_device_id = None
         else:
             primary_device_id = kwargs.get(PRIMARY_DEVICE_ID)
         try:
-            self.primary_device = Device.objects.get(pk=primary_device_id)
-            self.device_ip = self.primary_device.primary_ip.address  # type: ignore
-        except Device.DoesNotExist:
-            raise ValueError(f"Primary Device with ID {primary_device_id} not found.")  # pylint: disable=raise-missing-from
+            if primary_device_id:
+                self.primary_device = Device.objects.get(pk=primary_device_id)
+                self.device_ip = self.primary_device.primary_ip.address  # type: ignore
+        except Device.DoesNotExist as exc:
+            raise ValueError(f"Primary Device with ID {primary_device_id} not found.") from exc  # pylint: disable=raise-missing-from
 
     def _initialize_interface(self, kwargs):
         """Initialize the interface object."""
@@ -205,9 +223,12 @@ class LivedataQueryJob(Job):  # pylint: disable=too-many-instance-attributes
         if COMMANDS_J2 not in kwargs:
             raise ValueError(f"{COMMANDS_J2} is required.")
         if self.call_object_type == "dcim.interface":
-            self.intf_name = self.interface.name
-            self.intf_name_only, self.intf_number = split_interface(self.intf_name)
-            self.intf_abbrev = abbreviated_interface_name(self.interface.name)
+            if self.interface and hasattr(self.interface, "name"):
+                self.intf_name = self.interface.name
+                self.intf_name_only, self.intf_number = split_interface(self.intf_name)
+                self.intf_abbrev = abbreviated_interface_name(self.interface.name)
+            else:
+                self.intf_name = self.intf_name_only = self.intf_number = self.intf_abbrev = None
         self.commands = self.parse_commands(kwargs.get(COMMANDS_J2))
 
     # If both before_start() and run() are successful, the on_success() method
@@ -309,9 +330,20 @@ class LivedataQueryJob(Job):  # pylint: disable=too-many-instance-attributes
             )
             try:
                 for command in self.commands:
+                    # Support for !! filter syntax
+                    if "!!" in command:
+                        base_command, filter_part = command.split("!!", 1)
+                        filter_instruction = filter_part.strip("!")
+                        command_to_send = base_command.strip()
+                    else:
+                        command_to_send = command
+                        filter_instruction = None
                     try:
-                        self.logger.debug(f"Executing '{command}' on device {self.device_name}")
-                        task_result = connection.send_command(command)
+                        self.logger.debug(f"Executing '{command_to_send}' on device {self.device_name}")
+                        task_result = connection.send_command(command_to_send)
+                        # Apply filter if present
+                        if filter_instruction:
+                            task_result = apply_output_filter(task_result, filter_instruction)
                         results.append({"command": command, "task_result": task_result})
                     except NornirExecutionError as error:
                         raise ValueError(f"`E3001:` {error}") from error
@@ -388,12 +420,12 @@ class LivedataCleanupJobResultsJob(Job):
         job_results = JobResult.objects.filter(
             date_done__lt=cutoff_date,
             job_model__name=PLUGIN_SETTINGS["query_job_name"],
-            status="SUCCESS",
+            status=JOB_STATUS_SUCCESS,
         )
         cleanup_job_results = JobResult.objects.filter(
             date_done__lt=cutoff_date,
-            job_model__name="livedata_cleanup_job_results",
-            status="SUCCESS",
+            job_model__name=JOB_NAME_CLEANUP,
+            status=JOB_STATUS_SUCCESS,
         )
 
         if dry_run:
