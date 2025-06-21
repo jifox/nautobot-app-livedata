@@ -177,7 +177,9 @@ The following Jinja2 template variables are available to be used in the show com
 
 ### Filter Syntax for Platform Commands
 
-You can append a filter command to the end of a device command using the `!!` delimiter. The string following `!!` specifies the filter operation to be applied to the command output.
+You can append a filter command to the end of a device command using the `!!` delimiter. The string following `!!` specifies the filter operation to be applied to the command output. 
+
+Multiple filters can be chained in a single line by separating each filter with `!!`, for example: `show logging !!EXACT:{{intf_number}}!!LAST:10!!`. Each `!!` acts as a command terminator, and filters are applied in the order they appear.
 
 **Examples:**
 

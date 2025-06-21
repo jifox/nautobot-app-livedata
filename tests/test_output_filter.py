@@ -38,6 +38,18 @@ class TestOutputFilter(unittest.TestCase):
         filtered = apply_output_filter(output, "EXACT:1/0/1")
         self.assertEqual(filtered, " Gi1/0/1\n1/0/1  \n^1/0/1 \n1/0/1$")
 
+    def test_multiple_filters(self):
+        output = "foo\nbar\nfoo\nbaz\nfoo"
+        # Apply EXACT:foo, then LAST:2
+        filtered = apply_output_filter(output, "EXACT:foo!!LAST:2!!")
+        self.assertEqual(filtered, "foo\nfoo")
+        # Apply LAST:3, then EXACT:foo
+        filtered2 = apply_output_filter(output, "LAST:3!!EXACT:foo!!")
+        self.assertEqual(filtered2, "foo")
+        # Apply EXACT:foo, then LAST:1
+        filtered3 = apply_output_filter(output, "EXACT:foo!!LAST:1!!")
+        self.assertEqual(filtered3, "foo")
+
 
 if __name__ == "__main__":
     unittest.main()
