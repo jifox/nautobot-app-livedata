@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "nautobot_app_livedata"
 description = "Provides a live view of network data within Nautobot."
-version = "2.4.1"
+version = "2.4.2"
 authors = ["Josef Fuchs <josef.fuchs@j-fuchs.at>"]
 license = "Apache-2.0"
 homepage = "https://github.com/jifox/nautobot-app-livedata.git"
@@ -66,7 +66,7 @@ mkdocs-gen-files = "~0.5.0"
 mkdocs-glightbox = "^0.4.0"
 # Allow Markdown files to include other files
 # 3.0 TODO: remove this, as we don't actually use it any more since 2.0?
-mkdocs-include-markdown-plugin = ">=4.0.4"
+mkdocs-include-markdown-plugin = "~7.1.6"
 # Use Jinja2 templating in docs - see settings.md
 mkdocs-macros-plugin = "~1.3.7"
 # Material for mkdocs theme
@@ -221,7 +221,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.towncrier]
 package = "nautobot_app_livedata"
 directory = "changes"
-filename = "docs/admin/release_notes/version_2.4.md"
+filename = "docs/admin/release_notes/version_X_Y.md"
 template = "development/towncrier_template.j2"
 start_string = "<!-- towncrier release notes start -->"
 issue_format = "[#{issue}](https://github.com/jifox/nautobot-app-livedata/issues/{issue})"

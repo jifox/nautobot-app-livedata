@@ -5,10 +5,30 @@ This document describes all new features and changes in the release. The format 
 Changelog](https://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic
 Versioning](https://semver.org/spec/v2.0.0.html).
 
+### Filter Syntax for Platform Commands
+
+You can append a filter command to the end of a device command using the `!!` delimiter. The string following `!!` specifies the filter operation to be applied to the command output. 
+
+Multiple filters can be chained in a single line by separating each filter with `!!`, for example: `show logging !!EXACT:{{intf_number}}!!LAST:10!!`. Each `!!` acts as a command terminator, and filters are applied in the order they appear.
+
+!!! note
+    Added multiple filters in v2.4.2, this feature allows for more flexible and powerful command filtering directly in the Live Data tab.
+
 ## Release Overview
 
 - Major features or milestones
 - Changes to compatibility with Nautobot and/or other apps, libraries etc.
+
+## [v2.4.2 (2025-06-22)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.2)
+
+### Added
+
+- [#91](https://github.com/jifox/nautobot-app-livedata/issues/91) - Multiple filters can be chained in a single line using `!!` as a separator, with filters applied in order.
+
+### Dependencies
+
+- [#88](https://github.com/jifox/nautobot-app-livedata/issues/88) - Bump docker/build-push-action from 5.4.0 to 6.18.0
+- [#100](https://github.com/jifox/nautobot-app-livedata/issues/100) - Bump mkdocs-include-markdown-plugin from 7.1.5 to 7.1.6
 
 ## [v2.4.1 (2025-06-19)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.1)
 
