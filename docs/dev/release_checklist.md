@@ -124,6 +124,8 @@ Submit a pull request titled `Release v1.4.2` to merge your release branch into 
 !!! important
     Do not squash merge this branch into `main`. Make sure to select `Create a merge commit` when merging in GitHub.
 
+Wait for the CI to pass on the PR, and add the tag to the commit with `git tag v1.4.2` and `git push --tags`. This will trigger the CI to build the release package and publish it to PyPI.
+
 Once CI has completed on the PR, merge it.
 
 ### Create a New Release in GitHub
