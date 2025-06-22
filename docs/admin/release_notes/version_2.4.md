@@ -10,6 +10,17 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Major features or milestones
 - Changes to compatibility with Nautobot and/or other apps, libraries etc.
 
+## [v2.4.1 (2025-06-19)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.1)
+
+### Added
+
+- [#91](https://github.com/jifox/nautobot-app-livedata/issues/91) - # This file describes the change for issue #91: Support for Filter Commands in Live Device Output Using !! Syntax
+- [#91](https://github.com/jifox/nautobot-app-livedata/issues/91) - feature: Support for post-processing filter commands in live device output using the `!!` syntax (e.g., `!!EXACT:foo!!`, `!!LAST:100!!`).
+
+### Dependencies
+
+- [#95](https://github.com/jifox/nautobot-app-livedata/issues/95) - Bump mkdocstrings-python from 1.13.0 to 1.16.7
+
 ## [v2.4.1a0 (2025-06-08)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.1a0)
 
 No significant changes.
@@ -33,17 +44,6 @@ No significant changes.
 - [#69](https://github.com/jifox/nautobot-app-livedata/issues/69) - Bump mkdocstrings from 0.27.0 to 0.29.1
 - [#75](https://github.com/jifox/nautobot-app-livedata/issues/75) - Supported python Versions set to ">=3.9.2,<3.13"
 - [#89](https://github.com/jifox/nautobot-app-livedata/issues/89) - Bump ruff from 0.8.6 to 0.11.12
-
-# v2.4 Release Notes
-
-This document describes all new features and changes in the release. The format is based on [Keep a
-Changelog](https://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic
-Versioning](https://semver.org/spec/v2.0.0.html).
-
-## Release Overview
-
-- Major features or milestones
-- Changes to compatibility with Nautobot and/or other apps, libraries etc.
 
 ## [v2.4.0 (2025-03-20)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.0)
 

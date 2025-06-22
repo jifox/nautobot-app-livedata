@@ -9,24 +9,29 @@ import re
 
 def apply_output_filter(output: str, filter_instruction: str) -> str:
     """
-    Apply a filter to the output string based on the filter_instruction.
+    Apply one or more filters to the output string based on the filter_instruction.
+    Multiple filters can be chained using '!!' as a separator, e.g. 'EXACT:foo!!LAST:10!!'.
     Supported filters:
       - EXACT:<pattern>: Only lines that contain <pattern> as a whole word (ignoring leading/trailing whitespace)
       - LAST:<N>: Only the last N lines
     """
     if not filter_instruction:
         return output
-    if filter_instruction.startswith("EXACT:"):
-        pattern = filter_instruction[len("EXACT:") :].strip()
-        # Match pattern as a whole word, ignoring leading/trailing whitespace
-        regex = re.compile(rf"(^|\s){re.escape(pattern)}(\s|$)")
-        return "\n".join(line for line in output.splitlines() if regex.search(line.strip()))
-    if filter_instruction.startswith("LAST:"):
-        n_str = filter_instruction[len("LAST:") :]
-        try:
-            n = int(n_str)
-        except ValueError:
-            return output
-        return "\n".join(output.splitlines()[-n:])
-    # Unknown filter, return output unchanged
+    # Split by '!!' and filter out empty segments
+    filters = [f for f in filter_instruction.split("!!") if f.strip()]
+    for filt in filters:
+        if filt.startswith("EXACT:"):
+            pattern = filt[len("EXACT:") :].strip()
+            regex = re.compile(rf"(^|\s){re.escape(pattern)}(\s|$)")
+            output = "\n".join(line for line in output.splitlines() if regex.search(line.strip()))
+        elif filt.startswith("LAST:"):
+            n_str = filt[len("LAST:") :]
+            try:
+                n = int(n_str)
+            except ValueError:
+                continue  # skip invalid LAST filter
+            output = "\n".join(output.splitlines()[-n:])
+        else:
+            # Unknown filter, skip
+            continue
     return output

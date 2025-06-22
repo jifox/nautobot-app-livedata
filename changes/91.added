@@ -1,2 +1,1 @@
-# This file describes the change for issue #91: Support for Filter Commands in Live Device Output Using !! Syntax
-feature: Support for post-processing filter commands in live device output using the `!!` syntax (e.g., `!!EXACT:foo!!`, `!!LAST:100!!`).
+Multiple filters can be chained in a single line using `!!` as a separator, with filters applied in order.
