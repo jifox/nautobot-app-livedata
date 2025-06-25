@@ -22,7 +22,7 @@ def apply_output_filter(output: str, filter_instruction: str) -> str:
     for filt in filters:
         if filt.startswith("EXACT:"):
             pattern = filt[len("EXACT:") :].strip()
-            regex = re.compile(rf"(^|\s){re.escape(pattern)}(\s|$)")
+            regex = re.compile(rf"(^|\S*){re.escape(pattern)}(\D|$)")
             output = "\n".join(line for line in output.splitlines() if regex.search(line.strip()))
         elif filt.startswith("LAST:"):
             n_str = filt[len("LAST:") :]
