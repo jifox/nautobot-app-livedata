@@ -19,6 +19,18 @@ Multiple filters can be chained in a single line by separating each filter with 
 - Major features or milestones
 - Changes to compatibility with Nautobot and/or other apps, libraries etc.
 
+## [v2.4.3 (2025-06-25)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.3)
+
+### Fixed
+
+- [#109](https://github.com/jifox/nautobot-app-livedata/issues/109) - Fixed filter EXACT: is not matching Interface Numbers in Log Lines
+
+### Dependencies
+
+- [#74](https://github.com/jifox/nautobot-app-livedata/issues/74) - Bump django-debug-toolbar from 5.0.1 to 5.2.0
+- [#94](https://github.com/jifox/nautobot-app-livedata/issues/94) - Bump griffe from 1.5.7 to 1.7.3
+- [#108](https://github.com/jifox/nautobot-app-livedata/issues/108) - Bump ruff from 0.11.13 to 0.12.0
+
 ## [v2.4.2 (2025-06-22)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.2)
 
 ### Added
