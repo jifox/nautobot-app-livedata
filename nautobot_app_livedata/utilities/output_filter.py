@@ -1,7 +1,7 @@
 """
 Output filtering utilities for Nautobot App Livedata.
 
-Provides functions to apply post-processing filters to device command output, such as EXACT and LAST filters.
+Provides functions to apply post-processing filters to device command output, such as EXACT, LAST, and FIRST filters.
 """
 
 import re
@@ -14,6 +14,7 @@ def apply_output_filter(output: str, filter_instruction: str) -> str:
     Supported filters:
       - EXACT:<pattern>: Only lines that contain <pattern> as a whole word (ignoring leading/trailing whitespace)
       - LAST:<N>: Only the last N lines
+      - FIRST:<N>: Only the first N lines
     """
     if not filter_instruction:
         return output
@@ -31,6 +32,13 @@ def apply_output_filter(output: str, filter_instruction: str) -> str:
             except ValueError:
                 continue  # skip invalid LAST filter
             output = "\n".join(output.splitlines()[-n:])
+        elif filt.startswith("FIRST:"):
+            n_str = filt[len("FIRST:") :]
+            try:
+                n = int(n_str)
+            except ValueError:
+                continue  # skip invalid FIRST filter
+            output = "\n".join(output.splitlines()[:n])
         else:
             # Unknown filter, skip
             continue
