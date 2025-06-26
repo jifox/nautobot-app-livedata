@@ -189,6 +189,7 @@ Multiple filters can be chained in a single line by separating each filter with 
 **Supported Filters:**
 - `!!EXACT:<pattern>!!` — Only lines that contain `<pattern>` as a whole word (ignoring leading/trailing whitespace, not matching substrings within other numbers or words)
 - `!!LAST:<N>!!` — Only the last N lines
+- `!!FIRST:<N>!!` — Only the first N lines
 
 This feature provides a consistent filtering mechanism across all supported platforms, reducing the need for custom scripts or manual output parsing.
 

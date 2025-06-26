@@ -85,10 +85,13 @@ You can now append a filter command to the end of a device command using the `!!
 
 - `show logging | i {{intf_number}} !!EXACT:{{intf_number}}!!` — Filters the output to contain only lines that contain the interface number as a whole word (e.g., matches ` Gi1/0/1`, `1/0/1  `, `^1/0/1 `, `1/0/1$` but not `11/0/1`, `1/0/11`, `foo1/0/1bar`).
 - `show logging !!LAST:100!!` — Returns only the last 100 lines of the output.
+- `show logging !!FIRST:10!!` — Returns only the first 10 lines of the output.
+- `show logging !!EXACT:{{intf_number}}!!FIRST:5!!` — Filters for lines containing the interface number, then returns only the first 5 matching lines.
 
 ### Supported Filters
 - `!!EXACT:<pattern>!!` — Only lines that contain `<pattern>` as a whole word (ignoring leading/trailing whitespace, not matching substrings within other numbers or words)
 - `!!LAST:<N>!!` — Only the last N lines
+- `!!FIRST:<N>!!` — Only the first N lines
 
 Additional filters may be added in the future.
 

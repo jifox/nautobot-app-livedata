@@ -50,6 +50,11 @@ class TestOutputFilter(unittest.TestCase):
         filtered3 = apply_output_filter(output, "EXACT:foo!!LAST:1!!")
         self.assertEqual(filtered3, "foo")
 
+    def test_first_filter(self):
+        output = "line1\nline2\nline3\nline4\nline5"
+        filtered = apply_output_filter(output, "FIRST:3")
+        self.assertEqual(filtered, "line1\nline2\nline3")
+
 
 if __name__ == "__main__":
     unittest.main()
