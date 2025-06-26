@@ -19,6 +19,16 @@ Multiple filters can be chained in a single line by separating each filter with 
 - Major features or milestones
 - Changes to compatibility with Nautobot and/or other apps, libraries etc.
 
+## [v2.4.4 (2025-06-26)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.4)
+
+### Added
+
+- [#113](https://github.com/jifox/nautobot-app-livedata/issues/113) - Added the Filter 'FIRST: <n>' to output only the top <n> lines
+
+### Changed
+
+- [#113](https://github.com/jifox/nautobot-app-livedata/issues/113) - changed ci.yml to include the python version 3.10
+
 ## [v2.4.3 (2025-06-25)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.3)
 
 ### Fixed
