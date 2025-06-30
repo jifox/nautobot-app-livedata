@@ -2,5 +2,5 @@ mkdocs==1.6.1
 mkdocs-material==9.6.14
 markdown-version-annotations==1.0.1
 griffe==1.7.3
-mkdocstrings-python==1.16.7
+mkdocstrings-python==1.16.12
 mkdocstrings==0.29.1
