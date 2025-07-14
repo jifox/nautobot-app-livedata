@@ -19,6 +19,12 @@ Multiple filters can be chained in a single line by separating each filter with 
 - Major features or milestones
 - Changes to compatibility with Nautobot and/or other apps, libraries etc.
 
+## [v2.4.5 (2025-07-14)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.5)
+
+### Fixed
+
+- [#121](https://github.com/jifox/nautobot-app-livedata/issues/121) - Traceback on opening Live Data tab for a interface at chassis-2
+
 ## [v2.4.4 (2025-06-26)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.4)
 
 ### Added
