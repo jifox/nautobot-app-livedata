@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "nautobot_app_livedata"
 description = "Provides a live view of network data within Nautobot."
-version = "2.4.4"
+version = "2.4.5"
 authors = ["Josef Fuchs <josef.fuchs@j-fuchs.at>"]
 license = "Apache-2.0"
 homepage = "https://github.com/jifox/nautobot-app-livedata.git"
@@ -38,6 +38,7 @@ h11 = "^0.16.0"
 
 [tool.poetry.group.dev.dependencies]
 # Test code coverage measurement - pinned to 6.4.0 to resolve https://github.com/nedbat/coveragepy/issues/1420
+python-dotenv = "^1.1.0"
 coverage = "6.4.0"
 # Tool for debugging Django
 django-debug-toolbar = "~5.2.0"
