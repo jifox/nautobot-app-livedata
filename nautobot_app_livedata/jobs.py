@@ -323,11 +323,14 @@ class LivedataQueryJob(Job):  # pylint: disable=too-many-instance-attributes
         ) as nornir_obj:
             nr_with_processors = nornir_obj.with_processors([ProcessLivedata(self.logger)])
             # Establish the connection once
-            connection = (
-                nr_with_processors.filter(name=self.device_name)
-                .inventory.hosts[self.device_name]  # type: ignore
-                .get_connection("netmiko", nr_with_processors.config)
-            )
+            try:
+                connection = (
+                    nr_with_processors.filter(name=self.primary_device.name)  # type: ignore
+                    .inventory.hosts[self.primary_device.name]  # type: ignore
+                    .get_connection("netmiko", nr_with_processors.config)
+                )
+            except KeyError as error:
+                raise ValueError(f"Device {self.primary_device.name} not found in Nornir inventory.") from error
             try:
                 for command in self.commands:
                     # Support for !! filter syntax
