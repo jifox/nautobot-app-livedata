@@ -95,7 +95,8 @@
                                 clearInterval(intervalId);  // Disable the interval after displaying the content
                             }
                         }
-                        if (jobResultData.status.value === "FAILED") {
+                        if (jobResultData.status.value === "FAILURE") {
+                            document.getElementById("id_wait_for_jobexecution").style.display = 'none';
                             document.getElementById("id_refresh_live_interface_data").innerHTML = `<p>Failed to fetch live data.</p>`;
                             clearInterval(intervalId);  // Disable the interval after displaying the content
                         }
