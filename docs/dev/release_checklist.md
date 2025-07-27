@@ -62,7 +62,7 @@ Display the current version with no arguments:
 
 ```no-highlight
 > poetry version
-livedata 1.0.0-beta.2
+nautobot_app_livedata 2.4.6
 ```
 
 Bump pre-release versions using `prerelease`:

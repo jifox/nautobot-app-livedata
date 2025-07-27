@@ -40,22 +40,7 @@ JOB_STATUS_SUCCESS = "SUCCESS"
 
 
 class LivedataQueryJob(Job):  # pylint: disable=too-many-instance-attributes
-    """Job to query live data on an interface.
-
-    For more information on implementing jobs, refer to the Nautobot job documentation:
-    https://docs.nautobot.com/projects/core/en/stable/development/jobs/
-
-    Args:
-        commands_j2 (List[str]): The commands to execute in jinja2 syntax.
-        device_id (int): The device ID.
-        interface_id (int): The interface ID.
-        primary_device_id (int): The primary device ID with management ip.
-        remote_addr (str): The request.META.get("REMOTE_ADDR").
-        virtual_chassis_id (int): The virtual chassis ID.
-        x_forwarded_for (str): The request.META.get("HTTP_X_FORWARDED_FOR").
-        *args: Additional arguments.
-        **kwargs: Additional keyword arguments.
-    """
+    """Job to query live data on an interface."""
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Metadata for the Livedata Query Interface Job."""
@@ -68,43 +53,39 @@ class LivedataQueryJob(Job):  # pylint: disable=too-many-instance-attributes
         enabled = True
 
     def __init__(self, *args, **kwargs):
-        """Initialize the Livedata Query Interface Job variables."""
-        super().__init__(*args, **kwargs)  # defines self.logger
-        self.callername = None  # The user who initiated the job
-        self.commands = []  # The commands to execute
+        """Initialize job variables."""
+        super().__init__(*args, **kwargs)
+        # Instance attributes for job context and results
+        self.callername = None
+        self.commands = []
         self.device = None
-        self.interface = None  # The interface object
-        self.remote_addr = None  # The remote address request.META.get("REMOTE_ADDR")
-        self.primary_device = None  # The primary device object that will be used to execute the commands
-        self.virtual_chassis = None  # The virtual chassis object if applicable
-        self.x_forwarded_for = None  # The forwarded address request.META.get("HTTP_X_FORWARDED_FOR")
-        self.results = []  # The results of the command execution
-        self.intf_name = None  # The interface name (e.g. "GigabitEthernet1/0/10")
-        self.intf_name_only = None  # The interface name without the number (e.g. "GigabitEthernet")
-        self.intf_number = None  # The interface number (e.g. "1/0/10")
-        self.intf_abbrev = None  # The abbreviated interface name (e.g. "Gi1/0/10")
-        self.device_name = None  # The device name of the device where the interface is located
-        self.device_ip = None  # The primary IP address of the primary device
-        self.execution_timestamp = None  # The current timestamp in the format "YYYY-MM-DD HH:MM:SS"
-        self.now = None  # The current timestamp
-        self.call_object_type = None  # The object type of the call
+        self.interface = None
+        self.remote_addr = None
+        self.primary_device = None
+        self.virtual_chassis = None
+        self.x_forwarded_for = None
+        self.results = []
+        self.intf_name = None
+        self.intf_name_only = None
+        self.intf_number = None
+        self.intf_abbrev = None
+        self.device_name = None
+        self.device_ip = None
+        self.execution_timestamp = None
+        self.now = None
+        self.call_object_type = None
 
     def parse_commands(self, commands_j2):
-        """Replace jinja2 variables in the commands with the interface-specific context.
+        """Render Jinja2 commands with interface/device context.
 
-        Args:
-            commands_j2 (List[str]): The commands to execute in jinja2 syntax.
-
-        Returns:
-            List[str]: The parsed commands.
+        Raises:
+            ValueError: If Jinja2 rendering fails.
         """
-        # Initialize jinja2 environment with interface context
         j2env = jinja2.Environment(
             loader=jinja2.BaseLoader(),
-            autoescape=False,  # noqa: S701 # no HTML is involved
+            autoescape=False,  # No HTML involved # type: ignore  # noqa: S701
             undefined=jinja2.StrictUndefined,
         )
-        # Create a context with interface-specific variables
         context = {
             "intf_name": self.intf_name,
             "intf_name_only": self.intf_name_only,
@@ -118,30 +99,20 @@ class LivedataQueryJob(Job):  # pylint: disable=too-many-instance-attributes
             "call_object_type": self.call_object_type,
         }
 
-        # Render each command with the context
-        parsed_commands = [j2env.from_string(command).render(context) for command in commands_j2]
+        parsed_commands = []
+        for command in commands_j2:
+            try:
+                parsed_command = j2env.from_string(command).render(context)
+                parsed_commands.append(parsed_command)
+            except jinja2.TemplateError as exc:
+                raise ValueError(f"Failed to render Jinja2 command template: '{command}'. Error: {exc}") from exc
         return parsed_commands
 
-    # if you need to use the logger, you must define it here
     def before_start(self, task_id, args, kwargs):
-        """Job-specific setup before the run() method is called.
-
-        Args:
-            task_id: The task ID. Will always be identical to self.request.id
-            args: Will generally be empty
-            kwargs: Any user-specified variables passed into the Job execution
-
-        Returns:
-                The return value is ignored, but if it raises any exception,
-                    the Job execution will be marked as a failure and run() will
-                    not be called.
+        """Setup job context before execution.
 
         Raises:
-            ValueError: If the interface_id is not provided.
-            ValueError: If the commands_j2 is not provided.
-            ValueError: If the interface with the provided interface_id is not found.
-            ValueError: If the primary device with the provided primary_device_id is not found.
-            ValueError: If the call_object_type is not provided.
+            ValueError: If required variables are missing or invalid.
         """
         super().before_start(task_id, args, kwargs)
         self._initialize_variables(kwargs)
@@ -152,7 +123,7 @@ class LivedataQueryJob(Job):  # pylint: disable=too-many-instance-attributes
         self._initialize_commands(kwargs)
 
     def _initialize_variables(self, kwargs):
-        """Initialize common variables."""
+        """Initialize common context variables."""
         self.callername = self.user.username  # type: ignore
         self.now = make_aware(datetime.now())
         self.remote_addr = kwargs.get(REMOTE_ADDR)
@@ -160,45 +131,30 @@ class LivedataQueryJob(Job):  # pylint: disable=too-many-instance-attributes
         self.call_object_type = kwargs.get(CALL_OBJECT_TYPE)
         if not self.call_object_type:
             raise ValueError(f"{CALL_OBJECT_TYPE} is required.")
-        # Defensive: ensure self.now is not None
-        if self.now:
-            self.execution_timestamp = self.now.strftime("%Y-%m-%d %H:%M:%S")
-        else:
-            self.execution_timestamp = None
+        self.execution_timestamp = self.now.strftime("%Y-%m-%d %H:%M:%S") if self.now else None
 
     def _initialize_virtual_chassis(self, kwargs):
-        """Initialize the virtual chassis object if applicable."""
+        """Set virtual chassis if provided or available on device."""
         if VIRTUAL_CHASSIS_ID in kwargs:
             virtual_chassis_id = kwargs.get(VIRTUAL_CHASSIS_ID)
             if virtual_chassis_id:
                 self.virtual_chassis = VirtualChassis.objects.get(pk=virtual_chassis_id)
-            else:
-                if self.device and hasattr(self.device, "virtual_chassis") and self.device.virtual_chassis:
-                    self.virtual_chassis = self.device.virtual_chassis
+            elif self.device and hasattr(self.device, "virtual_chassis") and self.device.virtual_chassis:
+                self.virtual_chassis = self.device.virtual_chassis
 
-    def _initialize_device(self, kwargs):  # pylint: disable=possibly-used-before-assignment
-        """Initialize the device object."""
-        if DEVICE_ID in kwargs:
-            device_id = kwargs.get(DEVICE_ID)
-        else:
-            device_id = (
-                self.interface.device.id  # type: ignore[attr-defined]
-                if self.interface and hasattr(self.interface, "device")
-                else None
-            )
+    def _initialize_device(self, kwargs):
+        """Set device object from kwargs or interface."""
+        device_id = kwargs.get(DEVICE_ID) or (
+            self.interface.device.id if self.interface and hasattr(self.interface, "device") else None
+        )
         if device_id:
             self.device = Device.objects.get(pk=device_id)
             self.device_name = self.device.name
 
     def _initialize_primary_device(self, kwargs):
-        """Initialize the primary device object."""
-        if PRIMARY_DEVICE_ID not in kwargs:
-            if self.interface and hasattr(self.interface, "id"):
-                primary_device_id = (
-                    PrimaryDeviceUtils("dcim.interface", str(self.interface.id)).primary_device.id  # type: ignore
-                )
-            else:
-                primary_device_id = None
+        """Set primary device object from kwargs or via utility."""
+        if PRIMARY_DEVICE_ID not in kwargs and self.interface and hasattr(self.interface, "id"):
+            primary_device_id = PrimaryDeviceUtils("dcim.interface", str(self.interface.id)).primary_device.id  # type: ignore
         else:
             primary_device_id = kwargs.get(PRIMARY_DEVICE_ID)
         try:
@@ -206,10 +162,10 @@ class LivedataQueryJob(Job):  # pylint: disable=too-many-instance-attributes
                 self.primary_device = Device.objects.get(pk=primary_device_id)
                 self.device_ip = self.primary_device.primary_ip.address  # type: ignore
         except Device.DoesNotExist as exc:
-            raise ValueError(f"Primary Device with ID {primary_device_id} not found.") from exc  # pylint: disable=raise-missing-from
+            raise ValueError(f"Primary Device with ID {primary_device_id} not found.") from exc
 
     def _initialize_interface(self, kwargs):
-        """Initialize the interface object."""
+        """Set interface object if call_object_type is 'dcim.interface'."""
         if kwargs.get(CALL_OBJECT_TYPE) == "dcim.interface":
             if INTERFACE_ID not in kwargs:
                 raise ValueError("Interface_id is required.")
@@ -219,77 +175,20 @@ class LivedataQueryJob(Job):  # pylint: disable=too-many-instance-attributes
                 raise ValueError(f"Interface with ID {kwargs.get(INTERFACE_ID)} not found.") from error
 
     def _initialize_commands(self, kwargs):
-        """Initialize the commands to be executed."""
+        """Parse and set commands to execute."""
         if COMMANDS_J2 not in kwargs:
             raise ValueError(f"{COMMANDS_J2} is required.")
-        if self.call_object_type == "dcim.interface":
-            if self.interface and hasattr(self.interface, "name"):
-                self.intf_name = self.interface.name
-                self.intf_name_only, self.intf_number = split_interface(self.intf_name)
-                self.intf_abbrev = abbreviated_interface_name(self.interface.name)
-            else:
-                self.intf_name = self.intf_name_only = self.intf_number = self.intf_abbrev = None
+        if self.call_object_type == "dcim.interface" and self.interface and hasattr(self.interface, "name"):
+            self.intf_name = self.interface.name
+            self.intf_name_only, self.intf_number = split_interface(self.intf_name)
+            self.intf_abbrev = abbreviated_interface_name(self.interface.name)
+        else:
+            self.intf_name = self.intf_name_only = self.intf_number = self.intf_abbrev = None
         self.commands = self.parse_commands(kwargs.get(COMMANDS_J2))
 
-    # If both before_start() and run() are successful, the on_success() method
-    # will be called next, if implemented.
-
-    # def on_success(self, retval, task_id, args, kwargs):
-    #     return super().on_success(retval, task_id, args, kwargs)
-
-    # def on_retry(self, exc, task_id, args, kwargs, einfo):
-    #     """Reserved as a future special method for handling retries."""
-    #     return super().on_retry(exc, task_id, args, kwargs, einfo)
-
-    # def on_failure(self, exc, task_id, args, kwargs, einfo):
-    #     # If either before_start() or run() raises any unhandled exception,
-    #     # the on_failure() method will be called next, if implemented.
-    #     return super().on_failure(exc, task_id, args, kwargs, einfo)
-
-    # The run() method is the primary worker of any Job, and must be implemented.
-    # After the self argument, it should accept keyword arguments for any variables
-    # defined on the job.
-    # If run() returns any value (even the implicit None), the Job execution
-    # will be marked as a success and the returned value will be stored in
-    # the associated JobResult database record.
-
-    def run(  # pylint: disable=too-many-locals
-        self,
-        *args,
-        **kwargs,
-    ):
-        """Run the job to query live data on an interface.
-
-        Args:
-            commands (List[str]): The commands to execute
-            device_id (int): The device ID.
-            interface_id (int): The interface ID.
-            primary_device (int): The primary device ID.
-            remote_addr (str): The remote address.
-            virtual_chassis_id (int): The virtual chassis ID.
-            x_forwarded_for (str): The forwarded address.
-            *args: Additional arguments.
-            extras (Dict): Additional information
-                - object_type (str): The object type.
-                - call_object_type (str): The call object type.
-            **kwargs: Additional keyword arguments.
-
-        Returns:
-            jobresult_id: The job result ID of the job that was enqueued.
-        """
-        # The job-specific variables are initialized in the before_start() method
-        # Example commands:
-        #   self.logger.info(
-        #       f"Livedata Query Interface Job for interface {self.intf_name} on {self.device_name} started.",
-        #       extra={"grouping": f"Query: {self.device_name}, {self.intf_name}", "object": self.job_result},
-        #   )
-        #   logger.info("This job is running!", extra={"grouping": "myjobisrunning", "object": self.job_result})
-        #   self.create_file("greeting.txt", "Hello world!")
-        #   self.create_file("farewell.txt", b"Goodbye for now!")  # content can be a str or bytes
-
+    def run(self, *args, **kwargs):  # pylint: disable=too-many-locals
+        """Main job logic: connect to device, execute commands, collect results."""
         callername = self.user.username  # type: ignore
-        # PrimaryDevice is the device that is manageabe
-
         now = make_aware(datetime.now())
         qs = Device.objects.filter(id=self.primary_device.id).distinct()  # type: ignore
 
@@ -313,7 +212,6 @@ class LivedataQueryJob(Job):  # pylint: disable=too-many-instance-attributes
             },
         }
 
-        # list of nornir results
         results = []
         with InitNornir(
             # runner={"plugin": "threadedrunner", "options": {"num_workers": 1}}
@@ -322,7 +220,6 @@ class LivedataQueryJob(Job):  # pylint: disable=too-many-instance-attributes
             inventory=inventory,
         ) as nornir_obj:
             nr_with_processors = nornir_obj.with_processors([ProcessLivedata(self.logger)])
-            # Establish the connection once
             try:
                 connection = (
                     nr_with_processors.filter(name=self.primary_device.name)  # type: ignore
@@ -333,7 +230,7 @@ class LivedataQueryJob(Job):  # pylint: disable=too-many-instance-attributes
                 raise ValueError(f"Device {self.primary_device.name} not found in Nornir inventory.") from error
             try:
                 for command in self.commands:
-                    # Support for !! filter syntax
+                    # Support for !! filter syntax (e.g., "show run !! include Gi")
                     if "!!" in command:
                         base_command, filter_part = command.split("!!", 1)
                         filter_instruction = filter_part.strip("!")
@@ -344,14 +241,14 @@ class LivedataQueryJob(Job):  # pylint: disable=too-many-instance-attributes
                     try:
                         self.logger.debug(f"Executing '{command_to_send}' on device {self.device_name}")
                         task_result = connection.send_command(command_to_send)
-                        # Apply filter if present
                         if filter_instruction:
                             task_result = apply_output_filter(task_result, filter_instruction)
                         results.append({"command": command, "task_result": task_result})
                     except NornirExecutionError as error:
                         raise ValueError(f"`E3001:` {error}") from error
             finally:
-                connection.disconnect()
+                if connection:
+                    connection.disconnect()
         return_values = []
         for res in results:
             result = res["task_result"]
@@ -362,24 +259,13 @@ class LivedataQueryJob(Job):  # pylint: disable=too-many-instance-attributes
             }
             return_values.append(value)
             self.logger.debug("Livedata results for interface: \n```%s\n```", value)
-        # Return the results
         return return_values
 
 
 class LivedataCleanupJobResultsJob(Job):
-    """Job to cleanup the Livedata Query Interface Job results.
-
-    For more information on implementing jobs, refer to the Nautobot job documentation:
-    https://docs.nautobot.com/projects/core/en/stable/development/jobs/
-
-    Args:
-        *args: Additional arguments.
-        **kwargs: Additional keyword arguments.
-    """
+    """Job to cleanup the Livedata Query Interface Job results."""
 
     class Meta:  # pylint: disable=too-few-public-methods
-        """Metadata for the Livedata Cleanup Job Results Job."""
-
         name = "Livedata Cleanup job results"
         description = "Cleanup the Livedata Query Interface Job results."
         dry_run_default = False
@@ -399,24 +285,8 @@ class LivedataCleanupJobResultsJob(Job):
         default=False,
     )
 
-    def run(  # pylint: disable=arguments-differ
-        self,
-        days_to_keep,
-        dry_run,
-        *args,
-        **kwargs,
-    ):
-        """Run the job to cleanup the Livedata Query Interface Job results.
-
-        Args:
-            days_to_keep (int): Number of days to keep job results.
-            dry_run (bool): If true, display the count of records that will be deleted without actually deleting them.
-            *args: Additional arguments.
-            **kwargs: Additional keyword arguments.
-
-        Returns:
-            str: Cleanup status message.
-        """
+    def run(self, days_to_keep, dry_run, *args, **kwargs):  # pylint: disable=arguments-differ
+        """Delete or count job results older than days_to_keep."""
         if not days_to_keep:
             days_to_keep = 30
         cutoff_date = timezone.now() - timezone.timedelta(days=days_to_keep)

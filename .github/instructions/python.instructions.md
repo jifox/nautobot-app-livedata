@@ -1,0 +1,27 @@
+# Python Coding Chat Instructions
+
+- Write clear, concise, and correct Python code.
+- Use PEP 257 conventions for all docstrings:
+  - Use triple double quotes (`"""docstring"""`).
+  - Start with a one-line summary.
+  - Separate summary from further description with a blank line.
+  - Use the first line as a summary, followed by a more detailed description if necessary.
+  - Separate sections with blank lines.
+  - Use `Args:` for parameters, `Returns:` for return values, and `Raises:` for exceptions.
+  - Use `Examples:` for usage examples if applicable.
+  - Use `Attributes:` for class attributes.
+  - Use `Notes:` for additional information.
+  - Use `See Also:` for references to related functions or classes.
+  - Use `Deprecated:` for deprecated features.
+  - Use `Version:` for version information.
+  - Use `Warning:` for important warnings.
+  - Describe arguments, return values, exceptions, and side effects as needed.
+  - Use imperative mood for docstrings in functions and methods.
+  - Always comment Excepions raised by the function.
+- Use `#` for inline comments and `"""` for block comments.
+- Use `#` for comments that explain complex logic or important decisions.
+- Use `# TODO` for tasks that need to be completed later.
+- Follow PEP 8 for code style.
+- Avoid unnecessary comments; prefer self-explanatory code and docstrings.
+- Include type hints where appropriate.
+- Use `from module import Class` for imports, not `import module.Class`.
