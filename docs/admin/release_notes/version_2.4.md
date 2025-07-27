@@ -19,6 +19,18 @@ Multiple filters can be chained in a single line by separating each filter with 
 - Major features or milestones
 - Changes to compatibility with Nautobot and/or other apps, libraries etc.
 
+## [v2.4.6 (2025-07-27)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.6)
+
+### Fixed
+
+- [#126](https://github.com/jifox/nautobot-app-livedata/issues/126) - Failed message is not displayed when Livedata Job is failing
+- [#126](https://github.com/jifox/nautobot-app-livedata/issues/126) - The GitHub workflow for upstream testing has been removed.
+
+### Dependencies
+
+- [#126](https://github.com/jifox/nautobot-app-livedata/issues/126) - Updated mkdocs-material from 9.6.14 to 9.6.16.
+- [#126](https://github.com/jifox/nautobot-app-livedata/issues/126) - Updated mkdocstrings-python from 1.16.7 to 1.16.12.
+
 ## [v2.4.5 (2025-07-14)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.5)
 
 ### Fixed
