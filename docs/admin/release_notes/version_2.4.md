@@ -19,6 +19,22 @@ Multiple filters can be chained in a single line by separating each filter with 
 - Major features or milestones
 - Changes to compatibility with Nautobot and/or other apps, libraries etc.
 
+
+## [v2.4.7 (2025-08-17)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.7)
+
+### Added
+
+- [#129](https://github.com/jifox/nautobot-app-livedata/issues/129) - Added an explanation to the FAQ detailing how the Primary Device is determined.
+
+### Fixed
+
+- [#129](https://github.com/jifox/nautobot-app-livedata/issues/129) - Fixed minor formatting issues in README.md.
+- [#139](https://github.com/jifox/nautobot-app-livedata/issues/139) - Live Data was not visible even with the user having the 'dcim.can_interact_device' permission.
+
+### Dependencies
+
+- [#139](https://github.com/jifox/nautobot-app-livedata/issues/139) - Updating ruff (0.12.5 -> 0.12.9)
+
 ## [v2.4.6 (2025-07-27)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.6)
 
 ### Fixed
