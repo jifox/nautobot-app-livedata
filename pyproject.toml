@@ -41,7 +41,7 @@ h11 = "^0.16.0"
 python-dotenv = "^1.1.0"
 coverage = "6.4.0"
 # Tool for debugging Django
-django-debug-toolbar = "~5.2.0"
+django-debug-toolbar = ">=5.2,<6.1"
 # Alternative to Make, CLI based on `tasks.py`
 invoke = "~2.2.0"
 # Change log management and generation
