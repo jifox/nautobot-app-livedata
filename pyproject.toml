@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "nautobot_app_livedata"
 description = "Provides a live view of network data within Nautobot."
-version = "2.4.6"
+version = "2.4.7"
 authors = ["Josef Fuchs <josef.fuchs@j-fuchs.at>"]
 license = "Apache-2.0"
 homepage = "https://github.com/jifox/nautobot-app-livedata.git"

@@ -75,13 +75,13 @@ Any PRs with fixes or improvements are very welcome!
 
 For any questions or comments, please check the [FAQ](https://nautobot-app-livedata.readthedocs.io/en/latest/user/faq/) first. Feel free to also swing by the [Network to Code Slack](https://networktocode.slack.com/) (channel `#nautobot`), sign up [here](http://slack.networktocode.com/) if you don't have an account.
 
-# Support for Filter Commands in Live Device Output Using !! Syntax
+## Support for Filter Commands in Live Device Output Using !! Syntax
 
-## Filter Syntax
+### Filter Syntax
 
 You can now append a filter command to the end of a device command using the `!!` delimiter. The string following `!!` specifies the filter operation to be applied to the command output.
 
-### Examples
+#### Examples
 
 - `show logging | i {{intf_number}} !!EXACT:{{intf_number}}!!` — Filters the output to contain only lines that contain the interface number as a whole word (e.g., matches ` Gi1/0/1`, `1/0/1  `, `^1/0/1 `, `1/0/1$` but not `11/0/1`, `1/0/11`, `foo1/0/1bar`).
 - `show logging !!LAST:100!!` — Returns only the last 100 lines of the output.
