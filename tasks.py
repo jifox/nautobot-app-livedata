@@ -123,9 +123,10 @@ def get_pyproject_nautobot_version():
 
 def get_nautobot_version(context):
     """Get Nautobot version from the context."""
-    if context.nautobot_ver == "pyproject":
-        context.nautobot_ver = get_pyproject_nautobot_version()
-    return context.nautobot_ver
+    ctx = context[CONFIGURATION_NAMESPACE]
+    if ctx.nautobot_ver == "pyproject":
+        ctx.nautobot_ver = get_pyproject_nautobot_version()
+    return ctx.nautobot_ver
 
 
 def _available_services(context):
@@ -192,7 +193,7 @@ def _print_context_info(context):
     print("--" * 40)
     print("Nautobot Docker Compose Environment")
     print(f"Using PYPROJECT_NAUTOBOT_VERSION:   {get_pyproject_nautobot_version()}")
-    print(f"Using Nautobot version:             {get_nautobot_version(ctx)}")
+    print(f"Using Nautobot version:             {get_nautobot_version(context)}")
     print(f"Using Python version:               {ctx.python_ver}")
     print(f"Using database container name:      {ctx.db_container_name}")
     print(f"Using redis container name:         {ctx.redis_container_name}")
@@ -252,7 +253,7 @@ def render_compose_templates(context):
         "nautobot_container_name": ctx.nautobot_container_name,
         "nautobot_image_name": imgnam,
         "db_container_name": ctx.db_container_name,
-        "nautobot_version": get_nautobot_version(ctx),
+        "nautobot_version": get_nautobot_version(context),
         "python_ver": ctx.python_ver,
     }
     print("Rendering docker-compose templates with variables:")
@@ -420,7 +421,7 @@ def lock(context, check=False, constrain_nautobot_ver=False, constrain_python_ve
             print(output.stderr, file=sys.stderr, end="")
         except UnexpectedExit:
             print("Unable to add Nautobot dependency with version constraint, falling back to git branch.")
-            command = f"poetry add --lock git+https://github.com/nautobot/nautobot.git#{get_nautobot_version(ctx)}"
+            command = f"poetry add --lock git+https://github.com/nautobot/nautobot.git#{get_nautobot_version(context)}"
             if constrain_python_ver:
                 command += f" --python {ctx.python_ver}"
             run_command(context, command)
