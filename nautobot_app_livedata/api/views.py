@@ -70,7 +70,7 @@ class LivedataQueryApiView(GenericAPIView, ABC):
             list: The commands to be executed.
         """
 
-    def get(self, request: Any, *args: Any, pk=None, **kwargs: Any) -> Response:
+    def get(self, request: Any, *args: Any, pk=None, **kwargs: Any) -> Response:  # pylint: disable=R0911
         """Handle GET request for Livedata Query API.
 
         The get method is used to enqueue the Livedata Query Job.
@@ -149,7 +149,7 @@ class LivedataQueryApiView(GenericAPIView, ABC):
                 "An error occurred during the Livedata Query API request.",
                 status=HTTPStatus.NOT_FOUND,
             )
-        except Exception as error:
+        except Exception as error:  # pylint: disable=broad-exception-caught
             logger.error("Unexpected error during Livedata Query API: %s", error)
             return Response(
                 "An unexpected error occurred during the Livedata Query API request.",

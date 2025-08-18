@@ -1,7 +1,8 @@
 """Unit tests for nautobot_app_livedata."""
 
+from http import HTTPStatus
+
 from django.contrib.auth import get_user_model
-from django.core.exceptions import PermissionDenied
 from django.test import RequestFactory
 from django.urls import reverse
 from nautobot.apps.testing import TestCase as APITransactionTestCase
@@ -84,8 +85,8 @@ class LiveDataAPITest(APITransactionTestCase):
         request = self.factory.get(url)
         request.user = self.forbidden_user
         self.client.logout()
-        with self.assertRaises(PermissionDenied):
-            _ = LivedataPrimaryDeviceApiView.as_view()(request)
+        response = LivedataPrimaryDeviceApiView.as_view()(request)
+        self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN, "Should return 403 Forbidden.")
 
     # TODO: Fix the following tests
 
