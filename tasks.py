@@ -13,19 +13,18 @@ limitations under the License.
 """
 
 import os
+from pathlib import Path
 import re
 import sys
-from pathlib import Path
 from time import sleep
 
-import jinja2
-import toml
-import yaml  # Added for parsing docker compose config output
 from dotenv import load_dotenv
 from invoke.collection import Collection
 from invoke.exceptions import Exit, UnexpectedExit
-from invoke.tasks import Task
-from invoke.tasks import task as invoke_task
+from invoke.tasks import Task, task as invoke_task
+import jinja2
+import toml
+import yaml  # Added for parsing docker compose config output
 
 # Set the environment files to be sourced in order. The highest priority file should be listed last.
 ENVIRONMENT_FILENAMES = ["dev.env", "development.env", "local.env", ".env", ".creds.env", "creds.env"]
@@ -608,12 +607,11 @@ def image_names(context, service=""):
 @task(
     help={
         "service": "Docker compose service name to push image for (default: nautobot).",
-        "registry": "Registry to push to (default: Docker Hub)"
+        "registry": "Registry to push to (default: Docker Hub)",
     }
 )
 def image_push(context, service="nautobot", registry=""):
     """Push the docker image for the specified service to the registry."""
-    ctx = context[CONFIGURATION_NAMESPACE]
     if service:
         service = _service_name(context, service)
     # Get the full docker compose config as YAML
@@ -756,7 +754,7 @@ def post_upgrade(context):
 @task(
     help={
         "action": (
-            "Available values are `['lint', 'format']`. " "Can be used multiple times. (default: `['lint', 'format']`)"
+            "Available values are `['lint', 'format']`. Can be used multiple times. (default: `['lint', 'format']`)"
         ),
         "target": "File or directory to inspect, repeatable (default: all files in the project will be inspected)",
         "fix": "Automatically fix selected actions. May not be able to fix all issues found. (default: False)",
