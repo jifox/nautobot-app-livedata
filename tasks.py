@@ -109,22 +109,23 @@ namespace.configure(
 )
 
 
-with open("pyproject.toml", "r", encoding="utf8") as pyproject:
-    parsed_toml = toml.load(pyproject)
-try:
-    PYPROJECT_NAUTOBOT_VERSION = parsed_toml["tool"]["poetry"]["dependencies"]["nautobot"]["version"]
-except TypeError:
-    PYPROJECT_NAUTOBOT_VERSION = parsed_toml["tool"]["poetry"]["dependencies"]["nautobot"]
-# Filter all Chars but 0-9,a-z,'.'
-PYPROJECT_NAUTOBOT_VERSION = re.sub(r"[^0-9a-z.]+", "", PYPROJECT_NAUTOBOT_VERSION.lower())
+def get_pyproject_nautobot_version():
+    with open("pyproject.toml", "r", encoding="utf8") as pyproject:
+        parsed_toml = toml.load(pyproject)
+    try:
+        pyproject_neutobot_version = parsed_toml["tool"]["poetry"]["dependencies"]["nautobot"]["version"]
+    except TypeError:
+        pyproject_neutobot_version = parsed_toml["tool"]["poetry"]["dependencies"]["nautobot"]
+    # Filter all Chars but 0-9,a-z,'.'
+    pyproject_neutobot_version = re.sub(r"[^0-9a-z.]+", "", pyproject_neutobot_version.lower())
+    return pyproject_neutobot_version
 
 
 def get_nautobot_version(context):
     """Get Nautobot version from the context."""
     if context.nautobot_ver == "pyproject":
-        return PYPROJECT_NAUTOBOT_VERSION
-    else:
-        return context.nautobot_ver
+        context.nautobot_ver = get_pyproject_nautobot_version()
+    return context.nautobot_ver
 
 
 def _available_services(context):
@@ -190,7 +191,7 @@ def _print_context_info(context):
         return
     print("--" * 40)
     print("Nautobot Docker Compose Environment")
-    print(f"Using PYPROJECT_NAUTOBOT_VERSION:   {PYPROJECT_NAUTOBOT_VERSION}")
+    print(f"Using PYPROJECT_NAUTOBOT_VERSION:   {get_pyproject_nautobot_version()}")
     print(f"Using Nautobot version:             {get_nautobot_version(ctx)}")
     print(f"Using Python version:               {ctx.python_ver}")
     print(f"Using database container name:      {ctx.db_container_name}")
