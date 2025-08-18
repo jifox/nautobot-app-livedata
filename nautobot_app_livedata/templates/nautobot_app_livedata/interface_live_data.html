@@ -27,7 +27,7 @@
                 <p>Permission denied to fetch live data.</p>
                 <p>Ask your administrator to grant permission to fetch live data</p>
                 <ul>
-                    <li>dcim.can_interact</li>
+                    <li>dcim.can_interact for device content type</li>
                     <li>extras.run_job</li>
                 </ul>
             </div>
@@ -44,6 +44,33 @@
             const csrftoken = '{{ csrf_token }}';
             var jobresultPk = document.getElementById("jobresult-pk").value;
 
+            function handleHttpError(response) {
+                if (!response.ok) {
+                    switch (response.status) {
+                        case 403:
+                            throw new Error('Permission denied (403). You do not have the permission "can_interact" for "dcim.device". Contact your administrator.');
+                        case 404:
+                            throw new Error('Resource not found (404). The requested interface may not exist.');
+                        case 500:
+                            throw new Error('Server error (500). Please try again later.');
+                        case 502:
+                        case 503:
+                            throw new Error('Service unavailable. The server is temporarily down.');
+                        default:
+                            throw new Error(`HTTP Error ${response.status}: ${response.statusText}`);
+                    }
+                }
+                return response;
+            }
+
+            function displayError(message) {
+                document.getElementById("id_wait_for_jobexecution").style.display = 'none';
+                document.getElementById("id_refresh_live_interface_data").innerHTML = `
+                    <div class="alert alert-danger" role="alert">
+                        <strong>Error:</strong> ${message}
+                    </div>`;
+            }
+
             if (jobresultPk === "") {
                 fetch("{% url 'plugins-api:nautobot_app_livedata-api:livedata-query-intf-api' pk=object.pk %}", {
                     method: 'GET',
@@ -51,6 +78,7 @@
                         'X-CSRFToken': csrftoken,
                     },
                 })
+                .then(handleHttpError)
                 .then(response => response.json())
                 .then(data => {
                     jobresultPk = data.jobresult_id;
@@ -62,7 +90,10 @@
                             </a>
                         </div>`;
                 })
-                .catch(error => console.error('Error fetching live data:', error));
+                .catch(error => {
+                    console.error('Error fetching live data:', error);
+                    displayError(error.message);
+                });
             }
 
             // Timer to check jobresult-pk and fetch job result
@@ -78,6 +109,7 @@
                             'X-CSRFToken': csrftoken,
                         },
                     })
+                    .then(handleHttpError)
                     .then(response => response.json())
                     .then(jobResultData => {
                         if (jobResultData.status.value === "SUCCESS") {
@@ -87,23 +119,37 @@
                                 jobResultData.result.forEach(result => {
                                     resultContent += `<p><pre><strong style="font-size: 1.4em;">${result.command}</strong><br><span style="font-size: 1.2em;">${result.stdout}</span></pre>`;
                                     if (result.stderr) {
-                                        resultContent += `<pre><strong style="font-size: 1.4em;>Error: </strong><span style="font-size: 1.2em;">${result.stderr}</span></pre>`;
+                                        resultContent += `<pre><strong style="font-size: 1.4em;">Error: </strong><span style="font-size: 1.2em;">${result.stderr}</span></pre>`;
                                     }
                                 });
                                 document.getElementById("id_wait_for_jobexecution").style.display = 'none';
                                 document.getElementById("id_refresh_live_interface_data").innerHTML = resultContent;
-                                clearInterval(intervalId);  // Disable the interval after displaying the content
+                                clearInterval(intervalId);
                             }
+                        } else if (jobResultData.status.value === "STARTED" || jobResultData.status.value === "RUNNING" || jobResultData.status.value === "PENDING") {
+                            // Show job result button when job is in progress
+                            document.getElementById("id_livedata-info").innerHTML = `
+                                <div class="text-right">
+                                    <a href='/extras/job-results/${jobresultPk}/' target='_blank' class="btn btn-info btn-sm">
+                                        Show Job Result
+                                    </a>
+                                </div>`;
+                        } else if (jobResultData.status.value === "FAILURE") {
+                            displayError("Failed to fetch live data from the device.");
+                            clearInterval(intervalId);
+                        } else if (jobResultData.status.value === "REVOKED") {
+                            displayError("Job was cancelled or revoked.");
+                            clearInterval(intervalId);
                         }
-                        if (jobResultData.status.value === "FAILURE") {
-                            document.getElementById("id_wait_for_jobexecution").style.display = 'none';
-                            document.getElementById("id_refresh_live_interface_data").innerHTML = `<p>Failed to fetch live data.</p>`;
-                            clearInterval(intervalId);  // Disable the interval after displaying the content
-                        }
+                        // Continue polling for PENDING, STARTED, RUNNING states
                     })
-                    .catch(error => console.error('Error fetching job result:', error));
+                    .catch(error => {
+                        console.error('Error fetching job result:', error);
+                        displayError(error.message);
+                        clearInterval(intervalId);
+                    });
                 }
-            }, 3000); // Check every 3 seconds
+            }, 3000);
         });
     </script>
 {% endif %}
