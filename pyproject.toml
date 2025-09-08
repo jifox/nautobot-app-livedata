@@ -52,7 +52,7 @@ ipython = "*"
 toml = "*"
 # Rendering of markdown files to HTML
 Markdown = "~3.6"
-griffe = "~1.7.3"
+griffe = ">=1.7.3,<1.15.0"
 
 #  [tool.poetry.group.docs.dependencies]
 # Rendering docs to HTML
