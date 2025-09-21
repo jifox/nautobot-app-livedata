@@ -19,6 +19,28 @@ Multiple filters can be chained in a single line by separating each filter with 
 - Major features or milestones
 - Changes to compatibility with Nautobot and/or other apps, libraries etc.
 
+## [v2.4.8 (2025-09-21)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.8)
+
+!! note
+    Minimum Nautobot version is now 2.4.15
+
+### Added
+
+- [#134](https://github.com/jifox/nautobot-app-livedata/issues/134) - Add .ruff_cache/ to .gitignore
+- [#134](https://github.com/jifox/nautobot-app-livedata/issues/134) - Added Nautbot 2.4.15 support and updated Compatibility Matrix
+
+### Fixed
+
+- [#134](https://github.com/jifox/nautobot-app-livedata/issues/134) - Fixed job files download in development environment
+- [#134](https://github.com/jifox/nautobot-app-livedata/issues/134) - Changed environment variable NAUTOBOT_TEST_FACTORY_SEED as a workaround for Nautobot issue #7841
+
+### Dependencies
+
+- [#78](https://github.com/jifox/nautobot-app-livedata/issues/78) - Bump yamllint from 1.35.1 to 1.37.1
+- [#134](https://github.com/jifox/nautobot-app-livedata/issues/134) - Bump mkdocstrings from 0.29.1 to 0.30.0
+- [#134](https://github.com/jifox/nautobot-app-livedata/issues/134) - Bump markdown from 3.6 to 3.8
+- [#143](https://github.com/jifox/nautobot-app-livedata/issues/143) - Bump actions/checkout from 4 to 5
+- [#147](https://github.com/jifox/nautobot-app-livedata/issues/147) - Bump pypa/gh-action-pypi-publish from 1.12.4 to 1.13.0
 
 ## [v2.4.7 (2025-08-17)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.7)
 

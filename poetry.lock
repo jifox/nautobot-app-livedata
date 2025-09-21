@@ -237,13 +237,13 @@ typecheck = ["mypy"]
 
 [[package]]
 name = "billiard"
-version = "4.2.1"
+version = "4.2.2"
 description = "Python multiprocessing fork with improvements and bugfixes"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "billiard-4.2.1-py3-none-any.whl", hash = "sha256:40b59a4ac8806ba2c2369ea98d876bc6108b051c227baffd928c644d15d8f3cb"},
-    {file = "billiard-4.2.1.tar.gz", hash = "sha256:12b641b0c539073fc8d3f5b8b7be998956665c4233c7c1fcd66a7e677c4fb36f"},
+    {file = "billiard-4.2.2-py3-none-any.whl", hash = "sha256:4bc05dcf0d1cc6addef470723aac2a6232f3c7ed7475b0b580473a9145829457"},
+    {file = "billiard-4.2.2.tar.gz", hash = "sha256:e815017a062b714958463e07ba15981d802dc53d41c5b69d28c5a7c238f8ecf3"},
 ]
 
 [[package]]
@@ -2377,13 +2377,13 @@ mkdocs = ">=1.2"
 
 [[package]]
 name = "mkdocstrings"
-version = "0.30.0"
+version = "0.30.1"
 description = "Automatic documentation from sources, for MkDocs."
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "mkdocstrings-0.30.0-py3-none-any.whl", hash = "sha256:ae9e4a0d8c1789697ac776f2e034e2ddd71054ae1cf2c2bb1433ccfd07c226f2"},
-    {file = "mkdocstrings-0.30.0.tar.gz", hash = "sha256:5d8019b9c31ddacd780b6784ffcdd6f21c408f34c0bd1103b5351d609d5b4444"},
+    {file = "mkdocstrings-0.30.1-py3-none-any.whl", hash = "sha256:41bd71f284ca4d44a668816193e4025c950b002252081e387433656ae9a70a82"},
+    {file = "mkdocstrings-0.30.1.tar.gz", hash = "sha256:84a007aae9b707fb0aebfc9da23db4b26fc9ab562eb56e335e9ec480cb19744f"},
 ]
 
 [package.dependencies]
@@ -3517,13 +3517,13 @@ urllib3 = ">=2.2.3,<3.0.0"
 
 [[package]]
 name = "pyparsing"
-version = "3.2.4"
+version = "3.2.5"
 description = "pyparsing - Classes and methods to define and execute parsing grammars"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "pyparsing-3.2.4-py3-none-any.whl", hash = "sha256:91d0fcde680d42cd031daf3a6ba20da3107e08a75de50da58360e7d94ab24d36"},
-    {file = "pyparsing-3.2.4.tar.gz", hash = "sha256:fff89494f45559d0f2ce46613b419f632bbb6afbdaed49696d322bcf98a58e99"},
+    {file = "pyparsing-3.2.5-py3-none-any.whl", hash = "sha256:e38a4f02064cf41fe6593d328d0512495ad1f3d8a91c4f73fc401b3079a59a5e"},
+    {file = "pyparsing-3.2.5.tar.gz", hash = "sha256:2df8d5b7b2802ef88e8d016a2eb9c7aeaa923529cd251ed0fe4608275d4105b6"},
 ]
 
 [package.extras]
@@ -4422,13 +4422,13 @@ typing-extensions = {version = "*", markers = "python_version < \"3.11\""}
 
 [[package]]
 name = "super-collections"
-version = "0.5.5"
+version = "0.5.7"
 description = "file: README.md"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "super_collections-0.5.5-py3-none-any.whl", hash = "sha256:2b8edab86ada80a2efbacf6a326c33f24ced143a1e882a73a9caa64e81e45967"},
-    {file = "super_collections-0.5.5.tar.gz", hash = "sha256:dfb3a03b5cdf47337b61bd7aaf28f8241bdadb61c936e65608d6e44c113f9bd6"},
+    {file = "super_collections-0.5.7-py3-none-any.whl", hash = "sha256:fa9b1653d5fed9e435df3edf3b43ed6c8d5af32ff7ff83fe00b589173990f07b"},
+    {file = "super_collections-0.5.7.tar.gz", hash = "sha256:796a9ab231487e488b2a8588c9bb6ca0dc719d66abf775ca67177e34de8f3bc0"},
 ]
 
 [package.dependencies]

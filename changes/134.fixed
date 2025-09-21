@@ -1,2 +1,0 @@
-Fixed job files download in development environment
-Changed environment variable NAUTOBOT_TEST_FACTORY_SEED as a workaround for Nautobot issue #7841
