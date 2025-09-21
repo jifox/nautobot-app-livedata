@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "nautobot_app_livedata"
 description = "Provides a live view of network data within Nautobot."
-version = "2.4.7"
+version = "2.4.8"
 authors = ["Josef Fuchs <josef.fuchs@j-fuchs.at>"]
 license = "Apache-2.0"
 homepage = "https://github.com/jifox/nautobot-app-livedata.git"
@@ -29,7 +29,7 @@ include = [
 [tool.poetry.dependencies]
 python = ">=3.9.2,<3.13"
 # Used for local development
-nautobot = "~2.4.0"
+nautobot = "~2.4.15"
 towncrier = "~24.8.0"
 to-json-schema = "*"
 jsonschema = "^4.7.0"
@@ -51,7 +51,7 @@ watchdog = "~6.0.0"
 ipython = "*"
 toml = "*"
 # Rendering of markdown files to HTML
-Markdown = "~3.6"
+Markdown = "~3.8"
 griffe = "~1.7.3"
 
 #  [tool.poetry.group.docs.dependencies]
@@ -77,7 +77,7 @@ mkdocs-redirects = "~1.2.2"
 # Automatically handle index pages for docs sections
 mkdocs-section-index = "~0.3.10"
 # Automatic documentation from sources, for MkDocs
-mkdocstrings = "~0.29.1"
+mkdocstrings = "~0.30.0"
 # Python-specific extension to mkdocstrings
 mkdocstrings-python = "~1.16.12"
 
@@ -91,7 +91,7 @@ pymarkdownlnt = "~0.9.28"
 # Combination linter and code formatter
 ruff = "~0.12.0"
 # YAML linting
-yamllint = "~1.35.1"
+yamllint = "~1.37.1"
 debugpy = "^1.8.14"
 # Random data generation
 factory-boy = "~3.3.3"
