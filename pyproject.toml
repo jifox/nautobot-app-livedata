@@ -89,7 +89,7 @@ pylint-django = "~2.6.1"
 # Python implementation of markdownlint
 pymarkdownlnt = "~0.9.28"
 # Combination linter and code formatter
-ruff = "~0.12.0"
+ruff = ">=0.12,<0.14"
 # YAML linting
 yamllint = "~1.37.1"
 debugpy = "^1.8.14"
