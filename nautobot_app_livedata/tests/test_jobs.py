@@ -7,6 +7,7 @@ from django.contrib.auth import get_user_model
 from django.utils.timezone import make_aware
 from nautobot.apps.testing import TestCase as APITransactionTestCase
 
+import nautobot_app_livedata.jobs as jobs_module  # Used in patch.object decorators
 from nautobot_app_livedata.jobs import LivedataCleanupJobResultsJob, LivedataQueryJob
 
 from .conftest import create_db_data
@@ -343,7 +344,7 @@ class LivedataQueryJobTest(APITransactionTestCase):
             self.assertIsNotNone(self.job.primary_device)
             self.assertIsNotNone(self.job.commands)
 
-    @patch("nautobot_app_livedata.jobs.InitNornir")
+    @patch.object(jobs_module, "InitNornir")
     def test_run_success(self, mock_init_nornir):
         """Test run method executes commands successfully."""
         device = self.device_list[0]
@@ -381,7 +382,7 @@ class LivedataQueryJobTest(APITransactionTestCase):
             self.assertEqual(result[0]["stderr"], "")
             mock_connection.disconnect.assert_called_once()
 
-    @patch("nautobot_app_livedata.jobs.InitNornir")
+    @patch.object(jobs_module, "InitNornir")
     def test_run_with_filter_syntax(self, mock_init_nornir):
         """Test run method handles !! filter syntax correctly."""
         device = self.device_list[0]
@@ -410,7 +411,7 @@ class LivedataQueryJobTest(APITransactionTestCase):
             mock_connection.disconnect.return_value = None
             mock_host.get_connection.return_value = mock_connection
 
-            with patch("nautobot_app_livedata.jobs.apply_output_filter") as mock_filter:
+            with patch.object(jobs_module, "apply_output_filter") as mock_filter:
                 mock_filter.return_value = "Filtered output"
                 result = self.job.run()
 
@@ -419,7 +420,7 @@ class LivedataQueryJobTest(APITransactionTestCase):
                 self.assertEqual(len(result), 1)
                 self.assertEqual(result[0]["stdout"], "Filtered output")
 
-    @patch("nautobot_app_livedata.jobs.InitNornir")
+    @patch.object(jobs_module, "InitNornir")
     def test_run_device_not_in_inventory(self, mock_init_nornir):
         """Test run raises ValueError when device not found in inventory."""
         device = self.device_list[0]
@@ -473,7 +474,7 @@ class LivedataCleanupJobResultsJobTest(APITransactionTestCase):
         self.assertEqual(self.job.Meta.soft_time_limit, 60)
         self.assertTrue(self.job.Meta.enabled)
 
-    @patch("nautobot_app_livedata.jobs.JobResult.objects.filter")
+    @patch.object(jobs_module.JobResult.objects, "filter")
     def test_run_dry_run(self, mock_filter):
         """Test run with dry_run=True returns count without deleting."""
         # Mock QuerySets
@@ -493,7 +494,7 @@ class LivedataCleanupJobResultsJobTest(APITransactionTestCase):
         mock_query_results.delete.assert_not_called()
         mock_cleanup_results.delete.assert_not_called()
 
-    @patch("nautobot_app_livedata.jobs.JobResult.objects.filter")
+    @patch.object(jobs_module.JobResult.objects, "filter")
     def test_run_delete(self, mock_filter):
         """Test run with dry_run=False actually deletes records."""
         # Mock QuerySets
@@ -512,7 +513,7 @@ class LivedataCleanupJobResultsJobTest(APITransactionTestCase):
         mock_query_results.delete.assert_called_once()
         mock_cleanup_results.delete.assert_called_once()
 
-    @patch("nautobot_app_livedata.jobs.JobResult.objects.filter")
+    @patch.object(jobs_module.JobResult.objects, "filter")
     def test_run_default_days_to_keep(self, mock_filter):
         """Test run uses default 30 days when days_to_keep is None."""
         mock_query_results = Mock()
@@ -527,8 +528,8 @@ class LivedataCleanupJobResultsJobTest(APITransactionTestCase):
         # Should use default 30 days
         self.assertIn("30 days", result)
 
-    @patch("nautobot_app_livedata.jobs.timezone.now")
-    @patch("nautobot_app_livedata.jobs.JobResult.objects.filter")
+    @patch.object(jobs_module.timezone, "now")
+    @patch.object(jobs_module.JobResult.objects, "filter")
     def test_run_filters_by_cutoff_date(self, mock_filter, mock_now):
         """Test run filters JobResults by correct cutoff date."""
         # Set fixed "now" time

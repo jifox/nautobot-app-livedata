@@ -5,7 +5,6 @@ from importlib import metadata
 
 from nautobot.apps import nautobot_database_ready, NautobotAppConfig
 
-from . import jobs  # noqa: F401  # pylint: disable=unused-import
 from .signals import nautobot_database_ready_callback  # pylint: disable=unused-import, wrong-import-position
 
 __version__ = metadata.version(__name__)
