@@ -1,6 +1,6 @@
 """Utilities for getting the primary device for a given object."""
 
-from typing import List
+from typing import Any, List, Optional
 
 from .contenttype import ContentTypeUtils
 
@@ -40,8 +40,13 @@ class PrimaryDeviceUtils:
         self._primary_device = None
         self._get_primary_device()
 
-    def to_dict(self):
-        """Cast the PrimaryDeviceUtils object to a dictionary."""
+    def to_dict(self) -> dict[str, Any]:
+        """Cast the PrimaryDeviceUtils object to a dictionary.
+
+        Returns:
+            dict: Dictionary representation of the PrimaryDeviceUtils object containing
+                object_type, pk, device, interface, virtual_chassis, and primary_device IDs.
+        """
         return {
             "object_type": self._object_type,
             "pk": self._pk,
@@ -51,8 +56,18 @@ class PrimaryDeviceUtils:
             "primary_device": self._primary_device.id if self._primary_device else None,
         }
 
-    def _get_associated_device(self):
-        """Get the associated device for the given object type and ID."""
+    def _get_associated_device(self) -> None:
+        """Get the associated device for the given object type and ID.
+
+        This method retrieves the device based on the object type (interface, device, or virtual chassis).
+        For interfaces, it gets the parent device. For devices, it validates the status is Active.
+        For virtual chassis, it gets the master or first member device.
+
+        Raises:
+            ValueError: If the object type is invalid.
+            ValueError: If the interface/device/virtual chassis does not exist.
+            ValueError: If the device status is not Active.
+        """
         Interface = ContentTypeUtils("dcim.interface").model  # pylint: disable=invalid-name
         Device = ContentTypeUtils("dcim.device").model  # pylint: disable=invalid-name
         if self._object_type == "dcim.interface":
@@ -87,8 +102,18 @@ class PrimaryDeviceUtils:
         else:
             raise ValueError("Invalid object type")
 
-    def _get_primary_device(self):
-        """Get the primary device for the given object type and ID."""
+    def _get_primary_device(self) -> None:
+        """Get the primary device for the given object type and ID.
+
+        This method determines the primary device by first getting the associated device,
+        then checking for a primary IP address. If the device doesn't have a primary IP,
+        it searches through virtual chassis members for one that does.
+
+        Raises:
+            ValueError: If the device is not found.
+            ValueError: If no device with a primary IP address is found.
+            ValueError: If the device status is not Active.
+        """
         self._get_associated_device()
 
         # Check if device is None
@@ -115,17 +140,25 @@ class PrimaryDeviceUtils:
             raise ValueError("Device status is not 'Active'")
 
     @property
-    def device(self):
-        """Return the device that was given as input."""
+    def device(self) -> Optional[Any]:
+        """Return the device that was given as input.
+
+        Returns:
+            Device: The device object from the initial input, or None if input was not a device.
+        """
         return self._device
 
     @property
-    def interface(self):
-        """Return the interface that was given as input."""
+    def interface(self) -> Optional[Any]:
+        """Return the interface that was given as input.
+
+        Returns:
+            Interface: The interface object from the initial input, or None if input was not an interface.
+        """
         return self._interface
 
     @property
-    def primary_device(self):
+    def primary_device(self) -> Optional[Any]:
         """Return the primary device.
 
         Device that has a primary IP address and is in active state.
@@ -138,12 +171,17 @@ class PrimaryDeviceUtils:
         return self._primary_device
 
     @property
-    def virtual_chassis(self):
-        """Return the virtual chassis that was given as input."""
+    def virtual_chassis(self) -> Optional[Any]:
+        """Return the virtual chassis that was given as input.
+
+        Returns:
+            VirtualChassis: The virtual chassis object from the initial input, or None if input
+                was not a virtual chassis or the device is not part of one.
+        """
         return self._virtual_chassis
 
 
-def get_livedata_commands(device, custom_field_key) -> List[str]:
+def get_livedata_commands(device: Any, custom_field_key: str) -> List[str]:
     """Get the commands to be executed for Livedata on the given device.
 
     Args:
@@ -181,7 +219,7 @@ def get_livedata_commands(device, custom_field_key) -> List[str]:
     return commands
 
 
-def get_livedata_commands_for_device(device) -> List[str]:
+def get_livedata_commands_for_device(device: Any) -> List[str]:
     """Get the commands to be executed for Livedata on the given device.
 
     Args:
@@ -193,7 +231,7 @@ def get_livedata_commands_for_device(device) -> List[str]:
     return get_livedata_commands(device, "livedata_device_commands")
 
 
-def get_livedata_commands_for_interface(interface) -> List[str]:
+def get_livedata_commands_for_interface(interface: Any) -> List[str]:
     """Get the commands to be executed for Livedata on the given interface.
 
     Args:
