@@ -1,1 +1,0 @@
-Added new development dependencies: djhtml (3.0.6), djlint (1.34.0), rich (14.2.0), faker (37.11.0), and factory-boy (3.3.3) for improved Django template handling, output formatting, and test data generation.
