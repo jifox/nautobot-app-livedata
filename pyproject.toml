@@ -44,6 +44,8 @@ factory-boy = "~3.3.3"
 faker = "^37.11.0"
 # Alternative to Make, CLI based on `tasks.py`
 invoke = "~2.2.1"
+# YAML parsing for docker compose config in tasks.py
+PyYAML = "*"
 # Colorization and autoformatting of CLI output, used for Invoke tasks
 rich = "~14.2.0"
 # Change log management and generation
