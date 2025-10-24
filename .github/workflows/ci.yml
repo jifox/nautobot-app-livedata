@@ -48,6 +48,7 @@ jobs:
         uses: "networktocode/gh-action-setup-poetry-environment@v6"
         with:
           poetry-version: "1.8.5"
+          poetry-install-options: "--with dev,linting"
       - name: "Linting: ruff format"
         run: "poetry run invoke ruff --action format"
   ruff-lint:
@@ -61,6 +62,7 @@ jobs:
         uses: "networktocode/gh-action-setup-poetry-environment@v6"
         with:
           poetry-version: "1.8.5"
+          poetry-install-options: "--with dev,linting"
       - name: "Linting: ruff"
         run: "poetry run invoke ruff --action lint"
   check-docs-build:
@@ -74,6 +76,7 @@ jobs:
         uses: "networktocode/gh-action-setup-poetry-environment@v6"
         with:
           poetry-version: "1.8.5"
+          poetry-install-options: "--with dev,docs"
       - name: "Check Docs Build"
         run: "poetry run invoke build-and-check-docs"
   poetry:
@@ -87,6 +90,7 @@ jobs:
         uses: "networktocode/gh-action-setup-poetry-environment@v6"
         with:
           poetry-version: "1.8.5"
+          poetry-install-options: "--with dev"
       - name: "Checking: poetry lock file"
         run: "poetry run invoke lock --check"
   yamllint:
@@ -100,6 +104,7 @@ jobs:
         uses: "networktocode/gh-action-setup-poetry-environment@v6"
         with:
           poetry-version: "1.8.5"
+          poetry-install-options: "--with dev,linting"
       - name: "Linting: yamllint"
         run: "poetry run invoke yamllint"
   check-in-docker:

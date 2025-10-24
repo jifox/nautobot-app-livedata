@@ -1,7 +1,11 @@
 """Utilities for working with custom fields in Nautobot."""
 
+from typing import Any, Optional
 
-def create_custom_field(db_objects, content_type_objects=None, **kwargs):
+
+def create_custom_field(
+    db_objects: dict[str, Any], content_type_objects: Optional[list[Any]] = None, **kwargs: Any
+) -> None:
     """Create a custom field with the given key name and field type.
 
     Args:
