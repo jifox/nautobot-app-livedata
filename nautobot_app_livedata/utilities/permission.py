@@ -1,7 +1,11 @@
 """Utilities for working with permissions in Nautobot."""
 
+from typing import Any
 
-def create_permission(db_objects: dict, name: str, actions_list: list, description: str, content_type):
+
+def create_permission(
+    db_objects: dict[str, Any], name: str, actions_list: list[str], description: str, content_type: Any
+) -> None:
     """Create a permission in the database.
 
     Args:

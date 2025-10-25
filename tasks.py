@@ -727,6 +727,14 @@ def makemigrations(context, name=""):
 
 
 @task
+def showmigrations(context):
+    """Perform showmigrations operation in Django."""
+    command = "nautobot-server showmigrations"
+
+    run_command(context, command)
+
+
+@task
 def migrate(context):
     """Perform migrate operation in Django."""
     command = "nautobot-server migrate"
@@ -749,6 +757,39 @@ def post_upgrade(context):
     - invalidate all
     """
     command = "nautobot-server post_upgrade"
+
+    run_command(context, command)
+
+
+@task(
+    help={
+        "filepath": "Path to the file to create or overwrite",
+        "format": "Output serialization format for dumped data. (Choices: json, xml, yaml)",
+        "model": "Model to include, such as 'dcim.device', repeat as needed",
+    },
+    iterable=["model"],
+)
+def dumpdata(context, format="json", model=None, filepath=None):
+    """Dump data from database to file."""
+    if not filepath:
+        filepath = f"db_output.{format}"
+
+    command_tokens = [
+        "nautobot-server dumpdata",
+        f"--indent 2 --format {format} --natural-foreign --natural-primary",
+        f"--output {filepath}",
+    ]
+
+    if model is not None:
+        command_tokens += [" ".join(model)]
+
+    run_command(context, " \\\n    ".join(command_tokens))
+
+
+@task(help={"filepath": "Name and path of file to load."})
+def loaddata(context, filepath="db_output.json"):
+    """Load data from file."""
+    command = f"nautobot-server loaddata {filepath}"
 
     run_command(context, command)
 
@@ -1148,6 +1189,37 @@ def docs(context):
         start(context, service="docs")
 
 
+@task
+def serve_docs(context):
+    """Run local instance of mkdocs serve on port 8001 (ctrl-c to stop)."""
+    ctx = context[CONFIGURATION_NAMESPACE]
+    command = "mkdocs serve -v"
+
+    if is_truthy(ctx.local):
+        print(">>> Serving Documentation at http://localhost:8001")
+        run_command(context, command)
+    else:
+        start(context, service="docs")
+
+
+@task
+def open_docs_web(context):
+    """Navigate to the mkdocs interface in your web browser."""
+    import platform as plat
+
+    docs_url = "http://localhost:8001"
+
+    if plat.system().lower() == "darwin":
+        open_cmd = "open"
+    else:
+        open_cmd = "xdg-open"
+
+    try:
+        context.run(f"{open_cmd} {docs_url}", hide="err")
+    except Exception:
+        print(f"Unable to open browser. Documentation available at {docs_url}")
+
+
 @task(help={"service": "If specified, only pull images for this service."})
 def pull_images(context, service=""):
     """Pull Docker images for all services or a specific service using docker compose."""
@@ -1251,6 +1323,33 @@ def yamllint(context):
 
 
 @task
+def markdownlint(context, fix=False):
+    """Lint Markdown files."""
+    if fix:
+        command = "pymarkdown fix --recurse docs *.md"
+        run_command(context, command)
+    # fix mode doesn't scan/report issues it can't fix, so always run scan even after fixing
+    command = "pymarkdown scan --recurse docs *.md"
+    run_command(context, command)
+
+
+@task
+def djhtml(context, fix=False):
+    """Indent Django template files."""
+    command = f"djhtml {CONFIGURATION_NAMESPACE}/*/templates --tabwidth 4"
+    if not fix:
+        command += " --check"
+    run_command(context, f'bash -c "{command}"')  # needed for glob expansion
+
+
+@task
+def djlint(context):
+    """Lint and check Django template files formatting."""
+    command = "djlint . --lint"
+    run_command(context, command)
+
+
+@task
 def check_migrations(context):
     """Check for missing migrations."""
     command = "nautobot-server makemigrations --dry-run --check"
@@ -1260,26 +1359,56 @@ def check_migrations(context):
 
 @task(
     help={
+        "api_version": "Check a single specified API version only.",
+    },
+)
+def check_schema(context, api_version=None):
+    """Render the REST API schema and check for problems."""
+    if api_version is not None:
+        api_versions = [api_version]
+    else:
+        # Default to checking the latest version
+        # You can customize this to check multiple versions if needed
+        api_versions = ["2.4"]
+
+    for api_vers in api_versions:
+        command = f"nautobot-server spectacular --api-version {api_vers} --validate --fail-on-warn --file /dev/null"
+        run_command(context, command)
+
+
+@task(
+    help={
+        "append_coverage": "Append coverage data to .coverage, otherwise it starts clean each time.",
         "keepdb": "save and re-use test database between test runs for faster re-testing.",
         "label": "specify a directory or module to test instead of running all Nautobot tests",
         "failfast": "fail as soon as a single test fails don't run the entire test suite",
         "buffer": "Discard output from passing tests",
         "pattern": "Run specific test methods, classes, or modules instead of all tests",
+        "tag": "Run only tests with the specified tag. Can be used multiple times.",
+        "exclude_tag": "Do not run tests with the specified tag. Can be used multiple times.",
         "verbose": "Enable verbose test output.",
-    }
+    },
+    iterable=["tag", "exclude_tag", "pattern"],
 )
 def unittest(
     context,
+    append_coverage=False,
     keepdb=False,
     label=None,
     failfast=False,
     buffer=True,
-    pattern="",
+    pattern=None,
+    tag=None,
+    exclude_tag=None,
     verbose=False,
 ):
     """Run Nautobot unit tests."""
     if not label:
         label = CONFIGURATION_NAMESPACE
+
+    if not append_coverage:
+        run_command(context, "coverage erase")
+
     command = f"coverage run --module nautobot.core.cli test {label}"
 
     if keepdb:
@@ -1288,10 +1417,20 @@ def unittest(
         command += " --failfast"
     if buffer:
         command += " --buffer"
-    if pattern:
-        command += f" -k='{pattern}'"
     if verbose:
         command += " --verbosity 2"
+
+    # Handle tags
+    if tag:
+        for individual_tag in tag:
+            command += f" --tag {individual_tag}"
+    if exclude_tag:
+        for individual_exclude_tag in exclude_tag:
+            command += f" --exclude-tag {individual_exclude_tag}"
+
+    # Handle patterns
+    for item in pattern or []:
+        command += f" -k='{item}'"
 
     run_command(context, command)
 
@@ -1299,9 +1438,36 @@ def unittest(
 @task
 def unittest_coverage(context):
     """Report on code test coverage as measured by 'invoke unittest'."""
-    command = "coverage report --skip-covered --include 'nautobot_app_liveupdate/*' --omit *migrations*"
-
+    run_command(context, "coverage combine")
+    command = f"coverage report --skip-covered --include '{CONFIGURATION_NAMESPACE}/*' --omit *migrations*"
     run_command(context, command)
+    run_command(context, "coverage lcov -o lcov.info")
+
+
+@task
+def lint(context):
+    """Run all linters."""
+    print("Running hadolint...")
+    hadolint(context)
+    print("Running markdownlint...")
+    markdownlint(context)
+    print("Running yamllint...")
+    yamllint(context)
+    print("Running ruff...")
+    ruff(context)
+    print("Running pylint...")
+    pylint(context)
+    print("Running djhtml...")
+    djhtml(context)
+    print("Running djlint...")
+    djlint(context)
+    print("Running migrations check...")
+    check_migrations(context)
+    print("Running schema check...")
+    check_schema(context)
+    print("Running mkdocs...")
+    build_and_check_docs(context)
+    print("All linters passed!")
 
 
 @task(
@@ -1361,3 +1527,15 @@ def validate_app_config(context):
     """Validate the app config based on the app config schema."""
     start(context, service="nautobot")
     nbshell(context, plain=True, file="development/app_config_schema.py", env={"APP_CONFIG_SCHEMA_COMMAND": "validate"})
+
+
+@task(help={"version": "The version number or the rule to update the version."})
+def version(context, version=None):
+    """Show the version of the app package or bump it when a valid bump rule is provided.
+
+    The version number or rules are those supported by `poetry version`.
+    """
+    if version is None:
+        version = ""
+
+    run_command(context, f"poetry version --short {version}")

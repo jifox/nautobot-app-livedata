@@ -1,5 +1,7 @@
 """Utilities for working with the ContentType model."""
 
+from typing import Any, Optional
+
 from django.apps import apps as global_apps
 from django.db import DEFAULT_DB_ALIAS, router
 
@@ -7,7 +9,7 @@ from django.db import DEFAULT_DB_ALIAS, router
 class ContentTypeUtils:  # pylint: disable=too-many-instance-attributes
     """Utility functions for working with the ContentType model."""
 
-    def __init__(self, full_model_name=None, is_in_database_ready=False):
+    def __init__(self, full_model_name: Optional[str] = None, is_in_database_ready: bool = False) -> None:
         self.apps = global_apps
         self._app_name = None
         self._content_type_model = None
@@ -25,7 +27,7 @@ class ContentTypeUtils:  # pylint: disable=too-many-instance-attributes
             self._content_type = None
 
     @property
-    def ContentType(self):  # pylint: disable=invalid-name
+    def ContentType(self) -> Optional[Any]:  # pylint: disable=invalid-name
         """Retrieve the ContentType model.
 
         Returns:
@@ -36,7 +38,7 @@ class ContentTypeUtils:  # pylint: disable=too-many-instance-attributes
         return self._content_type
 
     @property
-    def full_model_name(self):
+    def full_model_name(self) -> Optional[str]:
         """Retrieve the full model name.
 
         Returns:
@@ -45,7 +47,7 @@ class ContentTypeUtils:  # pylint: disable=too-many-instance-attributes
         return self._full_model_name
 
     @full_model_name.setter
-    def full_model_name(self, value):
+    def full_model_name(self, value: str) -> None:
         """Set the full model name.
 
         Args:
@@ -121,15 +123,12 @@ class ContentTypeUtils:  # pylint: disable=too-many-instance-attributes
         """Retrieve the ContentType model.
 
         This function retrieves the ContentType model and can be used during
-        the database_ready signal.
-
-        Args:
-            apps (django.apps.apps.Apps): Used to look up model classes as needed.
-            is_in_database_ready (bool): If the function is being called from
-                the database_ready signal. Default is False.
+        the database_ready signal. It checks if the ContentType model is available
+        and whether migrations are allowed for it.
 
         Returns:
-            ContentType: The ContentType model, or None if it is not available.
+            ContentType: The ContentType model class, or None if it is not available
+                and is_in_database_ready is True.
 
         Raises:
             ValueError: If the ContentType model is not available and is_in_database_ready is False.
@@ -178,7 +177,7 @@ class ContentTypeUtils:  # pylint: disable=too-many-instance-attributes
                 )
         return self._content_type_model
 
-    def _split_app_model(self, full_model_name):
+    def _split_app_model(self, full_model_name: str) -> tuple[str, str]:
         """Split the model name into app_label and model_name.
 
         Args:
@@ -203,7 +202,7 @@ class ContentTypeUtils:  # pylint: disable=too-many-instance-attributes
         return self._app_label, self._model_name
 
     @property
-    def model(self):
+    def model(self) -> Optional[Any]:
         """Retrieve the model.
 
         Returns:

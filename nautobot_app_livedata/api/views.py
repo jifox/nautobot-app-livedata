@@ -47,30 +47,42 @@ except ImportError as err:
 
 
 class LivedataQueryApiView(GenericAPIView, ABC):
-    """Abstract Livedata Query API view."""
+    """Abstract Livedata Query API view.
+
+    Base class for all Livedata Query API views. Provides common functionality
+    for queuing livedata jobs to execute commands on network devices.
+    Subclasses must implement get_object_type() and get_commands() methods.
+    """
 
     serializer_class = LivedataSerializer
+    permission_classes = []  # Custom permission checking in get() method
 
     @abstractmethod
     def get_object_type(self) -> str:
         """Get the object type for the view.
 
+        Must be implemented by subclasses to identify the type of object
+        being queried (e.g., 'dcim.interface' or 'dcim.device').
+
         Returns:
-            str: The object type.
+            str: The object type in format 'app_label.model_name'.
         """
 
     @abstractmethod
-    def get_commands(self, instance) -> list:
+    def get_commands(self, instance: Any) -> list[str]:
         """Get the commands to be executed for the given instance.
 
+        Must be implemented by subclasses to retrieve the appropriate commands
+        based on the instance type and its platform configuration.
+
         Args:
-            instance (Model): The model instance.
+            instance (Model): The model instance (Device or Interface) to query.
 
         Returns:
-            list: The commands to be executed.
+            list[str]: List of command strings to be executed on the device.
         """
 
-    def get(self, request: Any, *args: Any, pk=None, **kwargs: Any) -> Response:  # pylint: disable=R0911
+    def get(self, request: Any, *args: Any, pk: Optional[Any] = None, **kwargs: Any) -> Response:  # pylint: disable=R0911
         """Handle GET request for Livedata Query API.
 
         The get method is used to enqueue the Livedata Query Job.
@@ -197,33 +209,73 @@ class LivedataQueryApiView(GenericAPIView, ABC):
 
 
 class LivedataQueryInterfaceApiView(LivedataQueryApiView):
-    """Livedata Query Interface API view."""
+    """Livedata Query Interface API view.
+
+    API endpoint for executing live data commands on a specific interface.
+    Retrieves commands from the device platform's 'livedata_interface_commands' custom field.
+    """
 
     serializer_class = LivedataSerializer
     queryset = Interface.objects.all()
 
     def get_object_type(self) -> str:
+        """Return the object type for interface queries.
+
+        Returns:
+            str: Always returns 'dcim.interface'.
+        """
         return "dcim.interface"
 
     def get_commands(self, instance) -> list:
+        """Get livedata commands for the interface.
+
+        Args:
+            instance (Interface): The interface instance to query.
+
+        Returns:
+            list[str]: List of commands from the platform's livedata_interface_commands field.
+        """
         return get_livedata_commands_for_interface(instance)
 
 
 class LivedataQueryDeviceApiView(LivedataQueryApiView):
-    """Livedata Query Device API view."""
+    """Livedata Query Device API view.
+
+    API endpoint for executing live data commands on a specific device.
+    Retrieves commands from the device platform's 'livedata_device_commands' custom field.
+    Restricts access to devices the user has 'can_interact_device' permission for.
+    """
 
     serializer_class = LivedataSerializer
     queryset = Device.objects.all()
 
-    def get_queryset(self):
+    def get_queryset(self) -> Any:
+        """Filter queryset to devices the user can interact with.
+
+        Returns:
+            QuerySet: Device queryset restricted by user's can_interact_device permission.
+        """
         # Restrict devices to those the user can interact with
         qs = super().get_queryset()
         return qs.restrict(self.request.user, action="can_interact_device")
 
     def get_object_type(self) -> str:
+        """Return the object type for device queries.
+
+        Returns:
+            str: Always returns 'dcim.device'.
+        """
         return "dcim.device"
 
     def get_commands(self, instance) -> list:
+        """Get livedata commands for the device.
+
+        Args:
+            instance (Device): The device instance to query.
+
+        Returns:
+            list[str]: List of commands from the platform's livedata_device_commands field.
+        """
         return get_livedata_commands_for_device(instance)
 
 
@@ -231,12 +283,17 @@ class LivedataQueryDeviceApiView(LivedataQueryApiView):
 class LivedataPrimaryDeviceApiView(GenericAPIView):
     """Nautobot App Livedata API Primary Device view.
 
-    For more information on implementing jobs, refer to the Nautobot job documentation:
-    https://docs.nautobot.com/projects/core/en/stable/development/jobs/
+    API endpoint for retrieving the primary device for a given object (device, interface, or virtual chassis).
+    The primary device is the device with an active status and primary IP address that can be used
+    to establish a connection for executing commands.
+
+    Returns information about the object hierarchy including device, interface, virtual chassis,
+    and the determined primary device.
     """
 
     serializer_class = LivedataSerializer
     queryset = Device.objects.all()
+    permission_classes = []  # No DRF permission checks - this view doesn't require authentication
 
     def get(
         self, request: Any, *args: Any, pk: Optional[int] = None, object_type: Optional[str] = None, **kwargs: Any
@@ -266,6 +323,17 @@ class LivedataPrimaryDeviceApiView(GenericAPIView):
             PermissionDenied: If the user does not have permission to access the object.
             NotFound: If the object does not exist.
         """
+        # Check if user has permission to interact with devices
+        if not request.user.has_perm("dcim.can_interact_device"):
+            return Response(
+                {
+                    "error": (
+                        "You do not have the permission 'can_interact' for 'dcim.device'. Contact your administrator."
+                    )
+                },
+                status=HTTPStatus.FORBIDDEN,  # 403
+            )
+
         data = request.data
         data["pk"] = pk
         data["object_type"] = object_type

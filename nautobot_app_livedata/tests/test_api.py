@@ -3,12 +3,15 @@
 from http import HTTPStatus
 
 from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.models import ContentType
 from django.test import RequestFactory
 from django.urls import reverse
 from nautobot.apps.testing import TestCase as APITransactionTestCase
+from nautobot.dcim.models import Device
+from nautobot.users.models import ObjectPermission
 
 from nautobot_app_livedata.api.views import LivedataPrimaryDeviceApiView
-from nautobot_app_livedata.utilities.contenttype import ContentTypeUtils
+from nautobot_app_livedata.utilities.permission import create_permission
 
 from .conftest import create_db_data, wait_for_debugger_connection
 
@@ -49,17 +52,33 @@ class LiveDataAPITest(APITransactionTestCase):
         self.forbidden_user: User without permission to interact with devices.
         self.factory: RequestFactory for creating requests.
         """
-        print("\nRUN setUp")
         super().setUp()
         self.factory = RequestFactory()
-        self.user = User.objects.create(username="test_user", password="password")
-        self.forbidden_user = User.objects.create(username="forbidden_user", password="password")
+        self.user = User.objects.create_user(username="testuser", password="password")
+        self.forbidden_user = User.objects.create_user(username="forbidden_user", password="password")
 
-        ObjectPermission = ContentTypeUtils("users.objectpermission").model  # pylint: disable=invalid-name
-
-        permission = ObjectPermission.objects.get(name="livedata.interact_with_devices")
-        self.user.object_permissions.add(permission)  # type: ignore
-        self.user.save()
+        # Grant the user the dcim.can_interact_device permission using ObjectPermission
+        device_ct = ContentType.objects.get_for_model(Device)
+        db_objects = {
+            "ContentType": ContentType,
+            "ObjectPermission": ObjectPermission,
+        }
+        create_permission(
+            db_objects=db_objects,
+            name="dcim.can_interact_device",
+            actions_list=["can_interact"],
+            description="Test permission to interact with devices",
+            content_type=device_ct,
+        )
+        obj_perm = ObjectPermission.objects.get(name="dcim.can_interact_device")
+        obj_perm.enabled = True
+        obj_perm.users.add(self.user)
+        obj_perm.validated_save()
+        # Clear cached permissions
+        if hasattr(self.user, "_perm_cache"):
+            delattr(self.user, "_perm_cache")
+        if hasattr(self.user, "_user_perm_cache"):
+            delattr(self.user, "_user_perm_cache")
         self.client.force_authenticate(user=self.user)  # type: ignore
 
     def test_self_user_has_permission_can_interact(self):
@@ -88,55 +107,51 @@ class LiveDataAPITest(APITransactionTestCase):
         response = LivedataPrimaryDeviceApiView.as_view()(request)
         self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN, "Should return 403 Forbidden.")
 
-    # TODO: Fix the following tests
+    def test_device_with_primary_ip(self):
+        """Test that the device with the primary_ip is returned."""
+        device = self.device_list[0]
+        interface = device.interfaces.first()
+        url = reverse(
+            "plugins-api:nautobot_app_livedata-api:livedata-managed-device-api",
+            kwargs={
+                "pk": interface.id,  # type: ignore
+                "object_type": "dcim.interface",
+            },
+        )
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, HTTPStatus.OK, "Should return 200 OK.")
+        response_data = response.json()
+        self.assertIn("primary_device", response_data, "Response should contain primary_device")
 
-    # def test_device_with_primary_ip(self):
-    #     """Test that the device with the primary_ip is returned."""
-    #     device = self.device_list[0]
-    #     interface = device.interfaces.first()
-    #     url = reverse(
-    #         "plugins-api:nautobot_app_livedata-api:livedata-managed-device-api",
-    #         kwargs={
-    #             "pk": interface.id,  # type: ignore
-    #             "object_type": "dcim.interface",
-    #         },
-    #     )
-    #     request = self.factory.get(url)
-    #     request.user = self.user
-    #     response = LivedataPrimaryDeviceApiView.as_view()(request)
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK, "Should return 200 OK.")
+    def test_primary_device_from_interface_on_device_with_primary_ip(self):
+        """Test that the primary device from interface on device with primary_ip is returned."""
+        print("\nRUN test_primary_device_from_interface_on_device_with_primary_ip")
+        device = self.device_list[0]
+        interface = device.interfaces.first()
+        url = reverse(
+            "plugins-api:nautobot_app_livedata-api:livedata-managed-device-api",
+            kwargs={
+                "pk": interface.id,  # type: ignore
+                "object_type": "dcim.interface",
+            },
+        )
+        response = self.client.get(url + "?depth=1&exclude_m2m=false")
+        self.assertEqual(response.status_code, HTTPStatus.OK, "Should return 200 OK.")
+        self.assertIn("primary_device", response.json(), "Response should contain primary_device")
 
-    # def test_primary_device_from_interface_on_device_with_primary_ip(self):
-    #     """Test that the device with the primary_ip is returned."""
-    #     print("\nRUN test_primary_device_from_interface_on_device_with_primary_ip")
-    #     device = self.device_list[0]
-    #     interface = device.interfaces.first()
-    #     url = reverse(
-    #         "plugins-api:nautobot_app_livedata-api:livedata-managed-device-api",
-    #         kwargs={
-    #             "pk": interface.id,  # type: ignore
-    #             "object_type": "dcim.interface",
-    #         },
-    #     )
-    #     response = self.client.get(url + "?depth=1&exclude_m2m=false")
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK, "Should return 200 OK.")
-
-    # def test_primary_device_from_interface_on_device_without_primary_ip(self):
-    #     """Test that the device with the primary_ip is returned."""
-    #     device = self.device_list[1]
-    #     interface = device.interfaces.first()
-    #     url = reverse(
-    #         "plugins-api:nautobot_app_livedata-api:livedata-managed-device-api",
-    #         kwargs={
-    #             "pk": interface.id,  # type: ignore
-    #             "object_type": "dcim.interface",
-    #         },
-    #     )
-    #     response = self.client.get(url)
-    #     # print repsonse as formatted json string
-    #     formattedstring = response.json()
-    #     print(formattedstring)
-
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK, "Should return 200 OK.")
-    #     # print the response data for debugging as json string
-    #     print(response.data)
+    def test_primary_device_from_interface_on_device_without_primary_ip(self):
+        """Test that the primary device from interface on device without primary_ip is handled."""
+        device = self.device_list[1]
+        interface = device.interfaces.first()
+        url = reverse(
+            "plugins-api:nautobot_app_livedata-api:livedata-managed-device-api",
+            kwargs={
+                "pk": interface.id,  # type: ignore
+                "object_type": "dcim.interface",
+            },
+        )
+        response = self.client.get(url)
+        # Should either return 200 with error message or 400 if device has no primary IP
+        self.assertIn(
+            response.status_code, [HTTPStatus.OK, HTTPStatus.BAD_REQUEST], "Should return 200 OK or 400 Bad Request."
+        )

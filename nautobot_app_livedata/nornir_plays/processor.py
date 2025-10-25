@@ -9,16 +9,32 @@ from nornir_nautobot.plugins.processors import BaseLoggingProcessor
 
 
 class ProcessLivedata(BaseLoggingProcessor):
-    """Processor class for livedata jobs."""
+    """Processor class for livedata jobs.
+
+    Custom Nornir processor that handles task completion and exception filtering
+    for livedata jobs. Extends BaseLoggingProcessor to provide error logging.
+    """
 
     def __init__(self, logger):
-        """Set logging facility."""
+        """Set logging facility.
+
+        Args:
+            logger: Logger instance for recording job execution messages.
+        """
         self.logger = logger
 
     def _find_result_exceptions(self, result):
         """Walk the results and return only valid Exceptions.
 
-        NornirNautobotException is expected to be raised in some situations.
+        Recursively searches through Nornir results to find exceptions that should
+        be reported. Filters out NornirNautobotException instances as these are
+        expected in certain situations.
+
+        Args:
+            result (Result | MultiResult): Nornir task result to search for exceptions.
+
+        Returns:
+            list: List of [exception, result] pairs for unexpected exceptions.
         """
         valid_exceptions = []
         if result.failed:
