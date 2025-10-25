@@ -14,10 +14,56 @@ Multiple filters can be chained in a single line by separating each filter with 
 !!! note
     Added multiple filters in v2.4.2, this feature allows for more flexible and powerful command filtering directly in the Live Data tab.
 
+### Enhanced tasks.py with new invoke tasks:
+
+  - `showmigrations` - Display Django migrations status
+  - `dumpdata` - Export database data as .json
+  - `loaddata` - Import database data from .json
+  - `serve_docs` - Serve documentation locally
+  - `open_docs_web` - Open documentation in browser
+  - `markdownlint` - Lint markdown files
+  - `djhtml` - Format Django templates
+  - `djlint` - Lint Django templates
+  - `check_schema` - Validate OpenAPI schema
+  - `lint` - Run all linting tools
+  - `version` - Display version information
+
+
 ## Release Overview
 
 - Major features or milestones
 - Changes to compatibility with Nautobot and/or other apps, libraries etc.
+
+## [v2.4.9 (2025-10-25)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.9)
+
+### Added
+
+- [#162](https://github.com/jifox/nautobot-app-livedata/issues/162) - Added comprehensive test coverage with 62 new tests across 4 test files: test_api.py (5 tests), test_views.py (20 tests), test_jobs.py (26 tests), and test_processor.py (11 tests).
+
+### Changed
+
+- [#162](https://github.com/jifox/nautobot-app-livedata/issues/162) - Reorganized pyproject.toml dependency groups (dev, docs, linting, testing) for better clarity and separated coverage dependency into dedicated testing group.
+
+### Fixed
+
+- [#162](https://github.com/jifox/nautobot-app-livedata/issues/162) - Fixed commented-out tests in test_api.py that were previously marked with FIXME, ensuring all API endpoint tests are now functional and passing. Fixed test_basic.py to check docs group instead of dev group for documentation dependencies, and removed griffe from docs/requirements.txt since it's a dev dependency. Fixed Python 3.10 compatibility issue in test_jobs.py by using patch.object() instead of string-based @patch() decorators for unittest.mock patching.
+
+### Dependencies
+
+- [#143](https://github.com/jifox/nautobot-app-livedata/issues/143) - Bump actions/checkout from 4 to 5
+- [#148](https://github.com/jifox/nautobot-app-livedata/issues/148) - Bumped griffe from ~1.7.3 to ~1.14.0.
+- [#159](https://github.com/jifox/nautobot-app-livedata/issues/159) - Bumped mkdocs-include-markdown-plugin from ~7.1.6 to ~7.2.0.
+- [#161](https://github.com/jifox/nautobot-app-livedata/issues/161) - Bumped ruff from ~0.12.0 to ~0.14.0 to align with Nautobot core version.
+- [#162](https://github.com/jifox/nautobot-app-livedata/issues/162) - Bumped ruff from ~0.12.0 to ~0.14.0 to align with Nautobot core. Bumped mkdocs-include-markdown-plugin from ~7.1.6 to ~7.2.0. Bumped griffe from ~1.7.3 to ~1.14.0. Added new development dependencies: djhtml (3.0.6), djlint (1.34.0), rich (14.2.0), faker (37.11.0), factory-boy (3.3.3), and PyYAML for improved Django template handling, output formatting, test data generation, and CI/CD compatibility.
+
+### Documentation
+
+- [#162](https://github.com/jifox/nautobot-app-livedata/issues/162) - Added comprehensive GitHub Copilot instructions file (.github/copilote-instructions.md) with Nautobot app development patterns, testing guidelines, and tooling documentation.
+
+### Housekeeping
+
+- [#162](https://github.com/jifox/nautobot-app-livedata/issues/162) - Added comprehensive type hints to jobs.py, api/views.py, and all utilities files (primarydevice.py, contenttype.py, output_filter.py, customfield.py, permission.py) for improved code quality and IDE support. Enhanced tasks.py with new invoke tasks: showmigrations, dumpdata, loaddata, serve_docs, open_docs_web, markdownlint, djhtml, djlint, check_schema, lint, and version. Improved unittest task with tag filtering, pattern matching, and coverage options.
+
 
 ## [v2.4.8 (2025-09-21)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.8)
 
