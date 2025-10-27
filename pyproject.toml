@@ -49,7 +49,7 @@ PyYAML = "*"
 # Colorization and autoformatting of CLI output, used for Invoke tasks
 rich = "~14.2.0"
 # Change log management and generation
-towncrier = "~24.8.0"
+towncrier = ">=24.8,<25.9"
 # Watch files for celery and mkdocs reload
 watchdog = "~6.0.0"
 # IPython for enhanced shell
