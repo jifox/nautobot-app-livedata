@@ -89,7 +89,7 @@ mkdocs-section-index = "~0.3.10"
 # Automatic documentation from sources, for MkDocs
 mkdocstrings = "~0.30.0"
 # Python-specific extension to mkdocstrings
-mkdocstrings-python = "~1.16.12"
+mkdocstrings-python = ">=1.16.12,<1.19.0"
 
 [tool.poetry.group.linting.dependencies]
 # Code static analysis
