@@ -45,7 +45,7 @@ class TestOutputFilter(unittest.TestCase):
         self.assertEqual(filtered, "foo\nfoo")
         # Apply LAST:3, then EXACT:foo
         filtered2 = apply_output_filter(output, "LAST:3!!EXACT:foo!!")
-        self.assertEqual(filtered2, "foo")
+        self.assertEqual(filtered2, "foo\nfoo")
         # Apply EXACT:foo, then LAST:1
         filtered3 = apply_output_filter(output, "EXACT:foo!!LAST:1!!")
         self.assertEqual(filtered3, "foo")

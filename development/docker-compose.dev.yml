@@ -11,6 +11,7 @@ services:
     volumes:
       - "./nautobot_config.py:/opt/nautobot/nautobot_config.py"
       - "../:/source"
+      - "./.nautobot/.git:/opt/nautobot/git"
       - "/etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt"
     healthcheck:
       interval: "30s"
@@ -32,22 +33,22 @@ services:
     entrypoint:
       - "sh"
       - "-c"  # this is to evaluate the $NAUTOBOT_LOG_LEVEL from the env
-      - "watchmedo auto-restart --directory './' --pattern '*.py' --recursive -- nautobot-server celery worker -l $$NAUTOBOT_LOG_LEVEL --events"  ## $$ because of docker-compose
-    volumes:
-      - "./nautobot_config.py:/opt/nautobot/nautobot_config.py"
-      - "../:/source"
-      - "/etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt"
+      - >
+        watchmedo auto-restart --directory './' --pattern '*.py' --recursive -- \
+        nautobot-server celery worker -l $$NAUTOBOT_LOG_LEVEL --events -Q default,ansible ## $$ because of docker-compose
+    volumes_from:
+      - "nautobot"
     healthcheck:
       test: ["CMD", "true"]  # Due to layering, disable: true won't work. Instead, change the test
   beat:
     entrypoint:
       - "sh"
       - "-c"  # this is to evaluate the $NAUTOBOT_LOG_LEVEL from the env
-      - "watchmedo auto-restart --directory './' --pattern '*.py' --recursive -- nautobot-server celery beat -l $$NAUTOBOT_LOG_LEVEL"  ## $$ because of docker-compose
-    volumes:
-      - "./nautobot_config.py:/opt/nautobot/nautobot_config.py"
-      - "../:/source"
-      - "/etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt"
+      - >
+        watchmedo auto-restart --directory './' --pattern '*.py' --recursive -- \
+        nautobot-server celery beat -l $$NAUTOBOT_LOG_LEVEL  ## $$ because of docker-compose
+    volumes_from:
+      - "nautobot"
 # To expose postgres (5432), myql (3306) on db service or redis (6379) to the host uncomment the
 # following. Ensure to match the 2 idented spaces which to have the service nested under services.
 # db:

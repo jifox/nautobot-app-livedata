@@ -7,10 +7,9 @@ from django.contrib.auth import get_user_model
 from django.utils.timezone import make_aware
 from nautobot.apps.testing import TestCase as APITransactionTestCase
 
+from .conftest import create_db_data
 import nautobot_app_livedata.jobs as jobs_module  # Used in patch.object decorators
 from nautobot_app_livedata.jobs import LivedataCleanupJobResultsJob, LivedataQueryJob
-
-from .conftest import create_db_data
 
 User = get_user_model()
 

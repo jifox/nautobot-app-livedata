@@ -5,6 +5,7 @@ from datetime import datetime
 import logging
 
 from django.utils.timezone import make_aware
+from nautobot.apps import utils
 from nautobot.apps.views import ObjectView
 from nautobot.dcim.models import Device, Interface
 
@@ -25,7 +26,11 @@ class LivedataExtraTabView(ObjectView):
             dict: The extra context for the view.
         """
         now = make_aware(datetime.now())
-        extra_context = {}
+
+        # Get the base extra context from the parent class
+        extra_context = super().get_extra_context(request, instance)
+        extra_context.update(utils.get_detail_view_components_context_for_model(instance))
+
         extra_context["instance"] = instance
         extra_context["now"] = now.strftime("%Y-%m-%d %H:%M:%S")
         permissions = request.user.get_all_permissions()
@@ -47,6 +52,8 @@ class LivedataInterfaceExtraTabView(LivedataExtraTabView):
 
     def get_extra_context(self, request, instance):
         extra_context = super().get_extra_context(request, instance)
+
+        extra_context["active_tab"] = "livedata_interface_tab"  # tab ID from template_content.py
         extra_context["interface"] = instance
         extra_context["object"] = instance
         return extra_context
@@ -60,6 +67,7 @@ class LivedataDeviceExtraTabView(LivedataExtraTabView):
 
     def get_extra_context(self, request, instance):
         extra_context = super().get_extra_context(request, instance)
+        extra_context["active_tab"] = "livedata_device_tab"  # tab ID from template_content.py
         extra_context["device"] = instance
         extra_context["object"] = instance
         return extra_context

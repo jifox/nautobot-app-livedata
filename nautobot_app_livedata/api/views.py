@@ -1,7 +1,5 @@
 """Views for the Livedata API."""
 
-# filepath: livedata/api/views.py
-
 from abc import ABC, abstractmethod
 from http import HTTPStatus
 import logging
@@ -14,13 +12,12 @@ from nautobot.extras.models import Job, JobResult
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
+from nautobot_app_livedata.api.serializers import LivedataSerializer
 from nautobot_app_livedata.urls import PLUGIN_SETTINGS
 from nautobot_app_livedata.utilities.primarydevice import (
     get_livedata_commands_for_device,
     get_livedata_commands_for_interface,
 )
-
-from .serializers import LivedataSerializer
 
 logger = logging.getLogger("nautobot_app_livedata")
 
@@ -108,22 +105,20 @@ class LivedataQueryApiView(GenericAPIView, ABC):
             Response: If the job Livedata Api-Job is not found.
             Response: If the job failed to run.
         """
-        logger.debug(
+        logger.info(
             "Resolved view=%s queryset_model=%s",
             self.__class__.__name__,
             getattr(getattr(self, "queryset", None), "model", None),
         )
-        data = request.data
-        data["pk"] = pk
-        data["object_type"] = self.get_object_type()
-        serializer = self.get_serializer(data=data)
+        payload = self._build_serializer_payload(request, pk)
+        serializer = self.get_serializer(data=payload)
         if not serializer.is_valid():
             return Response(
                 serializer.errors,
                 status=HTTPStatus.BAD_REQUEST,
             )
         # Check if user has permission to interact with the interface
-        if not request.user.has_perm("dcim.can_interact_device"):
+        if not self._user_can_interact(request.user):
             return Response(
                 {
                     "error": (
@@ -135,21 +130,8 @@ class LivedataQueryApiView(GenericAPIView, ABC):
 
         try:
             primary_device_info = serializer.validated_data
-            if not primary_device_info:
-                return Response(
-                    {"error": "Primary device information is missing."},
-                    status=HTTPStatus.BAD_REQUEST,
-                )
-            if data["object_type"] == "dcim.interface":
-                self.queryset = Interface.objects.all()
-                instance = Interface.objects.get(pk=pk)
-            elif data["object_type"] == "dcim.device":
-                self.queryset = Device.objects.all()
-                instance = Device.objects.get(pk=primary_device_info["primary_device"])
-            else:
-                qs = self.get_queryset()
-                instance = qs.get(pk=pk)
-            show_commands_j2_array = self.get_commands(instance)
+            instance = self._resolve_instance(payload["object_type"], pk, primary_device_info)
+            job_kwargs = self._build_job_kwargs(request, primary_device_info, payload["object_type"], instance)
         except ValueError as error:
             logger.error("Error during Livedata Query API: %s", error)
             return Response(
@@ -168,32 +150,16 @@ class LivedataQueryApiView(GenericAPIView, ABC):
                 status=HTTPStatus.INTERNAL_SERVER_ERROR,
             )
 
-        job = Job.objects.filter(name=PLUGIN_SETTINGS["query_job_name"]).first()
+        job = self._get_livedata_job()
         if job is None:
             return Response(
                 f"{PLUGIN_SETTINGS['query_job_name']} not found",
                 status=HTTPStatus.NOT_FOUND,  # 404
             )
 
-        job_kwargs = {
-            "commands_j2": show_commands_j2_array,
-            "device_id": primary_device_info["device"],
-            "interface_id": primary_device_info.get("interface"),
-            "primary_device_id": primary_device_info["primary_device"],
-            "remote_addr": request.META.get("REMOTE_ADDR"),
-            "virtual_chassis_id": primary_device_info.get("virtual_chassis"),
-            "x_forwarded_for": request.META.get("HTTP_X_FORWARDED_FOR"),
-            "call_object_type": data["object_type"],
-        }
-
         try:
-            jobres = JobResult.enqueue_job(
-                job,
-                user=request.user,
-                task_queue=PLUGIN_SETTINGS["query_job_task_queue"],
-                **job_kwargs,
-            )
-
+            jobres = self._enqueue_job(job, request.user, job_kwargs)
+            logger.debug("Enqueued %s: %s", PLUGIN_SETTINGS["query_job_name"], jobres.id)
             return Response(
                 content_type="application/json",
                 data={"jobresult_id": jobres.id},
@@ -206,6 +172,76 @@ class LivedataQueryApiView(GenericAPIView, ABC):
                 "An internal error has occurred while running the job.",
                 status=HTTPStatus.INTERNAL_SERVER_ERROR,  # 500
             )
+
+    def _build_serializer_payload(self, request: Any, pk: Optional[Any]) -> dict[str, Any]:
+        """Return serializer payload populated with object metadata."""
+
+        request_data = request.data if request.data is not None else {}
+        payload = request_data.copy() if hasattr(request_data, "copy") else dict(request_data)
+        payload["pk"] = pk
+        payload["object_type"] = self.get_object_type()
+        return payload
+
+    def _user_can_interact(self, user: Any) -> bool:
+        """Check whether the requesting user may interact with devices."""
+
+        return user.has_perm("dcim.can_interact_device")
+
+    def _resolve_instance(
+        self,
+        object_type: str,
+        pk: Optional[Any],
+        primary_device_info: dict[str, Any],
+    ) -> Any:
+        """Return the model instance for the given object_type."""
+
+        if not primary_device_info:
+            raise ValueError("Primary device information is missing.")
+
+        if object_type == "dcim.interface":
+            self.queryset = Interface.objects.all()
+            return Interface.objects.get(pk=pk)
+        if object_type == "dcim.device":
+            self.queryset = Device.objects.all()
+            return Device.objects.get(pk=primary_device_info["primary_device"])
+        queryset = self.get_queryset()
+        return queryset.get(pk=pk)
+
+    def _get_livedata_job(self) -> Job | None:
+        """Fetch the configured Livedata job if available."""
+
+        return Job.objects.filter(name=PLUGIN_SETTINGS["query_job_name"]).first()
+
+    def _build_job_kwargs(
+        self,
+        request: Any,
+        primary_device_info: dict[str, Any],
+        object_type: str,
+        instance: Any,
+    ) -> dict[str, Any]:
+        """Assemble keyword arguments required to enqueue the job."""
+
+        commands = self.get_commands(instance)
+        return {
+            "commands_j2": commands,
+            "device_id": primary_device_info["device"],
+            "interface_id": primary_device_info.get("interface"),
+            "primary_device_id": primary_device_info["primary_device"],
+            "remote_addr": request.META.get("REMOTE_ADDR"),
+            "virtual_chassis_id": primary_device_info.get("virtual_chassis"),
+            "x_forwarded_for": request.META.get("HTTP_X_FORWARDED_FOR"),
+            "call_object_type": object_type,
+        }
+
+    def _enqueue_job(self, job: Job, user: Any, job_kwargs: dict[str, Any]) -> JobResult:
+        """Enqueue the configured job and return the resulting JobResult."""
+
+        return JobResult.enqueue_job(
+            job,
+            user=user,
+            task_queue=PLUGIN_SETTINGS["query_job_task_queue"],
+            **job_kwargs,
+        )
 
 
 class LivedataQueryInterfaceApiView(LivedataQueryApiView):

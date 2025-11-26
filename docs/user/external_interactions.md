@@ -21,6 +21,7 @@ The Nautobot App LiveData integrates with the following systems:
 To configure the external dependencies and integrations, follow these steps:
 
 1. **Install Netmiko**: Ensure that the Netmiko library is installed in your environment. You can install it using pip:
+
     ```shell
     pip install netmiko
     ```

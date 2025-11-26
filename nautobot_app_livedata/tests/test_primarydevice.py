@@ -3,9 +3,8 @@
 from django.contrib.auth import get_user_model
 from nautobot.apps.testing import TestCase
 
-from nautobot_app_livedata.utilities.primarydevice import PrimaryDeviceUtils
-
 from .conftest import create_db_data, wait_for_debugger_connection
+from nautobot_app_livedata.utilities.primarydevice import PrimaryDeviceUtils
 
 User = get_user_model()
 

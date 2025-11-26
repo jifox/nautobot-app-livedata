@@ -13,13 +13,12 @@ from nautobot.extras.jobs import RunJobTaskFailed
 from nautobot.extras.models import Job, JobResult
 from nautobot.users.models import ObjectPermission
 
+from .conftest import create_db_data
 from nautobot_app_livedata.api.views import (
     LivedataQueryDeviceApiView,
     LivedataQueryInterfaceApiView,
 )
 from nautobot_app_livedata.utilities.permission import create_permission
-
-from .conftest import create_db_data
 
 User = get_user_model()
 

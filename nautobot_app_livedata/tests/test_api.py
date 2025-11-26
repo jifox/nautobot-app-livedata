@@ -10,10 +10,9 @@ from nautobot.apps.testing import TestCase as APITransactionTestCase
 from nautobot.dcim.models import Device
 from nautobot.users.models import ObjectPermission
 
+from .conftest import create_db_data, wait_for_debugger_connection
 from nautobot_app_livedata.api.views import LivedataPrimaryDeviceApiView
 from nautobot_app_livedata.utilities.permission import create_permission
-
-from .conftest import create_db_data, wait_for_debugger_connection
 
 User = get_user_model()
 
