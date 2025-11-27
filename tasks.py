@@ -88,7 +88,7 @@ namespace = Collection(CONFIGURATION_NAMESPACE)
 namespace.configure(
     {
         CONFIGURATION_NAMESPACE: {
-            "nautobot_ver": "2.4.14",
+            "nautobot_ver": "2.4.20",
             "project_name": CONFIGURATION_NAMESPACE,
             "python_ver": "3.12",
             "local": False,
