@@ -445,22 +445,22 @@ def generate_packages(context):
             "Generally intended to be used in CI and not for local development. (default: disabled)"
         ),
         "constrain_python_ver": (
-            "When using `constrain_nautobot_ver`, further constrain the nautobot version "
-            "to python_ver so that poetry doesn't complain about python version incompatibilities. "
+            "Target Python version to constrain resolution. Accepts X.Y or X.Y.Z. "
+            "Example: --constrain-python-ver=3.9.3 "
+            "This helps avoid poetry complaints about Python incompatibilities. "
             "Generally intended to be used in CI and not for local development. (default: disabled)"
         ),
     }
 )
-def lock(context, check=False, constrain_nautobot_ver=False, constrain_python_ver=False):
+def lock(context, check=False, constrain_nautobot_ver=False, constrain_python_ver=""):
     """Generate poetry.lock file."""
     ctx = context[CONFIGURATION_NAMESPACE]
     if constrain_nautobot_ver:
         docker_nautobot_version = _get_docker_nautobot_version(context)
         command = f"poetry add --lock nautobot@{docker_nautobot_version}"
         if constrain_python_ver:
-            command += f" --python {ctx.python_ver}"
+            command += f" --python {constrain_python_ver}"
         try:
-            run_command(context, command, hide=True)
             output = run_command(context, command, hide=True)
             print(output.stdout, end="")
             print(output.stderr, file=sys.stderr, end="")
