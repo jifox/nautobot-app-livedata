@@ -20,6 +20,8 @@ from time import sleep
 
 from dotenv import load_dotenv
 from invoke.collection import Collection
+from invoke.config import Config
+from invoke.context import Context
 from invoke.exceptions import Exit, UnexpectedExit
 from invoke.tasks import Task, task as invoke_task
 import jinja2
@@ -127,6 +129,49 @@ def get_nautobot_version(context):
     if ctx.nautobot_ver == "pyproject":
         ctx.nautobot_ver = get_pyproject_nautobot_version()
     return ctx.nautobot_ver
+
+
+def get_poetry_package_version(directory=None) -> tuple[str, str]:
+    """Return the package name and version reported by ``poetry version`` for ``directory``.
+
+    Args:
+        directory (str | Path): Directory that contains the desired Poetry project.
+
+    Returns:
+        tuple[str, str]: The package name and version as reported by Poetry.
+
+    Raises:
+        Exit: If the directory does not exist or Poetry does not return the expected output.
+    """
+    if directory:
+        resolved_path = Path(directory).expanduser().resolve()
+        if not resolved_path.is_dir():
+            raise Exit(f"Directory '{resolved_path}' does not exist.")
+    else:
+        resolved_path = Path.cwd()
+
+    # Read the poetry version with a new context
+    new_config = Config()
+    new_context = Context(config=new_config)
+    # use a new context to avoid changing the working directory of the main context
+    with new_context.cd(str(resolved_path)):
+        command = "poetry version"
+        try:
+            result = new_context.run(command, hide=True)
+        except UnexpectedExit as exc:  # pragma: no cover - surfaced to user with clear message
+            raise Exit(f"Failed to run 'poetry version' in {resolved_path}.") from exc
+
+    poetry_output = result.stdout.strip().splitlines()
+    if not poetry_output:
+        raise Exit("'poetry version' returned no output.")
+
+    package_info = poetry_output[-1].strip().split(maxsplit=1)
+    if len(package_info) != 2:
+        raise Exit(
+            f"Unexpected 'poetry version' output. Expected '<package> <version>' but received: '{poetry_output[-1]}'"
+        )
+
+    return package_info[0], package_info[1]
 
 
 def _available_services(context):
@@ -1278,23 +1323,35 @@ def hadolint(context):
     run_command(context, command)
 
 
-@task
-def pylint(context):
+@task(
+    help={
+        "project-path": "Path to the project root directory (default: current directory)",
+    }
+)
+def pylint(context, project_path=None):
     """Run pylint code analysis."""
     exit_code = 0
 
+    if not project_path:
+        working_directory = Path(__file__).absolute().parent
+    else:
+        working_directory = Path(project_path).absolute()
+
+    modulename, module_version = get_poetry_package_version(directory=working_directory)
+    print(f"Running pylint for {modulename} version {module_version}")
+
     base_pylint_command = 'pylint --verbose --init-hook "import nautobot; nautobot.setup()" --rcfile pyproject.toml'
-    command = f"{base_pylint_command} {CONFIGURATION_NAMESPACE}"
+    command = f"{base_pylint_command} {modulename} tests"
     if not run_command(context, command, warn=True):
         exit_code = 1
 
     # run the pylint_django migrations checkers on the migrations directory, if one exists
-    migrations_dir = Path(__file__).absolute().parent / Path(CONFIGURATION_NAMESPACE) / Path("migrations")
+    migrations_dir = Path(__file__).absolute().parent / Path(modulename) / Path("migrations")
     if migrations_dir.is_dir():
         migrations_pylint_command = (
             f"{base_pylint_command} --load-plugins=pylint_django.checkers.migrations"
             " --disable=all --enable=fatal,new-db-field-with-default,missing-backwards-migration-callable"
-            f" {CONFIGURATION_NAMESPACE}.migrations"
+            f" {modulename}.migrations"
         )
         if not run_command(context, migrations_pylint_command, warn=True):
             exit_code = 1
@@ -1501,7 +1558,8 @@ def tests(context, failfast=False, keepdb=False, lint_only=False):
     validate_app_config(context)
     if not lint_only:
         print("Running unit tests...")
-        unittest(context, failfast=failfast, keepdb=keepdb)
+        module_name, _ = get_poetry_package_version()
+        unittest(context, failfast=failfast, keepdb=keepdb, label=module_name)
         unittest_coverage(context)
     print("All tests have passed!")
 

@@ -28,7 +28,9 @@ ENV INVOKE_NAUTOBOT_APP_LIVEDATA_LOCAL=true
 # Since this is only used for development and we don't ship this container, pinning Poetry back is not expressly necessary
 # We also don't need virtual environments in container
 RUN which poetry || curl -sSL https://install.python-poetry.org | python3 - && \
-    poetry config virtualenvs.create false
+    poetry config virtualenvs.create false && \
+    # Install the nautobot project to include Nautobot
+    poetry self add poetry-plugin-export || true
 
 # !!! USE CAUTION WHEN MODIFYING LINES ABOVE
 # -------------------------------------------------------------------------------------
