@@ -94,7 +94,7 @@ class LiveDataAPITest(APITransactionTestCase):
         device = self.device_list[0]
         interface = device.interfaces.first()
         url = reverse(
-            "plugins-api:nautobot_app_livedata-api:livedata-managed-device-api",
+            "plugins-api:nautobot_app_livedata-api:livedata-primary-device-api",
             kwargs={
                 "pk": interface.id,  # type: ignore
                 "object_type": "dcim.interface",
@@ -111,7 +111,7 @@ class LiveDataAPITest(APITransactionTestCase):
         device = self.device_list[0]
         interface = device.interfaces.first()
         url = reverse(
-            "plugins-api:nautobot_app_livedata-api:livedata-managed-device-api",
+            "plugins-api:nautobot_app_livedata-api:livedata-primary-device-api",
             kwargs={
                 "pk": interface.id,  # type: ignore
                 "object_type": "dcim.interface",
@@ -128,7 +128,7 @@ class LiveDataAPITest(APITransactionTestCase):
         device = self.device_list[0]
         interface = device.interfaces.first()
         url = reverse(
-            "plugins-api:nautobot_app_livedata-api:livedata-managed-device-api",
+            "plugins-api:nautobot_app_livedata-api:livedata-primary-device-api",
             kwargs={
                 "pk": interface.id,  # type: ignore
                 "object_type": "dcim.interface",
@@ -143,7 +143,7 @@ class LiveDataAPITest(APITransactionTestCase):
         device = self.device_list[1]
         interface = device.interfaces.first()
         url = reverse(
-            "plugins-api:nautobot_app_livedata-api:livedata-managed-device-api",
+            "plugins-api:nautobot_app_livedata-api:livedata-primary-device-api",
             kwargs={
                 "pk": interface.id,  # type: ignore
                 "object_type": "dcim.interface",

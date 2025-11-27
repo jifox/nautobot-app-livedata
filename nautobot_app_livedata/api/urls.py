@@ -18,8 +18,8 @@ urlpatterns = [
         name="livedata-query-device-api",
     ),
     path(
-        "managed-device/<uuid:pk>/<str:object_type>/",
+        "primary-device/<uuid:pk>/<str:object_type>/",
         LivedataPrimaryDeviceApiView.as_view(),
-        name="livedata-managed-device-api",
+        name="livedata-primary-device-api",
     ),
 ]
