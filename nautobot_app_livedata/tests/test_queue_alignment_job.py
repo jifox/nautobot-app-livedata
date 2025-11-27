@@ -8,7 +8,7 @@ from nautobot.apps.testing import TestCase
 from nautobot.extras.choices import JobQueueTypeChoices
 from nautobot.extras.models import Job as JobModel, JobQueue
 
-from nautobot_app_livedata.jobs import EnforceDefaultJobQueueJob
+from nautobot_app_livedata.jobs.jobs import EnforceDefaultJobQueueJob
 
 
 class EnforceDefaultJobQueueJobTestCase(TestCase):

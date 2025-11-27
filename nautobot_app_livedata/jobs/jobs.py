@@ -6,7 +6,7 @@ from typing import Any
 from django.utils import timezone
 from django.utils.timezone import make_aware
 import jinja2
-from nautobot.apps.jobs import DryRunVar, IntegerVar, Job, ObjectVar, register_jobs
+from nautobot.apps.jobs import DryRunVar, IntegerVar, Job, ObjectVar
 from nautobot.dcim.models import Device, Interface, VirtualChassis
 from nautobot.extras.choices import JobQueueTypeChoices
 from nautobot.extras.models import Job as JobModel, JobQueue, JobResult
@@ -507,6 +507,3 @@ class EnforceDefaultJobQueueJob(Job):
         if changed and not dry_run:
             job_model.save()
         return changed
-
-
-register_jobs(LivedataQueryJob, LivedataCleanupJobResultsJob, EnforceDefaultJobQueueJob)
