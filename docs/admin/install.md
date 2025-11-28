@@ -14,7 +14,7 @@ Here you will find detailed instructions on how to **install** and **configure**
 ## Install Guide
 
 !!! note
-    Apps can be installed from the [Python Package Index](https://pypi.org/) or locally. See the [Nautobot documentation](https://docs.nautobot.com/projects/core/en/stable/user-guide/administration/installation/app-install/) for more details. The pip package name for this app is [`Nautobot_app_livedata`](https://pypi.org/project/nautobot_app_livedata/).
+    Apps can be installed from the [Python Package Index](https://pypi.org/) or locally. See the [Nautobot documentation](https://docs.nautobot.com/projects/core/en/stable/user-guide/administration/installation/app-install/) for more details. The pip package name for this app is [`nautobot_app_livedata`](https://pypi.org/project/nautobot_app_livedata/).
 
 ### Installation Steps
 

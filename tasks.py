@@ -1390,10 +1390,15 @@ def markdownlint(context, fix=False):
     run_command(context, command)
 
 
-@task
+@task(
+    help={
+        "fix": "Automatically fix formatting issues (default: False)",
+    }
+)
 def djhtml(context, fix=False):
     """Indent Django template files."""
-    command = f"djhtml {CONFIGURATION_NAMESPACE}/*/templates --tabwidth 4"
+    module_name, _ = get_poetry_package_version()
+    command = f"djhtml {module_name}/templates --tabwidth 4"
     if not fix:
         command += " --check"
     run_command(context, f'bash -c "{command}"')  # needed for glob expansion
