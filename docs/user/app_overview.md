@@ -24,5 +24,5 @@ The Nautobot App LiveData is maintained by the Nautobot community. Contributions
 
 - **Custom Fields**: The app creates custom fields for storing show commands on the platform level.
 - **Jobs**: The app installs the following jobs:
-  - `Livedata Query Job`: Queries live data on an interface.
-  - `Cleanup Job`: Cleans up old data stored in the database.
+    - `Livedata Query Job`: Queries live data on an interface.
+    - `Cleanup Job`: Cleans up old data stored in the database.

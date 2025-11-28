@@ -9,12 +9,12 @@ Here you will find detailed instructions on how to **install** and **configure**
 
 ### Dependencies
 
-- The app `nautobot_plugin_nornir` is required to be installed and configured. See the [Nautobot Plugin Nornir documentation](https://docs.nautobot.com/projects/plugin-nornir/en/stable/) for more details. 
+- The app `nautobot_plugin_nornir` is required to be installed and configured. See the [Nautobot Plugin Nornir documentation](https://docs.nautobot.com/projects/plugin-nornir/en/stable/) for more details.
 
 ## Install Guide
 
 !!! note
-    Apps can be installed from the [Python Package Index](https://pypi.org/) or locally. See the [Nautobot documentation](https://docs.nautobot.com/projects/core/en/stable/user-guide/administration/installation/app-install/) for more details. The pip package name for this app is [`nautobot_app_livedata`](https://pypi.org/project/nautobot_app_livedata/).
+    Apps can be installed from the [Python Package Index](https://pypi.org/) or locally. See the [Nautobot documentation](https://docs.nautobot.com/projects/core/en/stable/user-guide/administration/installation/app-install/) for more details. The pip package name for this app is [`Nautobot_app_livedata`](https://pypi.org/project/nautobot_app_livedata/).
 
 ### Installation Steps
 
@@ -59,7 +59,7 @@ PLUGINS_CONFIG = {
 
 ### Example Configuration for `nautobot_plugin_nornir`
 
-The following configuration shows an example of how to configure the [nautobot_plugin_nornir](https://docs.nautobot.com/projects/plugin-nornir/en/latest) app:
+The following configuration shows an example of how to configure the [Nautobot_plugin_Nornir](https://docs.nautobot.com/projects/plugin-nornir/en/latest) app:
 
 ```python
 # In your nautobot_config.py
@@ -131,7 +131,7 @@ The app behavior can be controlled with the following list of settings:
 
 Environment variables can be used to override the default settings:
 
-| Environment Variable | Key | 
+| Environment Variable | Key |
 | -------------------- | --- |
 | `LIVEDATA_QUERY_JOB_NAME` | `query_interface_job_name` |
 | `LIVEDATA_QUERY_JOB_DESCRIPTION` | `query_job_description` |
@@ -141,11 +141,11 @@ Environment variables can be used to override the default settings:
 
 ## Platform Commands
 
-You can configure the show commands to be executed at the platform level. The custom fields are used to store the show commands that are executed on the device. 
+You can configure the show commands to be executed at the platform level. The custom fields are used to store the show commands that are executed on the device.
 
 ![Custom Fields Table](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-custom-fields-table.png)
 
-The [nautobot-plugin-nornir](https://docs.nautobot.com/projects/plugin-nornir/en/latest/) uses Kirk Byers' [Netmiko](https://github.com/ktbyers/netmiko) library to collect data. Data is collected using the `send_command` method with platform-specific show commands.
+The [Nautobot-plugin-Nornir](https://docs.nautobot.com/projects/plugin-nornir/en/latest/) uses Kirk Byers' [Netmiko](https://github.com/ktbyers/netmiko) library to collect data. Data is collected using the `send_command` method with platform-specific show commands.
 
 Open the Nautobot Platform model and configure the custom fields with the show commands that are executed on the device.
 
@@ -177,13 +177,13 @@ The following Jinja2 template variables are available to be used in the show com
 
 ### Filter Syntax for Platform Commands
 
-You can append a filter command to the end of a device command using the `!!` delimiter. The string following `!!` specifies the filter operation to be applied to the command output. 
+You can append a filter command to the end of a device command using the `!!` delimiter. The string following `!!` specifies the filter operation to be applied to the command output.
 
 Multiple filters can be chained in a single line by separating each filter with `!!`, for example: `show logging !!EXACT:{{intf_number}}!!LAST:10!!`. Each `!!` acts as a command terminator, and filters are applied in the order they appear.
 
 **Examples:**
 
-- `show logging | i {{intf_number}} !!EXACT:{{intf_number}}!!` — Filters the output to contain only lines that contain the interface number as a whole word (e.g., matches ` Gi1/0/1`, `1/0/1  `, `^1/0/1 `, `1/0/1$` but not `11/0/1`, `1/0/11`, `foo1/0/1bar`).
+- `show logging | i {{intf_number}} !!EXACT:{{intf_number}}!!` — Filters the output to contain only lines that contain the interface number as a whole word (e.g., matches `Gi1/0/1`, `1/0/1`, `^1/0/1`, `1/0/1$` but not `11/0/1`, `1/0/11`, `foo1/0/1bar`).
 - `show logging !!LAST:100!!` — Returns only the last 100 lines of the output.
 
 **Supported Filters:**
@@ -197,7 +197,7 @@ This feature provides a consistent filtering mechanism across all supported plat
 
 The app provides a job to clean up old data. The job can be executed on a regular basis to clean up old data that is stored in the database. The job is executed via the Nautobot Scheduler.
 
-![ Cleanup Job Results Screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-app-cleanup-job-results.png)
+![Cleanup Job Results Screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-app-cleanup-job-results.png)
 
 The input field **Days to keep** is used to configure the number of days that the query job results is stored in the database. The data that is older than the configured number of days is deleted from the database.
 

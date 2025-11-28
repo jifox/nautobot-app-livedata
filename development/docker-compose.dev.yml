@@ -32,8 +32,9 @@ services:
     entrypoint:
       - "sh"
       - "-c"  # this is to evaluate the $NAUTOBOT_LOG_LEVEL from the env
-      - "watchmedo auto-restart --directory './' --pattern '*.py' --recursive -- nautobot-server celery worker -l $$NAUTOBOT_LOG_LEVEL --events"
-      ## $$ because of docker-compose
+      - >-
+        watchmedo auto-restart --directory './' --pattern '*.py' --recursive --
+        nautobot-server celery worker -l $$NAUTOBOT_LOG_LEVEL --events
     volumes:
       - "./nautobot_config.py:/opt/nautobot/nautobot_config.py"
       - "../:/source"
@@ -44,8 +45,9 @@ services:
     entrypoint:
       - "sh"
       - "-c"  # this is to evaluate the $NAUTOBOT_LOG_LEVEL from the env
-      - "watchmedo auto-restart --directory './' --pattern '*.py' --recursive -- nautobot-server celery beat -l $$NAUTOBOT_LOG_LEVEL"
-      ## $$ because of docker-compose
+      - >-
+        watchmedo auto-restart --directory './' --pattern '*.py' --recursive --
+        nautobot-server celery beat -l $$NAUTOBOT_LOG_LEVEL
     volumes:
       - "./nautobot_config.py:/opt/nautobot/nautobot_config.py"
       - "../:/source"
