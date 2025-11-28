@@ -29,7 +29,7 @@ include = [
 [tool.poetry.dependencies]
 python = ">=3.9.2,<3.13"
 # Used for local development
-nautobot = {version = "2.4.20", python = "3.10"}
+nautobot = {version = "2.4.20", python = "3.11"}
 to-json-schema = "*"
 jsonschema = "^4.7.0"
 nautobot-plugin-nornir = "~2.2.0"
@@ -57,7 +57,8 @@ ipython = "*"
 # TOML parsing
 toml = "*"
 # Rendering of markdown files to HTML
-Markdown = "~3.8"
+Markdown = "*"
+# Markdown = "~3.8"
 # Documentation generation support
 griffe = "~1.14.0"
 # Environment variables support
