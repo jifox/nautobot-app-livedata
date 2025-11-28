@@ -367,6 +367,10 @@ def run_command(context, command, service="nautobot", **kwargs):
     """Wrapper to run a command locally or inside the nautobot container."""
     ctx = context[CONFIGURATION_NAMESPACE]
     service = _service_name(context, service)
+    module_name, _ = get_poetry_package_version()
+    env_local_name = f"INVOKE_{module_name.upper()}_LOCAL".replace("-", "_")
+    if os.getenv(env_local_name, str(ctx.local)).lower() == "true" or ctx.local:
+        ctx.local = True
     if is_truthy(ctx.local):
         if "command_env" in kwargs:
             kwargs["env"] = {
