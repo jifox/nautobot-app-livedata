@@ -33,7 +33,8 @@ RUN if ! command -v poetry >/dev/null 2>&1; then \
         curl -sSL https://install.python-poetry.org | python3 -; \
     fi; \
     poetry config virtualenvs.create false; \
-    poetry self add poetry-plugin-export || true
+    poetry self add poetry-plugin-export || true \
+    poetry self add poetry-plugin-shell || true
 
 # !!! USE CAUTION WHEN MODIFYING LINES ABOVE
 # -------------------------------------------------------------------------------------
