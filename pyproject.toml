@@ -43,7 +43,6 @@ factory-boy = "~3.3.3"
 # Factory Boy dependency for test data
 faker = "^37.11.0"
 # Alternative to Make, CLI based on `tasks.py`
-invoke = "~2.2.1"
 # YAML parsing for docker compose config in tasks.py
 PyYAML = "*"
 # Colorization and autoformatting of CLI output, used for Invoke tasks
@@ -65,6 +64,7 @@ griffe = "~1.14.0"
 python-dotenv = "^1.1.0"
 # Debugging support
 debugpy = "^1.8.14"
+invoke = "^2.2.1"
 
 [tool.poetry.group.docs.dependencies]
 # Rendering docs to HTML
