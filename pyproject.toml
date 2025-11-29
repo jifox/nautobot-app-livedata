@@ -29,10 +29,10 @@ include = [
 [tool.poetry.dependencies]
 python = ">=3.9.2,<3.13"
 # Used for local development
-nautobot = {version = "2.4.20", python = "3.11"}
+nautobot = {version = "2.4.20", python = "3.12"}
 to-json-schema = "*"
 jsonschema = "^4.7.0"
-nautobot-plugin-nornir = "~2.2.0"
+nautobot-plugin-nornir = ">=2.2.0,<3.0.0"
 h11 = "^0.16.0"
 
 [tool.poetry.group.dev.dependencies]
