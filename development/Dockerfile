@@ -15,6 +15,8 @@ ARG PYTHON_VER="3.11"
 # Retrieve published development image of Nautobot base which should include most CI dependencies
 FROM ghcr.io/nautobot/nautobot-dev:${NAUTOBOT_VER}-py${PYTHON_VER}
 
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
 # Runtime argument and environment setup
 ARG NAUTOBOT_ROOT=/opt/nautobot
 
@@ -27,8 +29,12 @@ ENV INVOKE_NAUTOBOT_APP_LIVEDATA_LOCAL=true
 # and CI and local development may have a newer version of Poetry
 # Since this is only used for development and we don't ship this container, pinning Poetry back is not expressly necessary
 # We also don't need virtual environments in container
-RUN which poetry || curl -sSL https://install.python-poetry.org | python3 - && \
-    poetry config virtualenvs.create false
+RUN if ! command -v poetry >/dev/null 2>&1; then \
+        curl -sSL https://install.python-poetry.org | python3 -; \
+    fi; \
+    poetry config virtualenvs.create false; \
+    poetry self add poetry-plugin-export || true \
+    poetry self add poetry-plugin-shell || true
 
 # !!! USE CAUTION WHEN MODIFYING LINES ABOVE
 # -------------------------------------------------------------------------------------
@@ -61,9 +67,11 @@ ARG PYTHON_VER
 # In CI, this should be done outside of the Dockerfile to prevent cross-compile build failures
 ARG CI
 RUN if [ -z "${CI+x}" ]; then \
-    INSTALLED_NAUTOBOT_VER=$(pip show nautobot | grep "^Version" | sed "s/Version: //"); \
-    poetry add --lock nautobot@${INSTALLED_NAUTOBOT_VER} --python ${PYTHON_VER} || \
-    poetry add --lock git+https://github.com/nautobot/nautobot.git#${NAUTOBOT_VER} --python ${PYTHON_VER}; fi
+        INSTALLED_NAUTOBOT_VER="$(pip show nautobot | grep "^Version" | sed "s/Version: //")"; \
+        if ! poetry add --lock "nautobot@${INSTALLED_NAUTOBOT_VER}" --python "${PYTHON_VER}"; then \
+            poetry add --lock "git+https://github.com/nautobot/nautobot.git#${NAUTOBOT_VER}" --python "${PYTHON_VER}"; \
+        fi; \
+    fi
 
 # Install the app
 RUN poetry install --extras all --with dev

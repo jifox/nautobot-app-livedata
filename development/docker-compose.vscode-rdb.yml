@@ -22,7 +22,8 @@ services:
     ports:
       - "6898:6898"  # For remote debugging of Jobs (Celery)
     entrypoint: ""
-    command: >
+    command: >-
       sh -c "
       pip install debugpy &&
-      watchmedo auto-restart --directory './' --pattern '*.py' --recursive -- python -m debugpy --listen 0.0.0.0:6898 -m nautobot.core.cli celery worker -l INFO --events"
+      watchmedo auto-restart --directory './' --pattern '*.py' --recursive --
+      python -m debugpy --listen 0.0.0.0:6898 -m nautobot.core.cli celery worker -l INFO --events"

@@ -20,38 +20,55 @@ from time import sleep
 
 from dotenv import load_dotenv
 from invoke.collection import Collection
+from invoke.config import Config
+from invoke.context import Context
 from invoke.exceptions import Exit, UnexpectedExit
 from invoke.tasks import Task, task as invoke_task
 import jinja2
 import toml
-import yaml  # Added for parsing docker compose config output
+import yaml
 
-# Set the environment files to be sourced in order. The highest priority file should be listed last.
+# ------------------------------------------------------------------------------
+# ENVIRONMENT LOADING
+# ------------------------------------------------------------------------------
+
+# Environment files are loaded in order; later files override earlier ones.
 ENVIRONMENT_FILENAMES = ["dev.env", "development.env", "local.env", ".env", ".creds.env", "creds.env"]
 ENVIRONMENT_DIRS = [
     ".",  # Current directory
     "development",  # Development directory
     "environments",  # Environments directory
 ]
+
 # Load environment variables from the specified files
-for envfile in ENVIRONMENT_FILENAMES:
-    for dir in ENVIRONMENT_DIRS:
-        if not os.path.isabs(dir):
-            dir = os.path.join(os.getcwd(), dir)
-            # Check if the environment file exists in the current directory or in the development directory
-        if not os.path.exists(dir):
+for _envfile in ENVIRONMENT_FILENAMES:
+    for _dir in ENVIRONMENT_DIRS:
+        _dir_path = os.path.join(os.getcwd(), _dir) if not os.path.isabs(_dir) else _dir
+        if not os.path.exists(_dir_path):
             continue
-        # If the file exists, source it
-        # If the directory is not absolute, make it absolute
-        dir = os.path.abspath(dir)
-        fname = os.path.join(dir, envfile)
-        if os.path.isfile(fname):
-            print(f"Loading environment variables from {fname}")
-            load_dotenv(fname, override=True)
+        _dir_path = os.path.abspath(_dir_path)
+        _fname = os.path.join(_dir_path, _envfile)
+        if os.path.isfile(_fname):
+            print(f"Loading environment variables from {_fname}")
+            load_dotenv(_fname, override=True)
 
 
-# This is the invoke configuration name that is used as context for the tasks. (invoke.yml)
+# ------------------------------------------------------------------------------
+# CONFIGURATION
+# ------------------------------------------------------------------------------
+
+# This is the invoke configuration namespace used as context for tasks (invoke.yml)
+# Can be overridden via INVOKE_NAUTOBOT_APP_LIVEDATA_* environment variables
 CONFIGURATION_NAMESPACE = os.getenv("CONFIGURATION_NAMESPACE", "nautobot_app_livedata")
+
+# Container names from environment (set in local.env or creds.env)
+DB_CONTAINER_NAME = os.getenv("NAUTOBOT_DB_HOST", "db")
+REDIS_CONTAINER_NAME = os.getenv("NAUTOBOT_REDIS_HOST", "redis")
+
+
+# ------------------------------------------------------------------------------
+# HELPER FUNCTIONS
+# ------------------------------------------------------------------------------
 
 
 def is_truthy(arg):
@@ -60,9 +77,10 @@ def is_truthy(arg):
     Examples:
         >>> is_truthy('yes')
         True
+
     Args:
         arg (str): Truthy string (True values are y, yes, t, true, on and 1; false values are n, no,
-        f, false, off and 0. Raises ValueError if val is anything else.
+            f, false, off and 0. Raises ValueError if val is anything else.
     """
     if isinstance(arg, bool):
         return arg
@@ -70,29 +88,86 @@ def is_truthy(arg):
     val = str(arg).lower()
     if val in ("y", "yes", "t", "true", "on", "1"):
         return True
-    elif val in ("n", "no", "f", "false", "off", "0"):
+    if val in ("n", "no", "f", "false", "off", "0"):
         return False
+    raise ValueError(f"Invalid truthy value: `{arg}`")
+
+
+def get_poetry_package_version(directory=None) -> tuple[str, str]:
+    """Return the package name and version reported by ``poetry version`` for ``directory``.
+
+    Args:
+        directory (str | Path): Directory that contains the desired Poetry project.
+
+    Returns:
+        tuple[str, str]: The package name and version as reported by Poetry.
+
+    Raises:
+        Exit: If the directory does not exist or Poetry does not return the expected output.
+    """
+    if directory:
+        resolved_path = Path(directory).expanduser().resolve()
+        if not resolved_path.is_dir():
+            raise Exit(f"Directory '{resolved_path}' does not exist.")
     else:
-        raise ValueError(f"Invalid truthy value: `{arg}`")
+        resolved_path = Path.cwd()
+
+    # Read the poetry version with a new context
+    new_config = Config()
+    new_context = Context(config=new_config)
+    # use a new context to avoid changing the working directory of the main context
+    with new_context.cd(str(resolved_path)):
+        command = "poetry version"
+        try:
+            result = new_context.run(command, hide=True)
+        except UnexpectedExit as exc:  # pragma: no cover - surfaced to user with clear message
+            raise Exit(f"Failed to run 'poetry version' in {resolved_path}.") from exc
+
+    poetry_output = result.stdout.strip().splitlines()
+    if not poetry_output:
+        raise Exit("'poetry version' returned no output.")
+
+    package_info = poetry_output[-1].strip().split(maxsplit=1)
+    if len(package_info) != 2:
+        raise Exit(
+            f"Unexpected 'poetry version' output. Expected '<package> <version>' but received: '{poetry_output[-1]}'"
+        )
+
+    return package_info[0], package_info[1]
 
 
-# Defined in local.env or creds.env
-db_container_name = os.getenv("NAUTOBOT_DB_HOST", "db")
-redis_container_name = os.getenv("NAUTOBOT_REDIS_HOST", "redis")
+def module_name():
+    """Get the module name from the poetry configuration."""
+    module_name, _ = get_poetry_package_version()
+    return module_name
 
-# Use pyinvoke configuration for default values, see http://docs.pyinvoke.org/en/stable/concepts/configuration.html
-# Variables may be overwritten in invoke.yml or by the environment variables INVOKE_NAUTOBOT_APP_LIVEUPDATE_xxx
+
+def module_version():
+    """Get the module version from the poetry configuration."""
+    _, module_version = get_poetry_package_version()
+    return module_version
+
+
+# ------------------------------------------------------------------------------
+# INVOKE NAMESPACE CONFIGURATION
+# ------------------------------------------------------------------------------
+
+# Use pyinvoke configuration for default values
+# See: http://docs.pyinvoke.org/en/stable/concepts/configuration.html
+# Variables can be overwritten in invoke.yml or via INVOKE_NAUTOBOT_APP_LIVEDATA_* env vars
 namespace = Collection(CONFIGURATION_NAMESPACE)
 namespace.configure(
     {
         CONFIGURATION_NAMESPACE: {
-            "nautobot_ver": "2.4.14",
+            "nautobot_ver": "2.4.20",
             "project_name": CONFIGURATION_NAMESPACE,
+            "module_name": module_name(),
+            "module_version": module_version(),
             "python_ver": "3.12",
             "local": False,
             "use_django_extensions": True,
             "docker_swarm_mode": False,
-            "render_templates": False,  # Automatically render docker-compose templates from Jinja2 templates
+            "render_templates": False,
             "compose_dir": os.path.join(os.path.dirname(__file__), "development/"),
             "compose_files": [
                 "docker-compose.base.yml",
@@ -102,14 +177,15 @@ namespace.configure(
             ],
             "compose_http_timeout": "86400",
             "nautobot_container_name": "nautobot",
-            "db_container_name": globals().get("db_container_name", "db"),
-            "redis_container_name": globals().get("redis_container_name", redis_container_name),
+            "db_container_name": DB_CONTAINER_NAME,
+            "redis_container_name": REDIS_CONTAINER_NAME,
         }
     }
 )
 
 
 def get_pyproject_nautobot_version():
+    """Get Nautobot version from pyproject.toml."""
     with open("pyproject.toml", "r", encoding="utf8") as pyproject:
         parsed_toml = toml.load(pyproject)
     try:
@@ -122,7 +198,12 @@ def get_pyproject_nautobot_version():
 
 
 def get_nautobot_version(context):
-    """Get Nautobot version from the context."""
+    """Get Nautobot version from the context.
+
+    If nautobot_ver is set to 'pyproject', it will be read from pyproject.toml.
+    Otherwise, it returns the configured version (can be overridden via
+    INVOKE_NAUTOBOT_APP_LIVEDATA_NAUTOBOT_VER environment variable).
+    """
     ctx = context[CONFIGURATION_NAMESPACE]
     if ctx.nautobot_ver == "pyproject":
         ctx.nautobot_ver = get_pyproject_nautobot_version()
@@ -136,11 +217,13 @@ def _available_services(context):
 
 
 def _await_healthy_service(context, service):
+    """Wait for a specific service to become healthy."""
     container_id = docker_compose(context, f"ps -q -- {service}", pty=False, echo=False, hide=True).stdout.strip()
     _await_healthy_container(context, container_id)
 
 
 def _await_healthy_container(context, container_id):
+    """Wait for a specific container to become healthy."""
     while True:
         result = context.run(
             "docker inspect --format='{{.State.Health.Status}}' " + container_id,
@@ -400,22 +483,22 @@ def generate_packages(context):
             "Generally intended to be used in CI and not for local development. (default: disabled)"
         ),
         "constrain_python_ver": (
-            "When using `constrain_nautobot_ver`, further constrain the nautobot version "
-            "to python_ver so that poetry doesn't complain about python version incompatibilities. "
+            "Target Python version to constrain resolution. Accepts X.Y or X.Y.Z. "
+            "Example: --constrain-python-ver=3.9.3 "
+            "This helps avoid poetry complaints about Python incompatibilities. "
             "Generally intended to be used in CI and not for local development. (default: disabled)"
         ),
     }
 )
-def lock(context, check=False, constrain_nautobot_ver=False, constrain_python_ver=False):
+def lock(context, check=False, constrain_nautobot_ver=False, constrain_python_ver=""):
     """Generate poetry.lock file."""
     ctx = context[CONFIGURATION_NAMESPACE]
     if constrain_nautobot_ver:
         docker_nautobot_version = _get_docker_nautobot_version(context)
         command = f"poetry add --lock nautobot@{docker_nautobot_version}"
         if constrain_python_ver:
-            command += f" --python {ctx.python_ver}"
+            command += f" --python {constrain_python_ver}"
         try:
-            run_command(context, command, hide=True)
             output = run_command(context, command, hide=True)
             print(output.stdout, end="")
             print(output.stderr, file=sys.stderr, end="")
@@ -1278,23 +1361,35 @@ def hadolint(context):
     run_command(context, command)
 
 
-@task
-def pylint(context):
+@task(
+    help={
+        "project-path": "Path to the project root directory (default: current directory)",
+    }
+)
+def pylint(context, project_path=None):
     """Run pylint code analysis."""
     exit_code = 0
 
+    if not project_path:
+        working_directory = Path(__file__).absolute().parent
+    else:
+        working_directory = Path(project_path).absolute()
+
+    modulename, module_version = get_poetry_package_version(directory=working_directory)
+    print(f"Running pylint for {modulename} version {module_version}")
+
     base_pylint_command = 'pylint --verbose --init-hook "import nautobot; nautobot.setup()" --rcfile pyproject.toml'
-    command = f"{base_pylint_command} {CONFIGURATION_NAMESPACE}"
+    command = f"{base_pylint_command} {modulename} tests"
     if not run_command(context, command, warn=True):
         exit_code = 1
 
     # run the pylint_django migrations checkers on the migrations directory, if one exists
-    migrations_dir = Path(__file__).absolute().parent / Path(CONFIGURATION_NAMESPACE) / Path("migrations")
+    migrations_dir = Path(__file__).absolute().parent / Path(modulename) / Path("migrations")
     if migrations_dir.is_dir():
         migrations_pylint_command = (
             f"{base_pylint_command} --load-plugins=pylint_django.checkers.migrations"
             " --disable=all --enable=fatal,new-db-field-with-default,missing-backwards-migration-callable"
-            f" {CONFIGURATION_NAMESPACE}.migrations"
+            f" {modulename}.migrations"
         )
         if not run_command(context, migrations_pylint_command, warn=True):
             exit_code = 1
@@ -1333,10 +1428,15 @@ def markdownlint(context, fix=False):
     run_command(context, command)
 
 
-@task
+@task(
+    help={
+        "fix": "Automatically fix formatting issues (default: False)",
+    }
+)
 def djhtml(context, fix=False):
     """Indent Django template files."""
-    command = f"djhtml {CONFIGURATION_NAMESPACE}/*/templates --tabwidth 4"
+    ctx = context[CONFIGURATION_NAMESPACE]
+    command = f"djhtml {ctx.module_name}/templates --tabwidth 4"
     if not fix:
         command += " --check"
     run_command(context, f'bash -c "{command}"')  # needed for glob expansion
@@ -1501,7 +1601,7 @@ def tests(context, failfast=False, keepdb=False, lint_only=False):
     validate_app_config(context)
     if not lint_only:
         print("Running unit tests...")
-        unittest(context, failfast=failfast, keepdb=keepdb)
+        unittest(context, failfast=failfast, keepdb=keepdb, label=ctx.module_name)
         unittest_coverage(context)
     print("All tests have passed!")
 

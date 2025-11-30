@@ -130,9 +130,9 @@ Once CI has completed on the PR, merge it.
 
 Draft a [new release](https://github.com/jifox/nautobot-app-livedata.git/releases/new) with the following parameters.
 
-* **Tag:** Input current version (e.g. `v1.4.2`) and select `Create new tag: v1.4.2 on publish`
-* **Target:** `main`
-* **Title:** Version and date (e.g. `v1.4.2 - 2024-04-02`)
+- **Tag:** Input current version (e.g. `v1.4.2`) and select `Create new tag: v1.4.2 on publish`
+- **Target:** `main`
+- **Title:** Version and date (e.g. `v1.4.2 - 2024-04-02`)
 
 Click "Generate Release Notes" and edit the auto-generated content as follows:
 
@@ -195,7 +195,6 @@ At this stage, the CI should be running or finished for the `v1.4.2` tag and a p
 Documentation should also have been built for the tag on ReadTheDocs and if you're reading this page online, refresh it and look for the new version in the little version fly-out menu down at the bottom right of the page.
 
 All done!
-
 
 ## LTM Releases
 

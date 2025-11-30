@@ -29,10 +29,10 @@ include = [
 [tool.poetry.dependencies]
 python = ">=3.9.2,<3.13"
 # Used for local development
-nautobot = "~2.4.15"
+nautobot = {version = "2.4.20", python = "3.12"}
 to-json-schema = "*"
 jsonschema = "^4.7.0"
-nautobot-plugin-nornir = "~2.2.0"
+nautobot-plugin-nornir = ">=2.2.0,<3.0.0"
 h11 = "^0.16.0"
 
 [tool.poetry.group.dev.dependencies]
@@ -43,7 +43,6 @@ factory-boy = "~3.3.3"
 # Factory Boy dependency for test data
 faker = "^37.11.0"
 # Alternative to Make, CLI based on `tasks.py`
-invoke = "~2.2.1"
 # YAML parsing for docker compose config in tasks.py
 PyYAML = "*"
 # Colorization and autoformatting of CLI output, used for Invoke tasks
@@ -57,13 +56,31 @@ ipython = "*"
 # TOML parsing
 toml = "*"
 # Rendering of markdown files to HTML
-Markdown = "~3.8"
+Markdown = "*"
+# Markdown = "~3.8"
 # Documentation generation support
 griffe = "~1.14.0"
 # Environment variables support
 python-dotenv = "^1.1.0"
 # Debugging support
 debugpy = "^1.8.14"
+invoke = "^2.2.1"
+
+# [tool.poetry.group.linting.dependencies]
+# Code static analysis
+pylint = "~3.3.4"
+# Pylint extensions for Django
+pylint-django = "~2.6.1"
+# Python implementation of markdownlint
+pymarkdownlnt = "~0.9.28"
+# Combination linter and code formatter
+ruff = "~0.14.0"
+# YAML linting
+yamllint = "~1.37.1"
+# Django template indenter
+djhtml = "~3.0.6"
+# Django template linter
+djlint = "^1.34.0"
 
 [tool.poetry.group.docs.dependencies]
 # Rendering docs to HTML
@@ -90,22 +107,6 @@ mkdocs-section-index = "~0.3.10"
 mkdocstrings = "~0.30.0"
 # Python-specific extension to mkdocstrings
 mkdocstrings-python = "~1.16.12"
-
-[tool.poetry.group.linting.dependencies]
-# Code static analysis
-pylint = "~3.3.4"
-# Pylint extensions for Django
-pylint-django = "~2.6.1"
-# Python implementation of markdownlint
-pymarkdownlnt = "~0.9.28"
-# Combination linter and code formatter
-ruff = "~0.14.0"
-# YAML linting
-yamllint = "~1.37.1"
-# Django template indenter
-djhtml = "~3.0.6"
-# Django template linter
-djlint = "^1.34.0"
 
 [tool.poetry.group.testing.dependencies]
 # Test code coverage measurement - pinned to <=6.4.0 to resolve https://github.com/nedbat/coveragepy/issues/1420
