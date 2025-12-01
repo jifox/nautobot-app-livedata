@@ -67,7 +67,8 @@ DB_CONTAINER_NAME = os.getenv("NAUTOBOT_DB_HOST", "db")
 REDIS_CONTAINER_NAME = os.getenv("NAUTOBOT_REDIS_HOST", "redis")
 
 # Maximum time to wait for database to be ready (in seconds)
-DB_WAIT_TIMEOUT = 60
+# MySQL can take longer to initialize than PostgreSQL
+DB_WAIT_TIMEOUT = 120
 
 
 # ------------------------------------------------------------------------------
