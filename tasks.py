@@ -627,22 +627,21 @@ def generate_packages(context):
         ),
     }
 )
-def lock(context, check=False, constrain_nautobot_ver=False, constrain_python_ver=False):
+def lock(context, check=False, constrain_nautobot_ver=False, constrain_python_ver=""):
     """Generate poetry.lock file."""
     ctx = _get_ctx(context)
     if constrain_nautobot_ver:
         docker_nautobot_version = _get_docker_nautobot_version(context)
         command = f"poetry add --lock nautobot@{docker_nautobot_version}"
         if constrain_python_ver:
-            command += f" --python {ctx.python_ver}"
+            command += f" --python {constrain_python_ver}"
         try:
-            run_command(context, command, hide=True)
             output = run_command(context, command, hide=True)
             print(output.stdout, end="")
             print(output.stderr, file=sys.stderr, end="")
         except UnexpectedExit:
             print("Unable to add Nautobot dependency with version constraint, falling back to git branch.")
-            command = f"poetry add --lock git+https://github.com/nautobot/nautobot.git#{ctx.nautobot_ver}"
+            command = f"poetry add --lock git+https://github.com/nautobot/nautobot.git#{get_nautobot_version(context)}"
             if constrain_python_ver:
                 command += f" --python {ctx.python_ver}"
             run_command(context, command)
