@@ -199,10 +199,10 @@ jobs:
         db-backend: ["postgresql"]
         nautobot-version: ["3.0.0"]
         include:
-          # - python-version: "3.11"
-          #   db-backend: "mysql"
-          #   nautobot-version: "stable"
           - python-version: "3.13"
+            db-backend: "mysql"
+            nautobot-version: "stable"
+          - python-version: "3.11"
             db-backend: "postgresql"
             nautobot-version: "stable"
     runs-on: "ubuntu-latest"
