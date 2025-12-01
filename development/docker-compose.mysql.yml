@@ -22,26 +22,20 @@ services:
       - "creds.env"
       - "development_mysql.env"
   db:
-    image: "mysql:8"
-    command:
-      - "--max_connections=1000"
+    image: mysql:8
     env_file:
       - "development.env"
       - "creds.env"
       - "development_mysql.env"
     volumes:
-      - "mysql_data:/var/lib/mysql"
+      # Unit tests require the createdb permission to clone the database
+      - ./mysql-unittests.sql:/docker-entrypoint-initdb.d/mysql-unittests.sql
+      - mysqldata_nautobot:/var/lib/mysql
     healthcheck:
-      test:
-        - "CMD"
-        - "mysqladmin"
-        - "ping"
-        - "-h"
-        - "127.0.0.1"
-        - "--silent"
-      interval: "10s"
-      timeout: "5s"
-      start_period: "60s"
-      retries: 10
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+      test: 'mysql -h localhost -u $$MYSQL_USER --password=$$MYSQL_PASSWORD --execute "SHOW DATABASES;"'
 volumes:
-  mysql_data: {}
+  mysqldata_nautobot:
