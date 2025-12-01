@@ -38,7 +38,9 @@ services:
         - "ping"
         - "-h"
         - "localhost"
-      timeout: "20s"
+      interval: "10s"
+      timeout: "5s"
+      start_period: "30s"
       retries: 10
 volumes:
   mysql_data: {}
