@@ -1551,6 +1551,13 @@ def unittest(
     skip_docs_build=False,
 ):
     """Run Nautobot unit tests."""
+    ctx = _get_ctx(context)
+    if not is_truthy(ctx.local):
+        # Start db and redis services first and wait for them to be healthy
+        # This is necessary because 'docker compose run' does not wait for health checks
+        print("Starting database and redis services...")
+        docker_compose(context, "up --detach --wait db redis")
+
     if not skip_docs_build:
         build_and_check_docs(context)
     config_path = "nautobot_app_livedata/tests/nautobot_config.py"
