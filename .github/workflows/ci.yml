@@ -206,6 +206,7 @@ jobs:
             db-backend: "postgresql"
             nautobot-version: "stable"
     runs-on: "ubuntu-latest"
+    timeout-minutes: 30  # Ensure this is sufficient (default is 360)
     env:
       INVOKE_NAUTOBOT_APP_LIVEDATA_PYTHON_VER: "${{ matrix.python-version }}"
       INVOKE_NAUTOBOT_APP_LIVEDATA_NAUTOBOT_VER: "${{ matrix.nautobot-version }}"
