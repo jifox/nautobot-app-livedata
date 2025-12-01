@@ -1,9 +1,9 @@
 ---
 nautobot_app_livedata:
-  project_name: "livedata"
+  project_name: "dev-livedata"
   nautobot_ver: "3.0.0"
-  local: false
   python_ver: "3.12"
+  local: false
   compose_dir: "development"
   compose_files:
     - "docker-compose.base.yml"
