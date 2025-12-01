@@ -153,7 +153,7 @@ def module_version():
 # ------------------------------------------------------------------------------
 
 # Use pyinvoke configuration for default values, see http://docs.pyinvoke.org/en/stable/concepts/configuration.html
-# Variables may be overwritten in invoke.yml or by the environment variables INVOKE_NAUTOBOT_{CONFIGURATION_NAMESPACE}_xxx
+# Variables may be overwritten in invoke.yml or by the environment variables INVOKE_NAUTOBOT_xxx
 namespace = Collection(CONFIGURATION_NAMESPACE)
 namespace.configure(
     {
@@ -186,7 +186,7 @@ namespace.configure(
 
 
 def _parse_pyproject_nautobot_version():
-    """Get the Nautobot version from the pyproject.toml file."""
+    """Get the Nautobot version from the pyproject.toml file.
 
     Parse Pyproject.toml to get the Nautobot version constraint and return
     the lowest explicit version that satisfies the constraint. This covers
@@ -228,6 +228,10 @@ def _parse_pyproject_nautobot_version():
 
     # If we reach here, we couldn't find a Nautobot spec in pyproject.toml
     raise Exit("Could not determine Nautobot version from pyproject.toml (expected [tool.poetry] or [project] layout)")
+
+
+# Regex pattern to match dotted version strings (e.g., "3.0.0", "3.0")
+VERSION_PATTERN = re.compile(r"\d+(?:\.\d+)+")
 
 
 def _extract_min_version_from_spec(version_spec: str) -> str:
@@ -272,9 +276,8 @@ def _get_ctx(context):
         else:
             ctx.nautobot_container_name = "nautobot"
         if not getattr(ctx, "compose_dir", None):
-            # if directory exists:
-            # os.path.join(os.path.dirname(__file__), "environments")
-            ctx.compose_dir = compose_dir_setup()
+            # Default to development directory if compose_dir is not set
+            ctx.compose_dir = os.path.join(os.path.dirname(__file__), "development/")
         ctx.pyproject_nautobot_ver = _parse_pyproject_nautobot_version()
 
         try:
@@ -408,7 +411,7 @@ def task(function=None, *args, **kwargs):
 def render_compose_templates(context):
     """Render all docker-compose .j2 templates in TEMPLATE_DIR to COMPOSE_ENV_DIR/ as .yml files.
 
-    Variables:
+    Variables: {
         "compose_dir": ctx.compose_dir,
         "nautobot_container_name": ctx.nautobot_container_name,
         "nautobot_image_name": imgnam,
@@ -515,10 +518,10 @@ def docker_compose(context, command, **kwargs):
     compose_command_tokens = [
         "docker compose",
         f"--project-name {project_name}",
-        f'--project-directory "{ctx.compose_dir}/"',
+        f'--project-directory "{ctx.compose_dir}"',
     ]
     for compose_file in ctx.compose_files:
-        compose_file_path = f"{str(ctx.compose_dir).split('/')[-1]}/{compose_file}"
+        compose_file_path = os.path.join(ctx.compose_dir, compose_file)
         compose_command_tokens.append(f' -f "{compose_file_path}"')
 
     compose_command_tokens.append(command)

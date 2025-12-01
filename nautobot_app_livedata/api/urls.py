@@ -33,9 +33,14 @@ def _deprecated_managed_device_view(request, *args, **kwargs):
     try:
         response["Warning"] = '299 - "Deprecated API: use /api/plugins/livedata/primary-device/"'
         response["Deprecation"] = "true"
-    except Exception:
-        # If the view returned something unexpected, don't crash the request
-        logger.debug("Unable to set deprecation headers on response of type %s", type(response))
+    except (TypeError, AttributeError, KeyError) as exc:
+        # If the view returned something unexpected (e.g. doesn't support header assignment),
+        # avoid crashing the request but log the specific error for debugging.
+        logger.debug(
+            "Unable to set deprecation headers on response of type %s: %s",
+            type(response),
+            exc,
+        )
     return response
 
 
