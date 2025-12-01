@@ -12,11 +12,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import json
 import os
 from pathlib import Path
 import re
 import sys
-from time import sleep
+import time
 
 from dotenv import load_dotenv
 from invoke.collection import Collection
@@ -64,6 +65,9 @@ CONFIGURATION_NAMESPACE = os.getenv("CONFIGURATION_NAMESPACE", "nautobot_app_liv
 # Container names from environment (set in local.env or creds.env)
 DB_CONTAINER_NAME = os.getenv("NAUTOBOT_DB_HOST", "db")
 REDIS_CONTAINER_NAME = os.getenv("NAUTOBOT_REDIS_HOST", "redis")
+
+# Maximum time to wait for database to be ready (in seconds)
+DB_WAIT_TIMEOUT = 60
 
 
 # ------------------------------------------------------------------------------
@@ -317,7 +321,7 @@ def _await_healthy_container(context, container_id):
         if result.stdout.strip() == "healthy":
             break
         print(f"Waiting for `{container_id}` container to become healthy ...")
-        sleep(1)
+        time.sleep(1)
 
 
 def _get_docker_nautobot_version(context, nautobot_ver=None, python_ver=None):
@@ -564,11 +568,58 @@ def run_command(context, command, service="nautobot", **kwargs):
         if service in results.stdout:
             compose_command = f"exec{command_env_args} {service} {command}"
         else:
+            # Start dependent services (db, redis) and wait for them to be healthy before running
+            # This ensures the 'run' container can connect to the database
+            print("Starting dependent services and waiting for them to be healthy...")
+            docker_compose(context, "up --detach db redis", silent=True)
+            # Wait for db service to be healthy (docker compose --wait may not work in all versions)
+            _wait_for_healthy_service(context, "db")
             compose_command = f"run{command_env_args} --rm --entrypoint='{command}' {service}"
 
         pty = kwargs.pop("pty", True)
 
         return docker_compose(context, compose_command, pty=pty, **kwargs)
+
+
+def _wait_for_healthy_service(context, service, timeout=None):
+    """Wait for a Docker Compose service to be healthy.
+
+    Args:
+        context: Invoke context
+        service: Name of the service to wait for
+        timeout: Maximum seconds to wait (defaults to DB_WAIT_TIMEOUT)
+    """
+    if timeout is None:
+        timeout = DB_WAIT_TIMEOUT
+
+    print(f"Waiting for {service} to be healthy (timeout: {timeout}s)...")
+    start_time = time.time()
+    while True:
+        result = docker_compose(
+            context,
+            f"ps --format json {service}",
+            hide="both",
+            warn=True,
+            silent=True,
+        )
+        if result and result.ok:
+            try:
+                # Docker Compose v2 outputs one JSON object per line
+                for line in result.stdout.strip().splitlines():
+                    if line:
+                        container_info = json.loads(line)
+                        health = container_info.get("Health", "")
+                        if health == "healthy":
+                            print(f"Service {service} is healthy.")
+                            return True
+            except (json.JSONDecodeError, KeyError):
+                pass
+
+        elapsed = time.time() - start_time
+        if elapsed >= timeout:
+            raise Exit(f"Timeout waiting for {service} to become healthy after {timeout}s")
+
+        time.sleep(2)
 
 
 # ------------------------------------------------------------------------------
@@ -1551,13 +1602,6 @@ def unittest(
     skip_docs_build=False,
 ):
     """Run Nautobot unit tests."""
-    ctx = _get_ctx(context)
-    if not is_truthy(ctx.local):
-        # Start db and redis services first and wait for them to be healthy
-        # This is necessary because 'docker compose run' does not wait for health checks
-        print("Starting database and redis services...")
-        docker_compose(context, "up --detach --wait db redis")
-
     if not skip_docs_build:
         build_and_check_docs(context)
     config_path = "nautobot_app_livedata/tests/nautobot_config.py"
