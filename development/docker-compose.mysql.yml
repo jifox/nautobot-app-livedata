@@ -32,7 +32,7 @@ services:
     volumes:
       - "mysql_data:/var/lib/mysql"
     healthcheck:
-      test: "mysql -h localhost -u $$NAUTOBOT_DB_USER --password=$$MYSQL_ROOT_PASSWORD --execute 'SHOW DATABASES;'"
+      test: "mysql -h localhost -u root --password=$$MYSQL_ROOT_PASSWORD --execute 'SHOW DATABASES;'"
       interval: "10s"
       timeout: "5s"
       start_period: "30s"
