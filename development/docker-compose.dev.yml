@@ -13,6 +13,8 @@ services:
       - "../:/source"
       - "./.nautobot/.git:/opt/nautobot/git"
       - "/etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt"
+      # Add mariadb client configuration file to standard location
+      - ./mariadb-client.cnf:/etc/my.cnf
     healthcheck:
       interval: "30s"
       timeout: "10s"
