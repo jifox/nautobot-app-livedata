@@ -76,9 +76,11 @@ RUN cd /source && \
 # In CI, this should be done outside of the Dockerfile to prevent cross-compile build failures
 ARG CI
 RUN if [ -z "${CI+x}" ]; then \
-    INSTALLED_NAUTOBOT_VER=$(pip show nautobot | grep "^Version" | sed "s/Version: //"); \
-    poetry add --lock nautobot@${INSTALLED_NAUTOBOT_VER} --python ${PYTHON_VER} || \
-    poetry add --lock git+https://github.com/nautobot/nautobot.git#${NAUTOBOT_VER} --python ${PYTHON_VER}; fi
+        INSTALLED_NAUTOBOT_VER="$(pip show nautobot | grep "^Version" | sed "s/Version: //")"; \
+        if ! poetry add --lock "nautobot@${INSTALLED_NAUTOBOT_VER}" --python "${PYTHON_VER}"; then \
+            poetry add --lock "git+https://github.com/nautobot/nautobot.git#${NAUTOBOT_VER}" --python "${PYTHON_VER}"; \
+        fi; \
+    fi
 
 # Install the app
 RUN poetry install --with dev,docs,linting,testing

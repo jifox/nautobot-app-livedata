@@ -8,6 +8,8 @@ from nautobot_app_livedata.utilities.output_filter import apply_output_filter
 
 
 class TestOutputFilter(unittest.TestCase):
+    """Unit tests for output filtering utilities."""
+
     def test_exact_filter(self):
         output = "foo\nbar\nbaz\nfoo"
         filtered = apply_output_filter(output, "EXACT:foo")
