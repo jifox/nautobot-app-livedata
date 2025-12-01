@@ -32,12 +32,7 @@ services:
     volumes:
       - "mysql_data:/var/lib/mysql"
     healthcheck:
-      test:
-        - "CMD"
-        - "mysqladmin"
-        - "ping"
-        - "-h"
-        - "localhost"
+      test: "mysql -h localhost -u root --password=$$MYSQL_ROOT_PASSWORD --execute 'SHOW DATABASES;'"
       interval: "10s"
       timeout: "5s"
       start_period: "30s"
