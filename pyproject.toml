@@ -31,6 +31,7 @@ jsonschema = "^4.7.0"
 "python-dotenv" = "~=1.2.1"
 "nautobot-plugin-nornir" = "~=3.0.0"
 h11 = ">=0.16.0,<1.0.0"
+mysqlclient = "^2.2.7"
 
 [tool.poetry.group.dev.dependencies]
 "django-debug-toolbar" = "~=5.2.0"
