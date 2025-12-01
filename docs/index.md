@@ -3,6 +3,6 @@ hide:
   - navigation
 ---
 
-# Nautobot App LiveData
+# Nautobot App Livedata
 
 --8<-- "README.md"

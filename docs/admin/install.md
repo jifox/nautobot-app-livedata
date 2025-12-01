@@ -59,7 +59,7 @@ PLUGINS_CONFIG = {
 
 ### Example Configuration for Nautobot Plugin Nornir
 
-The following configuration shows an example of how to configure the [Nautobot Plugin Nornir](https://docs.nautobot.com/projects/plugin-nornir/en/latest) (`nautobot_plugin_nornir`) app:
+The following configuration shows an example of how to configure the [Nautobot Plugin Nornir](https://docs.nautobot.com/projects/plugin-nornir/en/latest) app:
 
 ```python
 # In your nautobot_config.py

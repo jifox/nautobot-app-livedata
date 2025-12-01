@@ -10,14 +10,14 @@ The logo of the project is a placeholder (docs/images/icon-livedata.png) - pleas
 To avoid extra work and temporary links, make sure that publishing docs (or merging a PR) is done at the same time as setting up the docs site on RTD, then test everything.
 -->
 
-![Nautobot App Livedata icon](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/icon-livedata.png)
+![Nautobot App Livedata logo](https://raw.githubusercontent.com/jifox/Nautobot-app-livedata/develop/docs/images/icon-livedata.png)
 
-[![GitHub Actions Status](https://github.com/jifox/nautobot-app-livedata/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jifox/nautobot-app-livedata/actions)
-[![Docs Status](https://readthedocs.org/projects/nautobot-app-livedata/badge/)](https://nautobot-app-livedata.readthedocs.io/en/latest/)
-[![PyPI Version](https://img.shields.io/pypi/v/nautobot-app-livedata)](https://pypi.org/project/nautobot-app-livedata/)
-[![PyPI Downloads](https://img.shields.io/pypi/dm/nautobot-app-livedata)](https://pypi.org/project/nautobot-app-livedata/)
+[![CI Status](https://github.com/jifox/Nautobot-app-livedata/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jifox/Nautobot-app-livedata/actions)
+[![Docs Status](https://readthedocs.org/projects/Nautobot-app-livedata/badge/)](https://Nautobot-app-livedata.readthedocs.io/en/latest/)
+[![PyPI Version](https://img.shields.io/pypi/v/Nautobot-app-livedata)](https://pypi.org/project/Nautobot-app-livedata/)
+[![PyPI Downloads](https://img.shields.io/pypi/dm/Nautobot-app-livedata)](https://pypi.org/project/Nautobot-app-livedata/)
 
-An [App](https://networktocode.com/nautobot-apps/) for [Nautobot](https://nautobot.com/).
+An [App](https://networktocode.com/Nautobot-apps/) for [Nautobot](https://Nautobot.com/).
 
 ## Overview
 

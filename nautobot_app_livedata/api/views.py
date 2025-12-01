@@ -1,5 +1,7 @@
 """Views for the Livedata API."""
 
+# filepath: livedata/api/views.py
+
 from abc import ABC, abstractmethod
 from http import HTTPStatus
 import logging

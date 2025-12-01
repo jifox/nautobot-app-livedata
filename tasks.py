@@ -12,7 +12,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-# from math import e
 import os
 from pathlib import Path
 import re
@@ -21,46 +20,55 @@ from time import sleep
 
 from dotenv import load_dotenv
 from invoke.collection import Collection
+from invoke.config import Config
+from invoke.context import Context
 from invoke.exceptions import Exit, UnexpectedExit
 from invoke.tasks import Task, task as invoke_task
 import jinja2
 import toml
-import yaml  # Added for parsing docker compose config output
+import yaml
 
-# Set the environment files to be sourced in order. The highest priority file should be listed last.
+# ------------------------------------------------------------------------------
+# ENVIRONMENT LOADING
+# ------------------------------------------------------------------------------
+
+# Environment files are loaded in order; later files override earlier ones.
 ENVIRONMENT_FILENAMES = ["dev.env", "development.env", "local.env", ".env", ".creds.env", "creds.env"]
 ENVIRONMENT_DIRS = [
     ".",  # Current directory
     "development",  # Development directory
     "environments",  # Environments directory
 ]
+
 # Load environment variables from the specified files
-for envfile in ENVIRONMENT_FILENAMES:
-    for dir in [".", "development", "environments"]:
-        if not os.path.isabs(dir):
-            dir = os.path.join(os.getcwd(), dir)
-            # Check if the environment file exists in the current directory or in the development directory
-        if not os.path.exists(dir):
+for _envfile in ENVIRONMENT_FILENAMES:
+    for _dir in ENVIRONMENT_DIRS:
+        _dir_path = os.path.join(os.getcwd(), _dir) if not os.path.isabs(_dir) else _dir
+        if not os.path.exists(_dir_path):
             continue
-        # If the file exists, source it
-        # If the directory is not absolute, make it absolute
-        dir = os.path.abspath(dir)
-        fname = os.path.join(dir, envfile)
-        if os.path.isfile(fname):
-            print(f"Loading environment variables from {fname}")
-            load_dotenv(fname, override=True)
+        _dir_path = os.path.abspath(_dir_path)
+        _fname = os.path.join(_dir_path, _envfile)
+        if os.path.isfile(_fname):
+            print(f"Loading environment variables from {_fname}")
+            load_dotenv(_fname, override=True)
 
 
-# This is the invoke configuration name that is used as context for the tasks. (invoke.yml)
-try:
-    CONFIGURATION_NAMESPACE = os.getenv("CONFIGURATION_NAMESPACE")
-except TypeError:
-    raise TypeError(
-        "CONFIGURATION_NAMESPACE environment variable is not set. "
-        "Please set it to the name of your configuration namespace."
-    )
+# ------------------------------------------------------------------------------
+# CONFIGURATION
+# ------------------------------------------------------------------------------
 
-VERSION_PATTERN = re.compile(r"\d+(?:\.\d+)+")
+# This is the invoke configuration namespace used as context for tasks (invoke.yml)
+# Can be overridden via INVOKE_NAUTOBOT_APP_LIVEDATA_* environment variables
+CONFIGURATION_NAMESPACE = os.getenv("CONFIGURATION_NAMESPACE", "nautobot_app_livedata")
+
+# Container names from environment (set in local.env or creds.env)
+DB_CONTAINER_NAME = os.getenv("NAUTOBOT_DB_HOST", "db")
+REDIS_CONTAINER_NAME = os.getenv("NAUTOBOT_REDIS_HOST", "redis")
+
+
+# ------------------------------------------------------------------------------
+# HELPER FUNCTIONS
+# ------------------------------------------------------------------------------
 
 
 def is_truthy(arg):
@@ -69,9 +77,10 @@ def is_truthy(arg):
     Examples:
         >>> is_truthy('yes')
         True
+
     Args:
         arg (str): Truthy string (True values are y, yes, t, true, on and 1; false values are n, no,
-        f, false, off and 0. Raises ValueError if val is anything else.
+            f, false, off and 0. Raises ValueError if val is anything else.
     """
     if isinstance(arg, bool):
         return arg
@@ -79,28 +88,72 @@ def is_truthy(arg):
     val = str(arg).lower()
     if val in ("y", "yes", "t", "true", "on", "1"):
         return True
-    elif val in ("n", "no", "f", "false", "off", "0"):
+    if val in ("n", "no", "f", "false", "off", "0"):
         return False
+    raise ValueError(f"Invalid truthy value: `{arg}`")
+
+
+def get_poetry_package_version(directory=None) -> tuple[str, str]:
+    """Return the package name and version reported by ``poetry version`` for ``directory``.
+
+    Args:
+        directory (str | Path): Directory that contains the desired Poetry project.
+
+    Returns:
+        tuple[str, str]: The package name and version as reported by Poetry.
+
+    Raises:
+        Exit: If the directory does not exist or Poetry does not return the expected output.
+    """
+    if directory:
+        resolved_path = Path(directory).expanduser().resolve()
+        if not resolved_path.is_dir():
+            raise Exit(f"Directory '{resolved_path}' does not exist.")
     else:
-        raise ValueError(f"Invalid truthy value: `{arg}`")
+        resolved_path = Path.cwd()
+
+    # Read the poetry version with a new context
+    new_config = Config()
+    new_context = Context(config=new_config)
+    # use a new context to avoid changing the working directory of the main context
+    with new_context.cd(str(resolved_path)):
+        command = "poetry version"
+        try:
+            result = new_context.run(command, hide=True)
+        except UnexpectedExit as exc:  # pragma: no cover - surfaced to user with clear message
+            raise Exit(f"Failed to run 'poetry version' in {resolved_path}.") from exc
+
+    poetry_output = result.stdout.strip().splitlines()
+    if not poetry_output:
+        raise Exit("'poetry version' returned no output.")
+
+    package_info = poetry_output[-1].strip().split(maxsplit=1)
+    if len(package_info) != 2:
+        raise Exit(
+            f"Unexpected 'poetry version' output. Expected '<package> <version>' but received: '{poetry_output[-1]}'"
+        )
+
+    return package_info[0], package_info[1]
 
 
-# Defined in local.env or creds.env
-db_container_name = os.getenv("NAUTOBOT_DB_HOST", "db")
-redis_container_name = os.getenv("NAUTOBOT_REDIS_HOST", "redis")
+def module_name():
+    """Get the module name from the poetry configuration."""
+    module_name, _ = get_poetry_package_version()
+    return module_name
 
 
-def compose_dir_setup():
-    """Determine the compose directory based on existing paths."""
-    if Path(__file__).parent.joinpath("development").exists():
-        compose_dir = Path(__file__).parent.joinpath("development").resolve()
-    elif Path(__file__).parent.joinpath("environments").exists():
-        compose_dir = Path(__file__).parent.joinpath("environments").resolve()
-    return compose_dir
+def module_version():
+    """Get the module version from the poetry configuration."""
+    _, module_version = get_poetry_package_version()
+    return module_version
 
+
+# ------------------------------------------------------------------------------
+# INVOKE NAMESPACE CONFIGURATION
+# ------------------------------------------------------------------------------
 
 # Use pyinvoke configuration for default values, see http://docs.pyinvoke.org/en/stable/concepts/configuration.html
-# Variables may be overwritten in invoke.yml or by the environment variables INVOKE_NAUTOBOT_xxx
+# Variables may be overwritten in invoke.yml or by the environment variables INVOKE_NAUTOBOT_{CONFIGURATION_NAMESPACE}_xxx
 namespace = Collection(CONFIGURATION_NAMESPACE)
 namespace.configure(
     {
@@ -114,7 +167,8 @@ namespace.configure(
             "local": False,
             "use_django_extensions": True,
             "docker_swarm_mode": False,
-            "compose_dir": compose_dir_setup(),
+            "render_templates": False,
+            "compose_dir": os.path.join(os.path.dirname(__file__), "development/"),
             "compose_files": [
                 "docker-compose.base.yml",
                 "docker-compose.redis.yml",
@@ -123,18 +177,16 @@ namespace.configure(
             ],
             "template_dir": os.path.join(os.path.dirname(__file__), "templates"),
             "compose_http_timeout": "86400",
-            "nautobot_container_name": "nautobot_container_name",
-            "db_container_name": db_container_name,
-            "redis_container_name": redis_container_name,
-            "render_templates": False,  # Set to True to render templates before running docker compose
-            "public_service_dns": None,
+            "nautobot_container_name": "nautobot",
+            "db_container_name": DB_CONTAINER_NAME,
+            "redis_container_name": REDIS_CONTAINER_NAME,
         }
     }
 )
 
 
 def _parse_pyproject_nautobot_version():
-    """Get the Nautobot version from the pyproject.toml file.
+    """Get the Nautobot version from the pyproject.toml file."""
 
     Parse Pyproject.toml to get the Nautobot version constraint and return
     the lowest explicit version that satisfies the constraint. This covers

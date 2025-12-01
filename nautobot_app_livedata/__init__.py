@@ -22,7 +22,7 @@ class LivedataConfig(NautobotAppConfig):
         "query_job_name",
     ]
     min_version = "3.0.0"
-    max_version = "4.9999"
+    max_version = "3.9999"
     default_settings = {
         "query_job_task_queue": "default",
     }
