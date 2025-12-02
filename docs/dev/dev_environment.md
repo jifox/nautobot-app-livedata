@@ -232,7 +232,7 @@ The Nautobot development image will automatically provision a super user when sp
 - `NAUTOBOT_SUPERUSER_PASSWORD=admin`
 
 !!! note
-    The default username is **admin**, but can be overridden by specifying **Nautobot_SUPERUSER_USERNAME**.
+    The default username is **admin**, but can be overridden by specifying `NAUTOBOT_SUPERUSER_USERNAME`.
 
 If you need to create additional superusers, run the follow commands.
 
@@ -390,7 +390,7 @@ namespace.configure(
         "nautobot_app_livedata": {
             ...
             "python_ver": "3.11",
-        ...
+            ...
         }
     }
 )
@@ -409,7 +409,7 @@ namespace.configure(
         "nautobot_app_livedata": {
             ...
             "nautobot_ver": "2.0.0",
-        ...
+            ...
         }
     }
 )

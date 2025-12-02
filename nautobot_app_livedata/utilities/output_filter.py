@@ -1,10 +1,31 @@
-"""
-Output filtering utilities for Nautobot App Livedata.
-
-Provides functions to apply post-processing filters to device command output, such as EXACT, LAST, and FIRST filters.
-"""
+"""Utility helpers for post-processing command output in Nautobot App Livedata."""
 
 import re
+from typing import Callable
+
+from netutils.constants import BASE_INTERFACES
+from netutils.interface import split_interface
+
+BOUNDARY_CHAR_CLASS = r"A-Za-z0-9_/"
+KNOWN_INTERFACE_PREFIXES = frozenset(BASE_INTERFACES)
+
+
+def _exact_match_predicate(pattern: str) -> Callable[[str], bool]:
+    """Build a predicate that returns ``True`` when ``pattern`` is matched as a standalone token."""
+
+    boundary_regex = re.compile(rf"(?<![{BOUNDARY_CHAR_CLASS}]){re.escape(pattern)}(?![{BOUNDARY_CHAR_CLASS}])")
+
+    def predicate(line: str) -> bool:
+        stripped_line = line.strip()
+        if boundary_regex.search(line):
+            return True
+        try:
+            interface_type, interface_number = split_interface(stripped_line)
+        except ValueError:
+            return False
+        return interface_type in KNOWN_INTERFACE_PREFIXES and interface_number == pattern
+
+    return predicate
 
 
 def apply_output_filter(output: str, filter_instruction: str) -> str:
@@ -23,8 +44,8 @@ def apply_output_filter(output: str, filter_instruction: str) -> str:
     for filt in filters:
         if filt.startswith("EXACT:"):
             pattern = filt[len("EXACT:") :].strip()
-            regex = re.compile(rf"(^|\S*){re.escape(pattern)}(\D|$)")
-            output = "\n".join(line for line in output.splitlines() if regex.search(line.strip()))
+            predicate = _exact_match_predicate(pattern)
+            output = "\n".join(line for line in output.splitlines() if predicate(line))
         elif filt.startswith("LAST:"):
             n_str = filt[len("LAST:") :]
             try:

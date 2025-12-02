@@ -6,9 +6,10 @@ from typing import Any
 from django.utils import timezone
 from django.utils.timezone import make_aware
 import jinja2
-from nautobot.apps.jobs import DryRunVar, IntegerVar, Job, register_jobs
+from nautobot.apps.jobs import DryRunVar, IntegerVar, Job, ObjectVar
 from nautobot.dcim.models import Device, Interface, VirtualChassis
-from nautobot.extras.models import JobResult
+from nautobot.extras.choices import JobQueueTypeChoices
+from nautobot.extras.models import Job as JobModel, JobQueue, JobResult
 from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
 from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInventory
 from netutils.interface import abbreviated_interface_name, split_interface
@@ -16,11 +17,10 @@ from nornir import InitNornir
 from nornir.core.exceptions import NornirExecutionError
 from nornir.core.plugins.inventory import InventoryPluginRegister
 
+from nautobot_app_livedata.nornir_plays.processor import ProcessLivedata
+from nautobot_app_livedata.urls import APP_NAME, PLUGIN_SETTINGS
+from nautobot_app_livedata.utilities.output_filter import apply_output_filter
 from nautobot_app_livedata.utilities.primarydevice import PrimaryDeviceUtils
-
-from .nornir_plays.processor import ProcessLivedata
-from .urls import APP_NAME, PLUGIN_SETTINGS
-from .utilities.output_filter import apply_output_filter
 
 # Groupname: Livedata
 name = GROUP_NAME = APP_NAME  # pylint: disable=invalid-name
@@ -407,4 +407,103 @@ class LivedataCleanupJobResultsJob(Job):
         return job_results_feedback
 
 
-register_jobs(LivedataQueryJob, LivedataCleanupJobResultsJob)
+class EnforceDefaultJobQueueJob(Job):
+    """Job to force every Nautobot job onto the default Celery queue."""
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        name = "Align jobs to default queue"
+        description = "Ensure every job uses the default Celery queue for execution."
+        has_sensitive_variables = False
+        hidden = False
+        enabled = True
+
+    dry_run = DryRunVar(
+        description="If enabled, report the actions without modifying any objects.",
+        default=True,
+    )
+
+    job_queue = ObjectVar(
+        model=JobQueue,
+        required=False,
+        description="JobQueue to treat as the default. Leave blank to use or create the 'default' Celery queue.",
+    )
+
+    def run(
+        self,
+        *args: Any,
+        dry_run: bool = True,
+        job_queue: JobQueue | None = None,
+        **kwargs: Any,
+    ) -> str:  # pylint: disable=arguments-differ
+        """Align all jobs with the default queue.
+
+        Args:
+            dry_run: When True emit a report without saving any changes.
+            job_queue: Optional queue instance to enforce; defaults to the system "default" queue.
+
+        Returns:
+            str: Summary indicating how many jobs required updates.
+        """
+
+        default_queue = self._ensure_default_queue(job_queue)
+        total_jobs = JobModel.objects.count()
+        updated_jobs = 0
+        for job_model in JobModel.objects.iterator():
+            if self._align_job(job_model, default_queue, dry_run):
+                updated_jobs += 1
+
+        action = "would update" if dry_run else "updated"
+        summary = f"{action.capitalize()} {updated_jobs} of {total_jobs} jobs to use queue '{default_queue.name}'."
+        self.logger.info(summary)
+        return summary
+
+    def _ensure_default_queue(self, queue: JobQueue | None) -> JobQueue:
+        """Create or normalize the default job queue."""
+
+        if queue is None:
+            queue, created = JobQueue.objects.get_or_create(
+                name="default",
+                defaults={
+                    "queue_type": JobQueueTypeChoices.TYPE_CELERY,
+                    "description": "Default Celery queue automatically managed by Live Data.",
+                },
+            )
+            if created:
+                self.logger.info("Created default JobQueue '%s'.", queue.name)
+        if queue.queue_type != JobQueueTypeChoices.TYPE_CELERY:
+            self.logger.warning(
+                "Updating JobQueue '%s' queue_type from %s to Celery.",
+                queue.name,
+                queue.queue_type,
+            )
+            queue.queue_type = JobQueueTypeChoices.TYPE_CELERY
+            queue.save()
+        return queue
+
+    def _align_job(self, job_model: JobModel, default_queue: JobQueue, dry_run: bool) -> bool:
+        """Align a job's default and allowed queues with the supplied queue."""
+
+        changed = False
+        if job_model.default_job_queue_id != default_queue.pk:
+            changed = True
+            self.logger.debug(
+                "Job '%s' default queue %s differs from '%s'.", job_model, job_model.default_job_queue, default_queue
+            )
+            if not dry_run:
+                job_model.default_job_queue = default_queue
+                job_model.default_job_queue_override = True
+
+        assigned_queue_ids = set(job_model.job_queues.values_list("pk", flat=True))
+        if assigned_queue_ids != {default_queue.pk}:
+            changed = True
+            self.logger.debug(
+                "Job '%s' assigned queues %s differ from default '%s'.", job_model, assigned_queue_ids, default_queue
+            )
+            if not dry_run:
+                job_model.job_queues.clear()
+                job_model.job_queues.add(default_queue)
+                job_model.job_queues_override = True
+
+        if changed and not dry_run:
+            job_model.save()
+        return changed

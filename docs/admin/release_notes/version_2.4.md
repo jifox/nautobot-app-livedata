@@ -1,4 +1,3 @@
-
 # v2.4 Release Notes
 
 This document describes all new features and changes in the release. The format is based on [Keep a
@@ -12,71 +11,27 @@ You can append a filter command to the end of a device command using the `!!` de
 Multiple filters can be chained in a single line by separating each filter with `!!`, for example: `show logging !!EXACT:{{intf_number}}!!LAST:10!!`. Each `!!` acts as a command terminator, and filters are applied in the order they appear.
 
 !!! note
-    Added multiple filters in v2.4.2, this feature allows for more flexible and powerful command filtering directly in the Live Data tab.
-
-### Enhanced tasks.py with new invoke tasks
-
-- `showmigrations` - Display Django migrations status
-- `dumpdata` - Export database data as `.json`
-- `loaddata` - Import database data from `.json`
-- `serve_docs` - Serve documentation locally
-- `open_docs_web` - Open documentation in a browser
-- `markdownlint` - Lint Markdown files
-- `djhtml` - Format Django templates
-- `djlint` - Lint Django templates
-- `check_schema` - Validate the OpenAPI schema
-- `lint` - Run all linting tools
-- `version` - Display version information
+    Added multiple filters in v2.4.2, allowing for more flexible and powerful command filtering directly in the Live Data tab.
 
 ## Release Overview
 
 - Major features or milestones
 - Changes to compatibility with Nautobot and/or other apps, libraries etc.
 
-## [v2.4.9 (2025-10-25)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.9)
-
-### Added (v2.4.9)
-
-- [#162](https://github.com/jifox/nautobot-app-livedata/issues/162) - Added comprehensive test coverage with 62 new tests across 4 test files: test_api.py (5 tests), test_views.py (20 tests), test_jobs.py (26 tests), and test_processor.py (11 tests).
-
-### Changed (v2.4.9)
-
-- [#162](https://github.com/jifox/nautobot-app-livedata/issues/162) - Reorganized pyproject.toml dependency groups (dev, docs, linting, testing) for better clarity and separated coverage dependency into dedicated testing group.
-
-### Fixed (v2.4.9)
-
-- [#162](https://github.com/jifox/nautobot-app-livedata/issues/162) - Fixed commented-out tests in test_api.py that were previously marked with FIXME, ensuring all API endpoint tests are now functional and passing. Fixed test_basic.py to check docs group instead of dev group for documentation dependencies, and removed griffe from docs/requirements.txt since it's a dev dependency. Fixed Python 3.10 compatibility issue in test_jobs.py by using patch.object() instead of string-based @patch() decorators for unittest.mock patching.
-
-### Dependencies (v2.4.9)
-
-- [#143](https://github.com/jifox/nautobot-app-livedata/issues/143) - Bump actions/checkout from 4 to 5
-- [#148](https://github.com/jifox/nautobot-app-livedata/issues/148) - Bumped griffe from ~1.7.3 to ~1.14.0.
-- [#159](https://github.com/jifox/nautobot-app-livedata/issues/159) - Bumped mkdocs-include-markdown-plugin from ~7.1.6 to ~7.2.0.
-- [#161](https://github.com/jifox/nautobot-app-livedata/issues/161) - Bumped ruff from ~0.12.0 to ~0.14.0 to align with Nautobot core version.
-- [#162](https://github.com/jifox/nautobot-app-livedata/issues/162) - Bumped ruff from ~0.12.0 to ~0.14.0 to align with Nautobot core. Bumped mkdocs-include-markdown-plugin from ~7.1.6 to ~7.2.0. Bumped griffe from ~1.7.3 to ~1.14.0. Added new development dependencies: djhtml (3.0.6), djlint (1.34.0), rich (14.2.0), faker (37.11.0), factory-boy (3.3.3), and PyYAML for improved Django template handling, output formatting, test data generation, and CI/CD compatibility.
-
-### Documentation (v2.4.9)
-
-- [#162](https://github.com/jifox/nautobot-app-livedata/issues/162) - Added comprehensive GitHub Copilot instructions file (.github/copilote-instructions.md) with Nautobot app development patterns, testing guidelines, and tooling documentation.
-
-### Housekeeping (v2.4.9)
-
-- [#162](https://github.com/jifox/nautobot-app-livedata/issues/162) - Added comprehensive type hints to jobs.py, api/views.py, and all utilities files (primarydevice.py, contenttype.py, output_filter.py, customfield.py, permission.py) for improved code quality and IDE support. Enhanced tasks.py with new invoke tasks: showmigrations, dumpdata, loaddata, serve_docs, open_docs_web, markdownlint, djhtml, djlint, check_schema, lint, and version. Improved unittest task with tag filtering, pattern matching, and coverage options.
-
 ## [v2.4.8 (2025-09-21)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.8)
 
 !!! note
-    Minimum Nautobot version is now 2.4.15
+    Minimum Nautobot version is now 2.4.15.
 
 ### Added (v2.4.8)
 
 - [#134](https://github.com/jifox/nautobot-app-livedata/issues/134) - Add .ruff_cache/ to .gitignore
-- [#134](https://github.com/jifox/nautobot-app-livedata/issues/134) - Added Nautbot 2.4.15 support and updated Compatibility Matrix
+- [#134](https://github.com/jifox/nautobot-app-livedata/issues/134) - Added Nautobot 2.4.15 support and updated the compatibility matrix
 
 ### Fixed (v2.4.8)
 
 - [#134](https://github.com/jifox/nautobot-app-livedata/issues/134) - Fixed job files download in development environment
-- [#134](https://github.com/jifox/nautobot-app-livedata/issues/134) - Changed environment variable Nautobot_TEST_FACTORY_SEED as a workaround for Nautobot issue #7841
+- [#134](https://github.com/jifox/nautobot-app-livedata/issues/134) - Changed environment variable `NAUTOBOT_TEST_FACTORY_SEED` as a workaround for Nautobot issue #7841
 
 ### Dependencies (v2.4.8)
 
@@ -110,8 +65,8 @@ Multiple filters can be chained in a single line by separating each filter with 
 
 ### Dependencies (v2.4.6)
 
-- [#126](https://github.com/jifox/nautobot-app-livedata/issues/126) - Updated mkdocs-material from 9.6.14 to 9.6.16.
-- [#126](https://github.com/jifox/nautobot-app-livedata/issues/126) - Updated mkdocstrings-Python from 1.16.7 to 1.16.12.
+- [#126](https://github.com/jifox/nautobot-app-livedata/issues/126) - Updated `mkdocs-material` from 9.6.14 to 9.6.16.
+- [#126](https://github.com/jifox/nautobot-app-livedata/issues/126) - Updated `mkdocstrings-python` from 1.16.7 to 1.16.12.
 
 ## [v2.4.5 (2025-07-14)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.5)
 
@@ -123,11 +78,11 @@ Multiple filters can be chained in a single line by separating each filter with 
 
 ### Added (v2.4.4)
 
-- [#113](https://github.com/jifox/nautobot-app-livedata/issues/113) - Added the filter `FIRST: <n>` to output only the top `&lt;n&gt;` lines
+- [#113](https://github.com/jifox/nautobot-app-livedata/issues/113) - Added the filter `FIRST: <n>` to output only the top `<n>` lines
 
 ### Changed (v2.4.4)
 
-- [#113](https://github.com/jifox/nautobot-app-livedata/issues/113) - changed ci.yml to include the Python version 3.10
+- [#113](https://github.com/jifox/nautobot-app-livedata/issues/113) - Updated `ci.yml` to include Python 3.10
 
 ## [v2.4.3 (2025-06-25)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.3)
 
@@ -137,7 +92,7 @@ Multiple filters can be chained in a single line by separating each filter with 
 
 ### Dependencies (v2.4.3)
 
-- [#74](https://github.com/jifox/nautobot-app-livedata/issues/74) - Bump Django-debug-toolbar from 5.0.1 to 5.2.0
+- [#74](https://github.com/jifox/nautobot-app-livedata/issues/74) - Bump `django-debug-toolbar` from 5.0.1 to 5.2.0
 - [#94](https://github.com/jifox/nautobot-app-livedata/issues/94) - Bump griffe from 1.5.7 to 1.7.3
 - [#108](https://github.com/jifox/nautobot-app-livedata/issues/108) - Bump ruff from 0.11.13 to 0.12.0
 
@@ -161,7 +116,7 @@ Multiple filters can be chained in a single line by separating each filter with 
 
 ### Dependencies (v2.4.1)
 
-- [#95](https://github.com/jifox/nautobot-app-livedata/issues/95) - Bump mkdocstrings-Python from 1.13.0 to 1.16.7
+- [#95](https://github.com/jifox/nautobot-app-livedata/issues/95) - Bump `mkdocstrings-python` from 1.13.0 to 1.16.7
 
 ## [v2.4.1a0 (2025-06-08)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.1a0)
 
@@ -179,12 +134,12 @@ No significant changes.
 
 ### Fixed (v2.4.1a0)
 
-- [#6](https://github.com/jifox/nautobot-app-livedata/issues/6) - ci.yml to use valid Nautobot version un unittest.
+- [#6](https://github.com/jifox/nautobot-app-livedata/issues/6) - Updated `ci.yml` to use a valid Nautobot version in unittest.
 
 ### Dependencies (v2.4.1a0)
 
 - [#69](https://github.com/jifox/nautobot-app-livedata/issues/69) - Bump mkdocstrings from 0.27.0 to 0.29.1
-- [#75](https://github.com/jifox/nautobot-app-livedata/issues/75) - Supported Python Versions set to ">=3.9.2,<3.13"
+- [#75](https://github.com/jifox/nautobot-app-livedata/issues/75) - Supported Python versions set to ">=3.9.2,<3.13"
 - [#89](https://github.com/jifox/nautobot-app-livedata/issues/89) - Bump ruff from 0.8.6 to 0.11.12
 
 ## [v2.4.0 (2025-03-20)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.0)
@@ -192,7 +147,7 @@ No significant changes.
 ### Security (v2.4.0)
 
 - [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Fixed Information exposure through an exception (Weakness CWE-209, CWE-497).
-- [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Fixed Github Action Workflow does not contain permissions (Weakness CWE-275).
+- [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Fixed GitHub Action workflow permissions (Weakness CWE-275).
 
 ### Added (v2.4.0)
 
@@ -200,32 +155,30 @@ No significant changes.
 
 ### Changed (v2.4.0)
 
-- [#12](https://github.com/jifox/nautobot-app-livedata/issues/12) - Changed - Bump docker/build-push-action (5 -> 6)
-- [#40](https://github.com/jifox/nautobot-app-livedata/issues/40) - Changed - Bump actions/checkout (2 -> 4)
-- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - The following environment variable names are changed
-- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) -
-- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - - LIVEDATA_QUERY_JOB_NAME was previously LIVEDATA_INTERFACE_QUERY_JOB_NAME
-- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - - LIVEDATA_QUERY_JOB_DESCRIPTION was previously LIVEDATA_QUERY_INTERFACE_JOB_DESCRIPTION
-- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - - LIVEDATA_QUERY_JOB_SOFT_TIME_LIMIT was previously LIVEDATA_QUERY_INTERFACE_JOB_SOFT_TIME_LIMIT
-- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - - LIVEDATA_QUERY_JOB_TASK_QUEUE was previously LIVEDATA_QUERY_INTERFACE_JOB_TASK_QUEUE
-- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - - LIVEDATA_QUERY_JOB_HIDDEN was previously LIVEDATA_QUERY_INTERFACE_JOB_HIDDEN
-- [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Changed - Updating urllib3 (1.26.20 -> 2.3.0)
-- [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Changed - Updating httpcore (0.17.3 -> 1.0.7)
-- [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Changed - Updating httpx (0.24.1 -> 0.27.0)
-- [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Changed - Updating pynautobot (2.0.1 -> 2.6.1)
-- [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Changed - Updating Nornir-Nautobot (3.1.0 -> 3.3.1)
-- [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Changed - Updating Nautobot-plugin-Nornir (2.2.0 -> 2.2.1)
-- [#58](https://github.com/jifox/nautobot-app-livedata/issues/58) - Changed - Downgrade mkdocs-material (9.6.4 -> 9.5.50)
+- [#12](https://github.com/jifox/nautobot-app-livedata/issues/12) - Changed - Bump `docker/build-push-action` (5 -> 6)
+- [#40](https://github.com/jifox/nautobot-app-livedata/issues/40) - Changed - Bump `actions/checkout` (2 -> 4)
+- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - Updated environment variable names:
+    - `LIVEDATA_QUERY_JOB_NAME` was previously `LIVEDATA_INTERFACE_QUERY_JOB_NAME`
+    - `LIVEDATA_QUERY_JOB_DESCRIPTION` was previously `LIVEDATA_QUERY_INTERFACE_JOB_DESCRIPTION`
+    - `LIVEDATA_QUERY_JOB_SOFT_TIME_LIMIT` was previously `LIVEDATA_QUERY_INTERFACE_JOB_SOFT_TIME_LIMIT`
+    - `LIVEDATA_QUERY_JOB_TASK_QUEUE` was previously `LIVEDATA_QUERY_INTERFACE_JOB_TASK_QUEUE`
+    - `LIVEDATA_QUERY_JOB_HIDDEN` was previously `LIVEDATA_QUERY_INTERFACE_JOB_HIDDEN`
+- [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Changed - Updating `urllib3` (1.26.20 -> 2.3.0)
+- [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Changed - Updating `httpcore` (0.17.3 -> 1.0.7)
+- [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Changed - Updating `httpx` (0.24.1 -> 0.27.0)
+- [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Changed - Updating `pynautobot` (2.0.1 -> 2.6.1)
+- [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Changed - Updating `nornir-nautobot` (3.1.0 -> 3.3.1)
+- [#57](https://github.com/jifox/nautobot-app-livedata/issues/57) - Changed - Updating `nautobot-plugin-nornir` (2.2.0 -> 2.2.1)
+- [#58](https://github.com/jifox/nautobot-app-livedata/issues/58) - Changed - Downgrade `mkdocs-material` (9.6.4 -> 9.5.50)
 
 ### Removed (v2.4.0)
 
-- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - The following environment variable names are removed
-- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) -
-- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - - `LIVEDATA_INTERFACE_QUERY_JOB_NAME` use `LIVEDATA_QUERY_JOB_NAME` instead
-- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - - `LIVEDATA_QUERY_INTERFACE_JOB_DESCRIPTION` use `LIVEDATA_QUERY_JOB_DESCRIPTION` instead
-- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - - `LIVEDATA_QUERY_INTERFACE_JOB_SOFT_TIME_LIMIT` use `LIVEDATA_QUERY_JOB_SOFT_TIME_LIMIT` instead
-- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - - `LIVEDATA_QUERY_INTERFACE_JOB_TASK_QUEUE` use `LIVEDATA_QUERY_JOB_TASK_QUEUE`
-- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - - `LIVEDATA_QUERY_INTERFACE_JOB_HIDDEN` use `LIVEDATA_QUERY_JOB_HIDDEN`
+- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - Removed legacy environment variables. Use the following replacements instead:
+    - `LIVEDATA_INTERFACE_QUERY_JOB_NAME` → `LIVEDATA_QUERY_JOB_NAME`
+    - `LIVEDATA_QUERY_INTERFACE_JOB_DESCRIPTION` → `LIVEDATA_QUERY_JOB_DESCRIPTION`
+    - `LIVEDATA_QUERY_INTERFACE_JOB_SOFT_TIME_LIMIT` → `LIVEDATA_QUERY_JOB_SOFT_TIME_LIMIT`
+    - `LIVEDATA_QUERY_INTERFACE_JOB_TASK_QUEUE` → `LIVEDATA_QUERY_JOB_TASK_QUEUE`
+    - `LIVEDATA_QUERY_INTERFACE_JOB_HIDDEN` → `LIVEDATA_QUERY_JOB_HIDDEN`
 
 ## [v2.4.0b2 (2025-02-19)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.0b2)
 
@@ -255,11 +208,11 @@ No significant changes.
 - [#14](https://github.com/jifox/nautobot-app-livedata/issues/14) - Update pymarkdownlnt from 0.9.26 to 0.9.28
 - [#15](https://github.com/jifox/nautobot-app-livedata/issues/15) - Update coverage from 6.4 to 7.6.12
 - [#16](https://github.com/jifox/nautobot-app-livedata/issues/16) - Update ruff from 0.8.6 to 0.9.6
-- [#17](https://github.com/jifox/nautobot-app-livedata/issues/17) - Update mkdocs-include-markdown-plugin from 7.1.2 to 7.1.4.
-- [#22](https://github.com/jifox/nautobot-app-livedata/issues/22) - Update mkdocs-material from 9.5.50 to 9.6.4
-- [#23](https://github.com/jifox/nautobot-app-livedata/issues/23) - Update mkdocstrings from 0.27.0 to 0.28.1
-- [#25](https://github.com/jifox/nautobot-app-livedata/issues/25) - Update griffe from 1.1.1 to 1.5.7
-- [#32](https://github.com/jifox/nautobot-app-livedata/issues/32) - Update Nautobot-plugin-Nornir from 2.2.0 to 2.2.1
+- [#17](https://github.com/jifox/nautobot-app-livedata/issues/17) - Update `mkdocs-include-markdown-plugin` from 7.1.2 to 7.1.4.
+- [#22](https://github.com/jifox/nautobot-app-livedata/issues/22) - Update `mkdocs-material` from 9.5.50 to 9.6.4
+- [#23](https://github.com/jifox/nautobot-app-livedata/issues/23) - Update `mkdocstrings` from 0.27.0 to 0.28.1
+- [#25](https://github.com/jifox/nautobot-app-livedata/issues/25) - Update `griffe` from 1.1.1 to 1.5.7
+- [#32](https://github.com/jifox/nautobot-app-livedata/issues/32) - Update `nautobot-plugin-nornir` from 2.2.0 to 2.2.1
 
 ## [v2.4.0b1 (2025-02-15)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v2.4.0b1)
 
@@ -269,6 +222,6 @@ No significant changes.
 
 ### Fixed (v2.4.0b1)
 
-- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - Github CI workflow for dependabot
-- [#1](https://github.com/jifox/nautobot-app-livedata/issues/1) - Fixed Nautobot_database_ready_callback to wait for the database initialization of dependent apps before running the callback. This ensures that the callback is only run once the database is fully initialized and ready for use.
-- [#2](https://github.com/jifox/nautobot-app-livedata/issues/2) Fixed Read The Docs build error and also fixed the test case for the version check
+- [#45](https://github.com/jifox/nautobot-app-livedata/issues/45) - GitHub CI workflow for Dependabot
+- [#1](https://github.com/jifox/nautobot-app-livedata/issues/1) - Fixed `nautobot_database_ready_callback` to wait for the database initialization of dependent apps before running the callback. This ensures that the callback is only run once the database is fully initialized and ready for use.
+- [#2](https://github.com/jifox/nautobot-app-livedata/issues/2) - Fixed Read the Docs build error and the associated test case for the version check

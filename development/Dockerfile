@@ -63,6 +63,15 @@ COPY . /source
 ARG NAUTOBOT_VER
 ARG PYTHON_VER
 
+
+# Install the nautobot project to include Nautobot
+RUN cd /source && \
+    poetry install --no-interaction --no-ansi && \
+    # Try to install the export plugin for Poetry v2, if it fails it's probably v1 so we can ignore it
+    poetry self add poetry-plugin-export || true && \
+    mkdir /tmp/dist && \
+    poetry export --without-hashes -o /tmp/dist/requirements.txt
+
 # Constrain the Nautobot version to NAUTOBOT_VER, fall back to installing from git branch if not available on PyPi
 # In CI, this should be done outside of the Dockerfile to prevent cross-compile build failures
 ARG CI
@@ -74,7 +83,7 @@ RUN if [ -z "${CI+x}" ]; then \
     fi
 
 # Install the app
-RUN poetry install --extras all --with dev
+RUN poetry install --with dev,docs,linting,testing
 
 COPY development/nautobot_config.py ${NAUTOBOT_ROOT}/nautobot_config.py
 # !!! USE CAUTION WHEN MODIFYING LINES ABOVE

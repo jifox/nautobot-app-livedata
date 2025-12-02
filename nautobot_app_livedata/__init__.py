@@ -21,9 +21,11 @@ class LivedataConfig(NautobotAppConfig):
     required_settings = [
         "query_job_name",
     ]
-    min_version = "2.4.0"
-    max_version = "2.9999"
-    default_settings = {}
+    min_version = "3.0.0"
+    max_version = "3.9999"
+    default_settings = {
+        "query_job_task_queue": "default",
+    }
     caching_config = {}
     docs_view_name = "plugins:nautobot_app_livedata:docs"
 

@@ -1,8 +1,8 @@
 ---
 name: "CI"
 permissions:
-  contents: read
-  pull-requests: write
+  contents: "read"
+  pull-requests: "write"
 concurrency:  # Cancel any existing runs of this workflow for this same PR
   group: "${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: true
@@ -25,7 +25,7 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - name: "Checkout repository"
-        uses: "actions/checkout@v5"
+        uses: "actions/checkout@v6"
       - name: "Create change fragment"
         run: |
           mkdir -p changes
@@ -43,11 +43,14 @@ jobs:
       INVOKE_NAUTOBOT_APP_LIVEDATA_LOCAL: "True"
     steps:
       - name: "Check out repository code"
-        uses: "actions/checkout@v5"
+        uses: "actions/checkout@v6"
+      - name: Copy credentials
+        run: "cp development/creds.example.env development/creds.env"
       - name: "Setup environment"
-        uses: "networktocode/gh-action-setup-poetry-environment@v5"
+        uses: "networktocode/gh-action-setup-poetry-environment@v6"
         with:
           poetry-version: "2.1.3"
+          poetry-install-options: "--with dev,linting"
       - name: "Linting: ruff format"
         run: "poetry run invoke ruff --action format"
   ruff-lint:
@@ -56,11 +59,14 @@ jobs:
       INVOKE_NAUTOBOT_APP_LIVEDATA_LOCAL: "True"
     steps:
       - name: "Check out repository code"
-        uses: "actions/checkout@v5"
+        uses: "actions/checkout@v6"
       - name: "Setup environment"
-        uses: "networktocode/gh-action-setup-poetry-environment@v5"
+        uses: "networktocode/gh-action-setup-poetry-environment@v6"
         with:
           poetry-version: "2.1.3"
+          poetry-install-options: "--with dev,linting"
+      - name: Copy credentials
+        run: "cp development/creds.example.env development/creds.env"
       - name: "Linting: ruff"
         run: "poetry run invoke ruff --action lint"
   check-docs-build:
@@ -69,12 +75,14 @@ jobs:
       INVOKE_NAUTOBOT_APP_LIVEDATA_LOCAL: "True"
     steps:
       - name: "Check out repository code"
-        uses: "actions/checkout@v5"
+        uses: "actions/checkout@v6"
       - name: "Setup environment"
         uses: "networktocode/gh-action-setup-poetry-environment@v6"
         with:
           poetry-version: "2.1.3"
-          poetry-install-options: "--only dev,docs"
+          poetry-install-options: "--with dev,docs"
+      - name: Copy credentials
+        run: "cp development/creds.example.env development/creds.env"
       - name: "Check Docs Build"
         run: "poetry run invoke build-and-check-docs"
   poetry:
@@ -83,11 +91,14 @@ jobs:
       INVOKE_NAUTOBOT_APP_LIVEDATA_LOCAL: "True"
     steps:
       - name: "Check out repository code"
-        uses: "actions/checkout@v5"
+        uses: "actions/checkout@v6"
       - name: "Setup environment"
         uses: "networktocode/gh-action-setup-poetry-environment@v6"
         with:
           poetry-version: "2.1.3"
+          poetry-install-options: "--with dev"
+      - name: Copy credentials
+        run: "cp development/creds.example.env development/creds.env"
       - name: "Checking: poetry lock file"
         run: "poetry run invoke lock --check"
   yamllint:
@@ -96,45 +107,51 @@ jobs:
       INVOKE_NAUTOBOT_APP_LIVEDATA_LOCAL: "True"
     steps:
       - name: "Check out repository code"
-        uses: "actions/checkout@v5"
+        uses: "actions/checkout@v6"
       - name: "Setup environment"
         uses: "networktocode/gh-action-setup-poetry-environment@v6"
         with:
           poetry-version: "2.1.3"
+          poetry-install-options: "--with dev,linting"
+      - name: Copy credentials
+        run: "cp development/creds.example.env development/creds.env"
       - name: "Linting: yamllint"
         run: "poetry run invoke yamllint"
-  # markdownlint:
-  #   runs-on: "ubuntu-latest"
-  #   env:
-  #     INVOKE_NAUTOBOT_APP_LIVEDATA_LOCAL: "True"
-  #   steps:
-  #     - name: "Check out repository code"
-  #       uses: "actions/checkout@v4"
-  #     - name: "Setup environment"
-  #       uses: "networktocode/gh-action-setup-poetry-environment@v6"
-  #       with:
-  #         poetry-version: "2.1.3"
-  #     - name: "Linting: markdownlint"
-  #       run: "poetry run invoke markdownlint"
+  markdownlint:
+    runs-on: "ubuntu-latest"
+    env:
+      INVOKE_NAUTOBOT_APP_LIVEDATA_LOCAL: "True"
+    steps:
+      - name: "Check out repository code"
+        uses: "actions/checkout@v4"
+      - name: "Setup environment"
+        uses: "networktocode/gh-action-setup-poetry-environment@v6"
+        with:
+          poetry-version: "2.1.3"
+          poetry-install-options: "--with docs,dev,linting"
+      - name: Copy credentials
+        run: "cp development/creds.example.env development/creds.env"
+      - name: "Linting: markdownlint"
+        run: "poetry run invoke markdownlint"
   check-in-docker:
     needs:
       - "ruff-format"
       - "ruff-lint"
       - "poetry"
       - "yamllint"
-      # - "markdownlint"
+      - "markdownlint"
     runs-on: "ubuntu-latest"
     strategy:
       fail-fast: true
       matrix:
         python-version: ["3.11"]
-        nautobot-version: ["2.4.20"]
+        nautobot-version: ["3.0.0"]
     env:
       INVOKE_NAUTOBOT_APP_LIVEDATA_PYTHON_VER: "${{ matrix.python-version }}"
       INVOKE_NAUTOBOT_APP_LIVEDATA_NAUTOBOT_VER: "${{ matrix.nautobot-version }}"
     steps:
       - name: "Check out repository code"
-        uses: "actions/checkout@v5"
+        uses: "actions/checkout@v6"
       - name: "Setup environment"
         uses: "networktocode/gh-action-setup-poetry-environment@v6"
         with:
@@ -155,10 +172,13 @@ jobs:
           context: "./"
           push: false
           load: true
-          tags: "${{ env.APP_NAME }}/nautobot:${{ matrix.nautobot-version }}-py${{ matrix.python-version }}"
+          tags: >-
+            ${{ env.APP_NAME }}/nautobot:${{ matrix.nautobot-version }}-py${{ matrix.python-version }}
           file: "./development/Dockerfile"
-          cache-from: "type=gha,scope=${{ matrix.nautobot-version }}-py${{ matrix.python-version }}"
-          cache-to: "type=gha,scope=${{ matrix.nautobot-version }}-py${{ matrix.python-version }}"
+          cache-from: >-
+            type=gha,scope=${{ matrix.nautobot-version }}-py${{ matrix.python-version }}
+          cache-to: >-
+            type=gha,scope=${{ matrix.nautobot-version }}-py${{ matrix.python-version }}
           build-args: |
             NAUTOBOT_VER=${{ matrix.nautobot-version }}
             PYTHON_VER=${{ matrix.python-version }}
@@ -175,23 +195,24 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.10"]  # 3.12 stable is tested in unittest_report stage.
+        python-version: ["3.10"]
         db-backend: ["postgresql"]
-        nautobot-version: ["2.4.20"]
+        nautobot-version: ["3.0.0"]
         include:
-          - python-version: "3.12"
+          # - python-version: "3.11"
+          #   db-backend: "mysql"
+          #   nautobot-version: "stable"
+          - python-version: "3.13"
             db-backend: "postgresql"
-            nautobot-version: "2.4.5"
-          - python-version: "3.12"
-            db-backend: "mysql"
-            nautobot-version: "2.4.23"
+            nautobot-version: "stable"
     runs-on: "ubuntu-latest"
+    timeout-minutes: 30  # Ensure this is sufficient (default is 360)
     env:
       INVOKE_NAUTOBOT_APP_LIVEDATA_PYTHON_VER: "${{ matrix.python-version }}"
       INVOKE_NAUTOBOT_APP_LIVEDATA_NAUTOBOT_VER: "${{ matrix.nautobot-version }}"
     steps:
       - name: "Check out repository code"
-        uses: "actions/checkout@v5"
+        uses: "actions/checkout@v6"
       - name: "Setup environment"
         uses: "networktocode/gh-action-setup-poetry-environment@v6"
         with:
@@ -213,10 +234,13 @@ jobs:
           context: "./"
           push: false
           load: true
-          tags: "${{ env.APP_NAME }}/nautobot:${{ matrix.nautobot-version }}-py${{ matrix.python-version }}"
+          tags: >-
+            ${{ env.APP_NAME }}/nautobot:${{ matrix.nautobot-version }}-py${{ matrix.python-version }}
           file: "./development/Dockerfile"
-          cache-from: "type=gha,scope=${{ matrix.nautobot-version }}-py${{ matrix.python-version }}"
-          cache-to: "type=gha,scope=${{ matrix.nautobot-version }}-py${{ matrix.python-version }}"
+          cache-from: >-
+            type=gha,scope=${{ matrix.nautobot-version }}-py${{ matrix.python-version }}
+          cache-to: >-
+            type=gha,scope=${{ matrix.nautobot-version }}-py${{ matrix.python-version }}
           build-args: |
             NAUTOBOT_VER=${{ matrix.nautobot-version }}
             PYTHON_VER=${{ matrix.python-version }}
@@ -235,7 +259,7 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - name: "Check out repository code"
-        uses: "actions/checkout@v5"
+        uses: "actions/checkout@v6"
         with:
           fetch-depth: "0"
       - name: "Setup environment"
@@ -258,7 +282,7 @@ jobs:
       contents: "write"
     steps:
       - name: "Check out repository code"
-        uses: "actions/checkout@v5"
+        uses: "actions/checkout@v6"
       - name: "Setup environment"
         uses: "networktocode/gh-action-setup-poetry-environment@v6"
         with:
@@ -291,7 +315,7 @@ jobs:
       INVOKE_NAUTOBOT_APP_LIVEDATA_LOCAL: "True"
     steps:
       - name: "Check out repository code"
-        uses: "actions/checkout@v5"
+        uses: "actions/checkout@v6"
       - name: "Setup environment"
         uses: "networktocode/gh-action-setup-poetry-environment@v6"
         with:
@@ -319,11 +343,11 @@ jobs:
     env:
       SLACK_WEBHOOK_URL: "${{ secrets.SLACK_WEBHOOK_URL }}"
       SLACK_MESSAGE: >-
-        *NOTIFICATION: NEW-RELEASE-PUBLISHED*\n
-        Repository: <${{ github.server_url }}/${{ github.repository }}|${{ github.repository }}>\n
-        Release: <${{ github.server_url }}/${{ github.repository }}/releases/tag/
-        ${{ github.ref_name }}|${{ github.ref_name }}>\n
-        Published by: <${{ github.server_url }}/${{ github.actor }}|${{ github.actor }}>
+          *NOTIFICATION: NEW-RELEASE-PUBLISHED*\n
+          Repository: ${{ github.repository }} (<${{ github.server_url }}/${{ github.repository }}|repo>)\n
+          Release: ${{ github.ref_name }}\n
+          Release link: <${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ github.ref_name }}|link>\n
+          Published by: ${{ github.actor }} (<${{ github.server_url }}/${{ github.actor }}|actor>)
     steps:
       - name: "Send a notification to Slack"
         # ENVs cannot be used directly in job.if. This is a workaround to check

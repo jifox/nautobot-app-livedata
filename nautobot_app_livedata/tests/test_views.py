@@ -13,13 +13,12 @@ from nautobot.extras.jobs import RunJobTaskFailed
 from nautobot.extras.models import Job, JobResult
 from nautobot.users.models import ObjectPermission
 
+from .conftest import create_db_data
 from nautobot_app_livedata.api.views import (
     LivedataQueryDeviceApiView,
     LivedataQueryInterfaceApiView,
 )
 from nautobot_app_livedata.utilities.permission import create_permission
-
-from .conftest import create_db_data
 
 User = get_user_model()
 
@@ -343,7 +342,7 @@ class LivedataPrimaryDeviceApiViewTest(APITransactionTestCase):
         device = self.device_list[0]
 
         url = reverse(
-            "plugins-api:nautobot_app_livedata-api:livedata-managed-device-api",
+            "plugins-api:nautobot_app_livedata-api:livedata-primary-device-api",
             kwargs={
                 "pk": device.id,
                 "object_type": "dcim.device",
@@ -361,7 +360,7 @@ class LivedataPrimaryDeviceApiViewTest(APITransactionTestCase):
         interface = device.interfaces.first()
 
         url = reverse(
-            "plugins-api:nautobot_app_livedata-api:livedata-managed-device-api",
+            "plugins-api:nautobot_app_livedata-api:livedata-primary-device-api",
             kwargs={
                 "pk": interface.id,
                 "object_type": "dcim.interface",
@@ -379,7 +378,7 @@ class LivedataPrimaryDeviceApiViewTest(APITransactionTestCase):
         interface = device.interfaces.first()
 
         url = reverse(
-            "plugins-api:nautobot_app_livedata-api:livedata-managed-device-api",
+            "plugins-api:nautobot_app_livedata-api:livedata-primary-device-api",
             kwargs={
                 "pk": interface.id,
                 "object_type": "dcim.interface",
@@ -397,7 +396,7 @@ class LivedataPrimaryDeviceApiViewTest(APITransactionTestCase):
         device = self.device_list[0]
 
         url = reverse(
-            "plugins-api:nautobot_app_livedata-api:livedata-managed-device-api",
+            "plugins-api:nautobot_app_livedata-api:livedata-primary-device-api",
             kwargs={
                 "pk": device.id,
                 "object_type": "invalid.type",
@@ -411,7 +410,7 @@ class LivedataPrimaryDeviceApiViewTest(APITransactionTestCase):
     def test_primary_device_api_with_invalid_pk(self):
         """Test primary device API with invalid primary key."""
         url = reverse(
-            "plugins-api:nautobot_app_livedata-api:livedata-managed-device-api",
+            "plugins-api:nautobot_app_livedata-api:livedata-primary-device-api",
             kwargs={
                 "pk": "00000000-0000-0000-0000-000000000000",
                 "object_type": "dcim.device",
@@ -428,7 +427,7 @@ class LivedataPrimaryDeviceApiViewTest(APITransactionTestCase):
         device = self.device_list[0]
 
         url = reverse(
-            "plugins-api:nautobot_app_livedata-api:livedata-managed-device-api",
+            "plugins-api:nautobot_app_livedata-api:livedata-primary-device-api",
             kwargs={
                 "pk": device.id,
                 "object_type": "dcim.device",
@@ -450,7 +449,7 @@ class LivedataPrimaryDeviceApiViewTest(APITransactionTestCase):
         interface = device.interfaces.first()
 
         url = reverse(
-            "plugins-api:nautobot_app_livedata-api:livedata-managed-device-api",
+            "plugins-api:nautobot_app_livedata-api:livedata-primary-device-api",
             kwargs={
                 "pk": interface.id,
                 "object_type": "dcim.interface",

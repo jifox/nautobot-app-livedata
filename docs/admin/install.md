@@ -57,9 +57,9 @@ PLUGINS_CONFIG = {
 }
 ```
 
-### Example Configuration for `nautobot_plugin_nornir`
+### Example Configuration for Nautobot Plugin Nornir
 
-The following configuration shows an example of how to configure the [Nautobot_plugin_Nornir](https://docs.nautobot.com/projects/plugin-nornir/en/latest) app:
+The following configuration shows an example of how to configure the [Nautobot Plugin Nornir](https://docs.nautobot.com/projects/plugin-nornir/en/latest) app:
 
 ```python
 # In your nautobot_config.py
@@ -145,7 +145,7 @@ You can configure the show commands to be executed at the platform level. The cu
 
 ![Custom Fields Table](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-custom-fields-table.png)
 
-The [Nautobot-plugin-Nornir](https://docs.nautobot.com/projects/plugin-nornir/en/latest/) uses Kirk Byers' [Netmiko](https://github.com/ktbyers/netmiko) library to collect data. Data is collected using the `send_command` method with platform-specific show commands.
+The [Nautobot Plugin Nornir](https://docs.nautobot.com/projects/plugin-nornir/en/latest/) uses Kirk Byers' [Netmiko](https://github.com/ktbyers/netmiko) library to collect data. Data is collected using the `send_command` method with platform-specific show commands.
 
 Open the Nautobot Platform model and configure the custom fields with the show commands that are executed on the device.
 
@@ -183,10 +183,11 @@ Multiple filters can be chained in a single line by separating each filter with 
 
 **Examples:**
 
-- `show logging | i {{intf_number}} !!EXACT:{{intf_number}}!!` — Filters the output to contain only lines that contain the interface number as a whole word (e.g., matches `Gi1/0/1`, `1/0/1`, `^1/0/1`, `1/0/1$` but not `11/0/1`, `1/0/11`, `foo1/0/1bar`).
+- `show logging | i {{intf_number}} !!EXACT:{{intf_number}}!!` — Filters the output to contain only lines that contain the interface number as a whole word (for example, matches `Gi1/0/1`, `1/0/1` with trailing whitespace, `^1/0/1`, or `1/0/1$` but not `11/0/1`, `1/0/11`, or `foo1/0/1bar`).
 - `show logging !!LAST:100!!` — Returns only the last 100 lines of the output.
 
 **Supported Filters:**
+
 - `!!EXACT:<pattern>!!` — Only lines that contain `<pattern>` as a whole word (ignoring leading/trailing whitespace, not matching substrings within other numbers or words)
 - `!!LAST:<N>!!` — Only the last N lines
 - `!!FIRST:<N>!!` — Only the first N lines

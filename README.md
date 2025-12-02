@@ -45,6 +45,8 @@ This app addresses the need for dynamic and up-to-date network information, allo
 
   ![Cleanup Job Results Screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-app-cleanup-job-results.png)
 
+- Job to align Nautobot job queues with the default worker so every Job executes on the shared Celery queue.
+
 More screenshots can be found in the [Using the App](https://nautobot-app-livedata.readthedocs.io/en/latest/user/app_use_cases/) page in the documentation. Here's a quick overview of some of the app's added functionality:
 
 ## Documentation
@@ -77,7 +79,7 @@ You can now append a filter command to the end of a device command using the `!!
 
 #### Examples
 
-- `show logging | i {{intf_number}} !!EXACT:{{intf_number}}!!` — Filters the output to contain only lines that contain the interface number as a whole word (e.g., matches `Gi1/0/1`, `1/0/1`, `^1/0/1`, `1/0/1$` but not `11/0/1`, `1/0/11`, `foo1/0/1bar`).
+- `show logging | i {{intf_number}} !!EXACT:{{intf_number}}!!` — Filters the output to contain only lines that contain the interface number as a whole word (for example, matches `Gi1/0/1`, `1/0/1` with trailing whitespace, `^1/0/1`, or `1/0/1$` but not `11/0/1`, `1/0/11`, or `foo1/0/1bar`).
 - `show logging !!LAST:100!!` — Returns only the last 100 lines of the output.
 - `show logging !!FIRST:10!!` — Returns only the first 10 lines of the output.
 - `show logging !!EXACT:{{intf_number}}!!FIRST:5!!` — Filters for lines containing the interface number, then returns only the first 5 matching lines.

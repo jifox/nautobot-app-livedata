@@ -3,6 +3,7 @@
 ## How is the Primary Device determined?
 
 If multiple devices share a single management plane, it is necessary to determine the Primary Device. The Primary Device is the one used for live data queries when several devices are configured for a single interface.
+
 The Primary Device is selected based on the following logic:
 
 1. The device associated with the object is initially considered as the Primary Device.

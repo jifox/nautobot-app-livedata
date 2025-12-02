@@ -1,7 +1,7 @@
 ---
 nautobot_app_livedata:
   project_name: "dev-livedata"
-  nautobot_ver: "2.4.20"
+  nautobot_ver: "3.0.0"
   python_ver: "3.12"
   local: false
   compose_dir: "development"
@@ -14,6 +14,7 @@ nautobot_app_livedata:
 # The following is an example of using MySQL as the database backend
 # ---
 # nautobot_app_livedata:
+#   project_name: "dev-livedata"
 #   compose_files:
 #     - "docker-compose.base.yml"
 #     - "docker-compose.redis.yml"

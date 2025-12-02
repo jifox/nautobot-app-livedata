@@ -2,9 +2,8 @@
 
 from django.test import TestCase
 
-from nautobot_app_livedata.utilities.contenttype import ContentTypeUtils
-
 from .conftest import create_db_data, wait_for_debugger_connection
+from nautobot_app_livedata.utilities.contenttype import ContentTypeUtils
 
 
 class ContentTypeUtilsTest(TestCase):
