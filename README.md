@@ -1,15 +1,5 @@
 # Nautobot App Livedata
 
-<!--
-Developer Note - Remove Me!
-
-The README will have certain links/images broken until the PR is merged into `develop`. Update the GitHub links with whichever branch you're using (main etc.) if different.
-
-The logo of the project is a placeholder (docs/images/icon-livedata.png) - please replace it with your app icon, making sure it's at least 200x200px and has a transparent background!
-
-To avoid extra work and temporary links, make sure that publishing docs (or merging a PR) is done at the same time as setting up the docs site on RTD, then test everything.
--->
-
 ![Nautobot App Livedata logo](https://raw.githubusercontent.com/jifox/Nautobot-app-livedata/develop/docs/images/icon-livedata.png)
 
 [![CI Status](https://github.com/jifox/Nautobot-app-livedata/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jifox/Nautobot-app-livedata/actions)
@@ -21,14 +11,21 @@ An [App](https://networktocode.com/Nautobot-apps/) for [Nautobot](https://Nautob
 
 ## Overview
 
-The [Nautobot App LiveData](https://github.com/jifox/nautobot-app-livedata/) is providing real-time data from network devices that are supported by [Netmiko](https://github.com/ktbyers/netmiko).
+Lightweight Nautobot plugin that fetches and displays live device and interface command output (via Netmiko) in Nautobot UI detail views.
 
-At the moment, the app is supporting only interface specific data. The data is collected from the devices via platform specific show commands and will be presented in the interface's 'Life Data' tab.
+**Compatibility:** Nautobot 3.0+.
 
-This app addresses the need for dynamic and up-to-date network information, allowing network administrators and engineers to make informed decisions based on the latest data.
+**Primary features:**
+- Live Data tabs on `Device` and `Interface` detail pages.
+- Configurable per-platform show commands (set at Platform objects).
+- Inline filtering of command output using `!!` filter syntax (EXACT/LAST/FIRST).
+- Background jobs included for scheduling and housekeeping:
+  - `LivedataQueryJob` — run queries against devices.
+  - `LivedataCleanupJobResultsJob` — remove stale collected results.
+  - `EnforceDefaultJobQueueJob` — align Job queue assignments with a default worker queue.
 
 ### Screenshots
-
+ 
 - Live Data Interface Output for interfaces
 
   ![Livedata output screenshot](https://raw.githubusercontent.com/jifox/nautobot-app-livedata/develop/docs/images/livedata-app-output.png)
