@@ -176,7 +176,7 @@ worker2_container_name = (
 )
 backend_network_name = f"{nautobot_container_name}_net"
 docker_registry = os.getenv("NAUTOBOT_DOCKER_REGISTRY", "local").replace("_", "-").lower()
-python_ver = os.getenv("PYTHON_VER", "3.12")
+python_ver = os.getenv("PYTHON_VER", "3.13")
 
 # Defined in local.env or creds.env
 project_name = str("-".join(str(CONFIGURATION_NAMESPACE).split("_")[:-1]).replace("_", "-")).lower()
@@ -186,7 +186,7 @@ namespace = Collection(CONFIGURATION_NAMESPACE)
 namespace.configure(
     {
         CONFIGURATION_NAMESPACE: {
-            "nautobot_ver": "3.0.1",  # e.g. 'pyproject' or '3.0.1'
+            "nautobot_ver": "3.0.0",  # e.g. 'pyproject' or '3.0.1'
             "project_name": project_name,
             "project_suffix": project_suffix,
             "nautobot_image_name": docker_registry + "/" + nautobot_container_name,
@@ -201,7 +201,6 @@ namespace.configure(
                 "docker-compose.redis.yml",
                 "docker-compose.postgres.yml",
                 "docker-compose.dev.yml",
-                "docker-compose.override.yml",
             ],
             "templates_dir": compose_dir_setup().joinpath("templates"),
             "compose_http_timeout": "86400",

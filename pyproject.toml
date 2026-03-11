@@ -30,7 +30,7 @@ include = ["LICENSE"]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.14"
-nautobot = ">=3.0.0,<4.0.0"
+nautobot = {version = "3.0.0", python = "3.13"}
 "to-json-schema" = "~=1.0.1"
 jsonschema = "^4.7.0"
 "python-dotenv" = "~=1.2.1"
