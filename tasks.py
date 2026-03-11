@@ -386,6 +386,8 @@ def _build_test_command(
     else:
         command = f"nautobot-server --config={module_metadata['config_path']} test {target_label}"
 
+    command += " --noinput"
+
     if keepdb:
         command += " --keepdb"
     if failfast:
