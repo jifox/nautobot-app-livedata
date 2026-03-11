@@ -201,7 +201,7 @@ namespace.configure(
                 "docker-compose.redis.yml",
                 "docker-compose.postgres.yml",
                 "docker-compose.dev.yml",
-                "docker-compose.ports.yml",
+                "docker-compose.override.yml",
             ],
             "templates_dir": compose_dir_setup().joinpath("templates"),
             "compose_http_timeout": "86400",
