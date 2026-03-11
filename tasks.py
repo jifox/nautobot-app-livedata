@@ -1,5 +1,4 @@
 """Tasks for use with Invoke.
-
 Copyright (c) 2023, Network to Code, LLC
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -11,69 +10,110 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+# ruff: noqa: E501
 
+from functools import lru_cache
 import json
 import os
 from pathlib import Path
 import re
 import sys
-import time
+from time import sleep
 
 from dotenv import load_dotenv
 from invoke.collection import Collection
-from invoke.config import Config
 from invoke.context import Context
 from invoke.exceptions import Exit, UnexpectedExit
 from invoke.tasks import Task, task as invoke_task
 import jinja2
 import toml
-import yaml
-
-# ------------------------------------------------------------------------------
-# ENVIRONMENT LOADING
-# ------------------------------------------------------------------------------
-
-# Environment files are loaded in order; later files override earlier ones.
-ENVIRONMENT_FILENAMES = ["dev.env", "development.env", "local.env", ".env", ".creds.env", "creds.env"]
-ENVIRONMENT_DIRS = [
-    ".",  # Current directory
-    "development",  # Development directory
-    "environments",  # Environments directory
-]
-
-# Load environment variables from the specified files
-for _envfile in ENVIRONMENT_FILENAMES:
-    for _dir in ENVIRONMENT_DIRS:
-        _dir_path = os.path.join(os.getcwd(), _dir) if not os.path.isabs(_dir) else _dir
-        if not os.path.exists(_dir_path):
-            continue
-        _dir_path = os.path.abspath(_dir_path)
-        _fname = os.path.join(_dir_path, _envfile)
-        if os.path.isfile(_fname):
-            print(f"Loading environment variables from {_fname}")
-            load_dotenv(_fname, override=True)
+import yaml  # Added for parsing docker compose config output
 
 
-# ------------------------------------------------------------------------------
-# CONFIGURATION
-# ------------------------------------------------------------------------------
+def _invoke_echo_enabled(ctx) -> bool:
+    """Return True if Invoke was run with -e/--echo.
 
-# This is the invoke configuration namespace used as context for tasks (invoke.yml)
-# Can be overridden via INVOKE_NAUTOBOT_APP_LIVEDATA_* environment variables
-CONFIGURATION_NAMESPACE = os.getenv("CONFIGURATION_NAMESPACE", "nautobot_app_livedata")
-
-# Container names from environment (set in local.env or creds.env)
-DB_CONTAINER_NAME = os.getenv("NAUTOBOT_DB_HOST", "db")
-REDIS_CONTAINER_NAME = os.getenv("NAUTOBOT_REDIS_HOST", "redis")
-
-# Maximum time to wait for database to be ready (in seconds)
-# MySQL can take longer to initialize than PostgreSQL
-DB_WAIT_TIMEOUT = 120
+    This function reads `ctx.config.run.echo` when possible, and falls back
+    to `ctx.config.get("run", {}).get("echo")` for mapping-like contexts.
+    """
+    try:
+        return bool(ctx.config.run.echo)
+    except Exception:
+        try:
+            return bool(ctx.config.get("run", {}).get("echo", False))
+        except Exception:
+            return False
 
 
-# ------------------------------------------------------------------------------
-# HELPER FUNCTIONS
-# ------------------------------------------------------------------------------
+loaded_environment_files = []
+
+
+def initialize_environment():
+    """Initialize environment variables from .env files."""
+    # Set the environment files to be sourced in order. The highest priority file should be listed last.
+    default_env_filenames = ["dev.env", "development.env", "local.env", ".env", ".creds.env", "creds.env"]
+    default_env_dirs = [
+        ".",  # Current directory
+        "development",  # Development directory
+        "environments",  # Environments directory
+    ]
+    configured_env_filenames = os.getenv("ENVIRONMENT_FILENAMES", default_env_filenames)
+    configured_env_dirs = os.getenv("ENVIRONMENT_DIRS", default_env_dirs)
+    # Load environment variables from the specified files
+    loaded_environment_files = []
+    for envfile in configured_env_filenames:
+        for dir in configured_env_dirs:
+            if not os.path.isabs(dir):
+                dir = os.path.join(os.getcwd(), dir)
+            if not os.path.exists(dir):
+                continue
+            # If the file exists, source it
+            # If the directory is not absolute, make it absolute
+            dir = os.path.abspath(dir)
+            fname = os.path.join(dir, envfile)
+            if os.path.isfile(fname):
+                load_dotenv(fname, override=True)
+                loaded_environment_files.append(fname)
+
+
+initialize_environment()
+
+
+# This is the invoke configuration name that is used as context for the tasks. (invoke.yml)
+try:
+    CONFIGURATION_NAMESPACE = os.getenv("CONFIGURATION_NAMESPACE")
+except TypeError:
+    raise TypeError(
+        "CONFIGURATION_NAMESPACE environment variable is not set. Please set "
+        "it to the name of your configuration namespace."
+    )
+
+VERSION_PATTERN = re.compile(r"\d+(?:\.\d+)+")
+
+REPOSITORY_ROOT = Path(__file__).resolve().parent
+
+
+def _relative_posix_path(path: Path) -> str:
+    """Return the repository-relative POSIX path string if possible."""
+    try:
+        return path.relative_to(REPOSITORY_ROOT).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
+def _absolute_path(path_str: str) -> Path:
+    """Convert a potentially relative path string to an absolute Path."""
+    path = Path(path_str)
+    if not path.is_absolute():
+        path = REPOSITORY_ROOT / path
+    return path
+
+
+@lru_cache(maxsize=1)
+def _load_pyproject_data() -> dict:
+    """Load pyproject.toml once for reuse across helper functions."""
+    with open(REPOSITORY_ROOT / "pyproject.toml", "r", encoding="utf8") as pyproject:
+        return toml.load(pyproject)
 
 
 def is_truthy(arg):
@@ -82,10 +122,9 @@ def is_truthy(arg):
     Examples:
         >>> is_truthy('yes')
         True
-
     Args:
         arg (str): Truthy string (True values are y, yes, t, true, on and 1; false values are n, no,
-            f, false, off and 0. Raises ValueError if val is anything else.
+        f, false, off and 0. Raises ValueError if val is anything else.
     """
     if isinstance(arg, bool):
         return arg
@@ -93,176 +132,319 @@ def is_truthy(arg):
     val = str(arg).lower()
     if val in ("y", "yes", "t", "true", "on", "1"):
         return True
-    if val in ("n", "no", "f", "false", "off", "0"):
+    elif val in ("n", "no", "f", "false", "off", "0"):
         return False
-    raise ValueError(f"Invalid truthy value: `{arg}`")
-
-
-def get_poetry_package_version(directory=None) -> tuple[str, str]:
-    """Return the package name and version reported by ``poetry version`` for ``directory``.
-
-    Args:
-        directory (str | Path): Directory that contains the desired Poetry project.
-
-    Returns:
-        tuple[str, str]: The package name and version as reported by Poetry.
-
-    Raises:
-        Exit: If the directory does not exist or Poetry does not return the expected output.
-    """
-    if directory:
-        resolved_path = Path(directory).expanduser().resolve()
-        if not resolved_path.is_dir():
-            raise Exit(f"Directory '{resolved_path}' does not exist.")
     else:
-        resolved_path = Path.cwd()
-
-    # Read the poetry version with a new context
-    new_config = Config()
-    new_context = Context(config=new_config)
-    # use a new context to avoid changing the working directory of the main context
-    with new_context.cd(str(resolved_path)):
-        command = "poetry version"
-        try:
-            result = new_context.run(command, hide=True)
-        except UnexpectedExit as exc:  # pragma: no cover - surfaced to user with clear message
-            raise Exit(f"Failed to run 'poetry version' in {resolved_path}.") from exc
-
-    poetry_output = result.stdout.strip().splitlines()
-    if not poetry_output:
-        raise Exit("'poetry version' returned no output.")
-
-    package_info = poetry_output[-1].strip().split(maxsplit=1)
-    if len(package_info) != 2:
-        raise Exit(
-            f"Unexpected 'poetry version' output. Expected '<package> <version>' but received: '{poetry_output[-1]}'"
-        )
-
-    return package_info[0], package_info[1]
+        raise ValueError(f"Invalid truthy value: `{arg}`")
 
 
-def module_name():
-    """Get the module name from the poetry configuration."""
-    module_name, _ = get_poetry_package_version()
-    return module_name
+def compose_dir_setup():
+    """Determine the compose directory based on existing paths."""
+    if Path(__file__).parent.joinpath("development").exists():
+        compose_dir = Path(__file__).parent.joinpath("development").resolve()
+    elif Path(__file__).parent.joinpath("environments").exists():
+        compose_dir = Path(__file__).parent.joinpath("environments").resolve()
+    return compose_dir
 
-
-def module_version():
-    """Get the module version from the poetry configuration."""
-    _, module_version = get_poetry_package_version()
-    return module_version
-
-
-# ------------------------------------------------------------------------------
-# INVOKE NAMESPACE CONFIGURATION
-# ------------------------------------------------------------------------------
 
 # Use pyinvoke configuration for default values, see http://docs.pyinvoke.org/en/stable/concepts/configuration.html
 # Variables may be overwritten in invoke.yml or by the environment variables INVOKE_NAUTOBOT_xxx
+if not CONFIGURATION_NAMESPACE.__contains__("_"):
+    print(
+        "ERROR: CONFIGURATION_NAMESPACE must contain at least one underscore "
+        "(_) character to separate project name and suffix."
+    )
+    sys.exit(1)
+
+
+# The Nautobot container name is unique on all swarm nodes
+nautobot_container_name = os.getenv("NAUTOBOT_CONTAINER_NAME", "nautobot").replace("_", "-").lower()
+# Derived unique Container names as default
+celery_container_name = (
+    os.getenv("NAUTOBOT_CELERY_CONTAINER_NAME", "celery-beat-" + nautobot_container_name).replace("_", "-").lower()
+)
+db_container_name = os.getenv("NAUTOBOT_DB_HOST", "db-" + nautobot_container_name).replace("_", "-").lower()
+mkdocs_container_name = (
+    os.getenv("NAUTOBOT_MKDOCS_CONTAINER_NAME", "mkdocs-" + nautobot_container_name).replace("_", "-").lower()
+)
+redis_container_name = os.getenv("NAUTOBOT_REDIS_HOST", "redis-" + nautobot_container_name).replace("_", "-").lower()
+worker_container_name = (
+    os.getenv("NAUTOBOT_WORKER_CONTAINER_NAME", "worker-" + nautobot_container_name).replace("_", "-").lower()
+)
+worker2_container_name = (
+    os.getenv("NAUTOBOT_WORKER2_CONTAINER_NAME", "worker2-" + nautobot_container_name).replace("_", "-").lower()
+)
+backend_network_name = f"{nautobot_container_name}_net"
+docker_registry = os.getenv("NAUTOBOT_DOCKER_REGISTRY", "local").replace("_", "-").lower()
+python_ver = os.getenv("PYTHON_VER", "3.12")
+
+# Defined in local.env or creds.env
+project_name = str("-".join(str(CONFIGURATION_NAMESPACE).split("_")[:-1]).replace("_", "-")).lower()
+project_suffix = str(CONFIGURATION_NAMESPACE).split("_")[-1]
+
 namespace = Collection(CONFIGURATION_NAMESPACE)
 namespace.configure(
     {
         CONFIGURATION_NAMESPACE: {
-            "nautobot_ver": "3.0.1",  # Use 'pyproject' to use the version from pyproject.toml
-            "project_name": "-".join(
-                CONFIGURATION_NAMESPACE.split("_")[0:-1]
-            ),  # e.g. 'nautobot_3_app_dev' -> 'nautobot-3-app'
-            "project_suffix": "-".join(CONFIGURATION_NAMESPACE.split("_")[-1:]),  # e.g. 'nautobot_3_app_dev' -> 'dev'
-            "python_ver": "3.12",
+            "nautobot_ver": "3.0.1",  # e.g. 'pyproject' or '3.0.1'
+            "project_name": project_name,
+            "project_suffix": project_suffix,
+            "nautobot_image_name": docker_registry + "/" + nautobot_container_name,
+            "python_ver": python_ver,
             "local": False,
             "use_django_extensions": True,
             "docker_swarm_mode": False,
-            "render_templates": False,
-            "compose_dir": os.path.join(os.path.dirname(__file__), "development/"),
+            "docker_registry": docker_registry,
+            "compose_dir": compose_dir_setup(),
             "compose_files": [
                 "docker-compose.base.yml",
                 "docker-compose.redis.yml",
                 "docker-compose.postgres.yml",
                 "docker-compose.dev.yml",
+                "docker-compose.ports.yml",
             ],
-            "template_dir": os.path.join(os.path.dirname(__file__), "templates"),
+            "templates_dir": compose_dir_setup().joinpath("templates"),
             "compose_http_timeout": "86400",
-            "nautobot_container_name": "nautobot",
-            "db_container_name": DB_CONTAINER_NAME,
-            "redis_container_name": REDIS_CONTAINER_NAME,
+            # Container names
+            "celery_container_name": celery_container_name,
+            "nautobot_container_name": nautobot_container_name,
+            "db_container_name": db_container_name,
+            "redis_container_name": redis_container_name,
+            # the celery_container_name key was accidentally duplicated above; the
+            # second occurrence has been removed to avoid F601 (duplicate key).
+            "worker_container_name": worker_container_name,
+            "worker2_container_name": worker2_container_name,
+            "backend_network_name": backend_network_name,
+            "mkdocs_container_name": mkdocs_container_name,
+            # the docker_registry key is already defined earlier in this dict; drop
+            # the duplicate occurrence here.
+            # Other settings
+            "render_templates": False,  # Set to True to render templates before running docker compose
+            # Build options: docker build target (one of: "final", "dev", "final-dev").
+            # If set to None (default), no --target flag will be passed to docker build.
+            "build_target": None,
+            # Settings for Traefik integration
+            "traefik_enabled": False,
+            "traefik_external_overlay_network": "t3_proxy",  # only used if traefik_enabled is True
+            "public_service_dns": None,  # e.g. "nautobot.example.com"
         }
     }
 )
 
 
 def _parse_pyproject_nautobot_version():
-    """Get the Nautobot version from the pyproject.toml file.
-
-    Parse Pyproject.toml to get the Nautobot version constraint and return
-    the lowest explicit version that satisfies the constraint. This covers
-    literal versions and ranges such as '~3.0.0', '>=3.0.0', '<4.0.0,>=3.0.0',
-    and '>=3.0.0,<4.0.0'.
-    """
-    with open("pyproject.toml", "r", encoding="utf8") as pyproject:
-        parsed_toml = toml.load(pyproject)
-
-    # 1) Try legacy Poetry layout: [tool.poetry.dependencies]
-    poetry_deps = parsed_toml.get("tool", {}).get("poetry", {}).get("dependencies")
-    if isinstance(poetry_deps, dict) and "nautobot" in poetry_deps:
-        nautobot_entry = poetry_deps["nautobot"]
-        if isinstance(nautobot_entry, dict):
-            nautobot_spec = nautobot_entry.get("version")
-        else:
-            nautobot_spec = nautobot_entry
-        if nautobot_spec:
-            return _extract_min_version_from_spec(str(nautobot_spec))
-
-    # 2) Try PEP 621 layout: [project] dependencies can be a list or table
-    project = parsed_toml.get("project", {})
-    deps = project.get("dependencies")
-    nautobot_spec = None
-    if isinstance(deps, dict):
-        # mapping-style dependencies
-        nautobot_spec = deps.get("nautobot")
-    elif isinstance(deps, list):
-        # list-style dependencies like "nautobot~=3.0.0" or "nautobot >=3.0"
-        for item in deps:
-            if isinstance(item, str) and item.strip().startswith("nautobot"):
-                # strip the package name and capture the specifier portion
-                remainder = item.strip()[len("nautobot") :].strip()
-                nautobot_spec = remainder or None
-                break
-
-    if nautobot_spec:
-        return _extract_min_version_from_spec(str(nautobot_spec))
-
-    # If we reach here, we couldn't find a Nautobot spec in pyproject.toml
-    raise Exit("Could not determine Nautobot version from pyproject.toml (expected [tool.poetry] or [project] layout)")
+    """Get the Nautobot version from poetry."""
+    # Use poetry show nautobot to get the version installed in the current environment.
+    # Create a new context and run the command in same directory as this source file
+    new_context = Context()
+    with new_context.cd(str(REPOSITORY_ROOT)):
+        result = new_context.run("poetry show -f json nautobot", hide=True)
+    new_context = None
+    # extract the version from the JSON output
+    nautobot_info = json.loads(result.stdout.strip())
+    if not nautobot_info or "version" not in nautobot_info:
+        raise Exit("Nautobot version not found in Poetry environment.")
+    return nautobot_info["version"]
 
 
-# Regex pattern to match dotted version strings (e.g., "3.0.0", "3.0")
-VERSION_PATTERN = re.compile(r"\d+(?:\.\d+)+")
+def _discover_package_dir(dependency_name: str, base_path: Path) -> Path:
+    """Return the Python package directory for the editable dependency."""
+    slug_candidate = dependency_name.replace("-", "_")
+    candidate_path = base_path / slug_candidate
+    if candidate_path.is_dir():
+        return candidate_path
+
+    for child in sorted(base_path.iterdir()):
+        if child.is_dir() and (child / "__init__.py").is_file():
+            return child
+
+    raise Exit(f"Unable to locate a Python package directory for '{dependency_name}' under {base_path.as_posix()}.")
 
 
-def _extract_min_version_from_spec(version_spec: str) -> str:
-    """Return the lowest dotted version snippet from a Poetry constraint.
+def _build_editable_module_metadata(dependency_name: str, dependency_spec: dict) -> dict:
+    """Create metadata needed to run tests for an editable dependency."""
+    dependency_path = dependency_spec.get("path")
+    if not dependency_path:
+        raise Exit(f"Editable dependency '{dependency_name}' is missing a path attribute in pyproject.toml.")
 
-    Args:
-        version_spec: A version constraint string such as '~3.0.0' or
-            '>=3.0.0,<4.0.0'.
+    base_path = _absolute_path(dependency_path)
+    if not base_path.exists():
+        raise Exit(f"Editable dependency '{dependency_name}' references path {dependency_path}, which does not exist.")
 
-    Returns:
-        The lowest dotted version extracted from the constraint. Falls back to
-        filtering non-alphanumeric characters if no numeric version is found.
-    """
-    normalized_spec = str(version_spec).strip()
-    if not normalized_spec:
-        return normalized_spec
+    package_dir = _discover_package_dir(dependency_name, base_path)
+    return {
+        "dependency_name": dependency_name,
+        "module": package_dir.name,
+        "config_path": _relative_posix_path(config_file)
+        if (config_file := package_dir / "tests" / "nautobot_config.py").is_file() and config_file.stat().st_size
+        else None,
+        "package_path": _relative_posix_path(package_dir),
+    }
 
-    matches = VERSION_PATTERN.findall(normalized_spec)
-    if matches:
 
-        def _version_key(value: str) -> tuple[int, ...]:
-            return tuple(int(part) for part in value.split("."))
+@lru_cache(maxsize=1)
+def _get_editable_app_modules() -> list[dict]:
+    """Return metadata for all editable app modules defined in pyproject.toml."""
+    parsed_toml = _load_pyproject_data()
+    dependencies = parsed_toml.get("tool", {}).get("poetry", {}).get("dependencies", {})
+    modules = []
+    for dependency_name, dependency_spec in dependencies.items():
+        if not isinstance(dependency_spec, dict):
+            continue
+        if "path" not in dependency_spec:
+            continue
+        if dependency_spec.get("develop", True) is False:
+            continue
+        modules.append(_build_editable_module_metadata(dependency_name, dependency_spec))
 
-        return min(matches, key=_version_key)
+    # If there are no editable path dependencies, fall back to assuming the
+    # current project itself is the editable module.  This is the case for
+    # standalone Nautobot apps which do not declare a local dependency on
+    # themselves in pyproject.toml.  Use the same inference logic as the
+    # pylint task above to determine the package directory.
+    if not modules:
+        # derive module name from project metadata or packages list
+        module_name = parsed_toml.get("project", {}).get("name") or parsed_toml.get("tool", {}).get("poetry", {}).get(
+            "name", ""
+        )
+        if not module_name:
+            packages_spec = parsed_toml.get("tool", {}).get("poetry", {}).get("packages", [])
+            if packages_spec:
+                first = packages_spec[0]
+                if isinstance(first, dict):
+                    module_name = first.get("include", "")
+                elif isinstance(first, str):
+                    module_name = first
+        module_name = module_name.replace("-", "_")
+        if module_name:
+            # build a fake dependency spec pointing at the current repo root
+            spec = {"path": "."}
+            try:
+                modules.append(_build_editable_module_metadata(module_name, spec))
+            except Exit:
+                # if even the fallback fails, we'll raise below
+                pass
 
-    return re.sub(r"[^0-9a-z.]+", "", normalized_spec.lower())
+    if not modules:
+        raise Exit("No editable modules with local paths were found in pyproject.toml.")
+
+    fallback_config = next((module["config_path"] for module in modules if module["config_path"]), None)
+    if not fallback_config:
+        raise Exit("Unable to locate a Nautobot test configuration file for any editable module.")
+
+    for module in modules:
+        if not module["config_path"]:
+            module["config_path"] = fallback_config
+    return modules
+
+
+def _filter_modules_by_name(modules: list[dict], module_name: str | None) -> list[dict]:
+    """Filter editable modules by pip or Python package name."""
+    if not module_name:
+        return list(modules)
+
+    normalized = module_name.replace("-", "_")
+    filtered = [
+        module for module in modules if module["module"] == normalized or module["dependency_name"] == module_name
+    ]
+    if not filtered:
+        available = ", ".join(sorted(module["module"] for module in modules))
+        raise Exit(f"Module '{module_name}' not found. Available editable modules: {available}")
+    return filtered
+
+
+def _resolve_modules_for_tests(module_name: str | None = None, label: str | None = None) -> list[dict]:
+    """Determine which editable modules should have their tests executed."""
+    modules = _filter_modules_by_name(_get_editable_app_modules(), module_name)
+    if label:
+        matched = next((module for module in modules if label.startswith(module["module"])), None)
+        if matched:
+            return [matched]
+        return modules[:1]
+    return modules
+
+
+def _build_test_command(
+    module_metadata: dict,
+    target_label: str,
+    *,
+    coverage: bool,
+    append: bool,
+    keepdb: bool,
+    failfast: bool,
+    buffer: bool,
+    pattern: str,
+    verbose: bool,
+) -> str:
+    """Construct the manage.py test command for a specific module."""
+    if coverage:
+        append_flag = " --append" if append else ""
+        command = (
+            f"coverage run{append_flag} --module nautobot.core.cli "
+            f"--config={module_metadata['config_path']} test {target_label}"
+        )
+    else:
+        command = f"nautobot-server --config={module_metadata['config_path']} test {target_label}"
+
+    if keepdb:
+        command += " --keepdb"
+    if failfast:
+        command += " --failfast"
+    if buffer:
+        command += " --buffer"
+    if pattern:
+        command += f" -k='{pattern}'"
+    if verbose:
+        command += " --verbosity 2"
+    return command
+
+
+def _run_unit_tests(
+    context,
+    *,
+    keepdb: bool,
+    module: str,
+    label: str,
+    failfast: bool,
+    buffer: bool,
+    pattern: str,
+    verbose: bool,
+    coverage: bool,
+):
+    """Execute Nautobot unit tests for the requested editable modules."""
+    modules_to_run = _resolve_modules_for_tests(module, label or None)
+    coverage_append = False
+    for module_metadata in modules_to_run:
+        tests_label = label or module_metadata["module"]
+        print(f"Running tests for {tests_label}...")
+        command = _build_test_command(
+            module_metadata,
+            tests_label,
+            coverage=coverage,
+            append=coverage_append,
+            keepdb=keepdb,
+            failfast=failfast,
+            buffer=buffer,
+            pattern=pattern,
+            verbose=verbose,
+        )
+        run_command(context, command)
+        if coverage:
+            coverage_append = True
+    return modules_to_run
+
+
+def _formatted_include_patterns(modules: list[dict]) -> str:
+    """Return the comma-separated include patterns for coverage reporting."""
+    patterns = sorted({f"{module['package_path']}/*" for module in modules})
+    return ",".join(patterns)
+
+
+def _run_coverage_report(context, modules: list[dict]):
+    """Generate the textual coverage report for the provided modules."""
+    include_patterns = _formatted_include_patterns(modules)
+    command = f"coverage report --skip-covered --include '{include_patterns}' --omit *migrations*"
+    run_command(context, command)
 
 
 def _get_ctx(context):
@@ -270,19 +452,10 @@ def _get_ctx(context):
     if not hasattr(context, "_validated_service_names"):
         # Run this code only once
         ctx = context[CONFIGURATION_NAMESPACE]
-        project_name = ctx.project_name
-        project_suffix = ctx.project_suffix
-
-        db_name = os.getenv("NAUTOBOT_DB_HOST", "db")
-        ctx.db_container_name = db_name
-        # redis_name = os.getenv("NAUTOBOT_REDIS_HOST", "redis")
-        if ctx.render_templates:
-            ctx.nautobot_container_name = f"{project_name}_{project_suffix}"
-        else:
-            ctx.nautobot_container_name = "nautobot"
         if not getattr(ctx, "compose_dir", None):
-            # Default to development directory if compose_dir is not set
-            ctx.compose_dir = os.path.join(os.path.dirname(__file__), "development/")
+            # if directory exists:
+            # os.path.join(os.path.dirname(__file__), "environments")
+            ctx.compose_dir = compose_dir_setup()
         ctx.pyproject_nautobot_ver = _parse_pyproject_nautobot_version()
 
         try:
@@ -295,8 +468,29 @@ def _get_ctx(context):
             # If the Nautobot version is set to 'pyproject', use the version from pyproject.toml
             ctx.nautobot_ver = ctx.get("pyproject_nautobot_ver")
 
+        # Ensure the container names are set in context
+        ctx.db_container_name = db_container_name
+        ctx.redis_container_name = redis_container_name
+        ctx.celery_container_name = celery_container_name
+        ctx.worker_container_name = worker_container_name
+        ctx.worker2_container_name = worker2_container_name
+        ctx.backend_network_name = backend_network_name
+        ctx.docker_registry = docker_registry
+
+        # Validate container names are valid DNS labels (no underscores, only lowercase letters, digits, hyphens)
+        # This avoids Docker hostname issues caused by invalid characters (e.g., underscores).
+        _validate_container_name(str(ctx.nautobot_container_name), "nautobot_container_name")
+        _validate_container_name(str(ctx.celery_container_name), "celery_container_name")
+        _validate_container_name(str(ctx.db_container_name), "db_container_name")
+        _validate_container_name(str(ctx.redis_container_name), "redis_container_name")
+        _validate_container_name(str(ctx.worker_container_name), "worker_container_name")
+        _validate_container_name(str(ctx.worker2_container_name), "worker2_container_name")
+
         # Set flag to indicate that service names have been validated
         context._validated_service_names = True
+
+        if _invoke_echo_enabled(context):
+            print("")
     return context[CONFIGURATION_NAMESPACE]
 
 
@@ -322,7 +516,7 @@ def _await_healthy_container(context, container_id):
         if result.stdout.strip() == "healthy":
             break
         print(f"Waiting for `{container_id}` container to become healthy ...")
-        time.sleep(1)
+        sleep(1)
 
 
 def _get_docker_nautobot_version(context, nautobot_ver=None, python_ver=None):
@@ -355,12 +549,18 @@ def _is_service_running(context, service):
     return service in results.stdout.splitlines()
 
 
-def _print_context_info(context):
+def _print_context_info(context, always=False):
     """Print the Nautobot Docker Compose context information."""
     ctx = _get_ctx(context)
+    if not (always or _invoke_echo_enabled(ctx)):
+        return
     if not ctx:
         print("Nautobot Docker Compose context is not configured.")
         return
+    print("--" * 40)
+    print("Loaded environment files:")
+    for fname in loaded_environment_files:
+        print("    -", fname)
     print("--" * 40)
     print("Nautobot Docker Compose Environment")
     print(f"Using configuration namespace:      {CONFIGURATION_NAMESPACE}")
@@ -370,22 +570,52 @@ def _print_context_info(context):
     print(f"Using database container name:      {ctx.db_container_name}")
     print(f"Using redis container name:         {ctx.redis_container_name}")
     print(f"Using nautobot container name:      {ctx.nautobot_container_name}")
+    print(f"Using celery container name:        {ctx.celery_container_name}")
     print("--" * 40)
 
 
 def _service_name(context, service):
-    """Get the service name from the context."""
+    """Get the service name from the context.
+
+    Expand common short service names (e.g., 'db', 'redis', 'worker', etc.) to
+    the project-specific suffixed name (e.g., 'db-<nautobot_container_name>'),
+    unless the provided service already includes the suffix. Print expansion
+    details only when the Invoke echo flag is enabled.
+    """
     ctx = _get_ctx(context)
+    # Map 'nautobot' to configured container name
     if service == "nautobot":
         return ctx.nautobot_container_name
-    elif service == "db":
-        print("Using db container name:", ctx.db_container_name)
+    if service == "db":
         return ctx.db_container_name
-    elif service == "redis":
-        print("Using redis container name:", ctx.redis_container_name)
-        return ctx.redis_container_name
-    else:
-        return service
+    if service in ["celery-beat", "redis", "worker", "worker2"]:
+        if context.config.run.echo:
+            my_name = "-".join([service, ctx.nautobot_container_name])
+            print(f"Using container name: {my_name}")
+        else:
+            my_name = service
+        return my_name
+    return service
+
+
+# Helpers for validating Docker container names (must be valid DNS labels)
+def _is_valid_dns_label(name: str) -> bool:
+    """Return True if `name` is a valid DNS label (lowercase alphanumeric and hyphens, 1-63 chars)."""
+    if not isinstance(name, str) or len(name) == 0 or len(name) > 63:
+        return False
+    return bool(re.match(r"^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$", name))
+
+
+def _validate_container_name(name: str, varname: str) -> None:
+    """Validate a single container name and raise Exit with a helpful message if invalid."""
+    if not _is_valid_dns_label(name):
+        raise Exit(
+            "Invalid container name '{0}' for '{1}'. Container names used as hostnames must be valid DNS labels: "
+            "lowercase letters, digits or hyphens only; must start and end with an alphanumeric character; max 63 chars. "
+            "Please update the corresponding environment variable or configuration (e.g. replace underscores with hyphens).".format(
+                name, varname
+            )
+        )
 
 
 def task(function=None, *args, **kwargs):
@@ -412,86 +642,155 @@ def task(function=None, *args, **kwargs):
 # Render docker-compose YAML from Jinja2 templates before running docker compose
 
 
-@task
-def render_compose_templates(context):
-    """Render all docker-compose .j2 templates in TEMPLATE_DIR to COMPOSE_ENV_DIR/ as .yml files.
+def _run_vaulttool_if_present(context, should_print: bool = False) -> None:
+    """Run vaulttool check-ignore and encrypt if a .vaulttool config is present in the repository root.
 
-    Variables: {
-        "compose_dir": ctx.compose_dir,
-        "nautobot_container_name": ctx.nautobot_container_name,
-        "nautobot_image_name": imgnam,
-        "db_container_name": ctx.db_container_name,
-        "nautobot_version": ctx.nautobot_ver,
-        "python_ver": ctx.python_ver,
+    Args:
+        context: Invoke context used to run shell commands.
+        should_print: When True, vaulttool output is displayed; otherwise it is suppressed.
+    """
+    if not Path(f"{REPOSITORY_ROOT}/.vaulttool.yml").is_file():
+        return
+    with context.cd(str(REPOSITORY_ROOT)):
+        if should_print:
+            print("Running vaulttool to check .vaulttool.yml configuration and encrypt secrets...")
+
+        result = context.run("vaulttool check-ignore", hide=not should_print)
+        if result.exited != 0:
+            raise Exit("vaulttool check-ignore failed. Please fix the issues before proceeding.")
+        result = context.run("vaulttool encrypt", hide=not should_print)
+        if result.exited != 0:
+            raise Exit("vaulttool encrypt failed. Please fix the issues before proceeding.")
+
+
+@task(
+    help={
+        "always": "Always print diagnostic output, even if echo is not enabled",
     }
+)
+def render_compose_templates(context, always=False):
+    """Render all docker-compose .j2 templates in templates_dir to COMPOSE_ENV_DIR/ as .yml files.
 
+    The function attempts to populate the Jinja2 template variables dictionary from the
+    configuration context (mapping-style when possible, otherwise by safe attribute
+    introspection). It prints diagnostic output only once per process unless `always`
+    is True or the Invoke echo flag is enabled.
     """
     ctx = _get_ctx(context)
 
     current_dir = Path(__file__).parent.resolve()
     compose_dir = Path(ctx.compose_dir).resolve().relative_to(current_dir)
-
-    template_dir = compose_dir.joinpath("templates")
-
+    templates_dir = compose_dir.joinpath("templates")
     if not os.path.exists(compose_dir):
         raise ValueError(f"COMPOSE_ENV_DIR '{compose_dir}' does not exist or is not a directory.")
-    if not os.path.isdir(template_dir):
-        raise ValueError(f"TEMPLATE_DIR '{template_dir}' is not a directory.")
-
+    if not os.path.isdir(templates_dir):
+        raise ValueError(f"templates_dir '{templates_dir}' is not a directory.")
     if _is_compose_included(context, "ldap"):
         dockerfile = f"{ctx.compose_dir}/Dockerfile-LDAP"
     else:
         dockerfile = f"{ctx.compose_dir}/Dockerfile"
 
     # ruff: noqa: S701
-    jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir), autoescape=False)
+    jinja_env = jinja2.Environment(
+        loader=jinja2.FileSystemLoader(templates_dir),
+        autoescape=False,
+        trim_blocks=True,
+        lstrip_blocks=True,
+    )
 
-    imgnam = ctx.nautobot_container_name.replace("_", "-").replace(" ", "-").lower().replace("nautobot-", "nautobot2-")
     variables = {
         "compose_dir": compose_dir,
         "dockerfile": dockerfile,
-        "nautobot_container_name": ctx.nautobot_container_name,
-        "nautobot_image_name": imgnam,
-        "db_container_name": ctx.db_container_name,
-        "redis_container_name": ctx.redis_container_name,
-        "nautobot_version": ctx.nautobot_ver,
-        "python_ver": ctx.python_ver,
-        "project_name": ctx.project_name,
-        "project_suffix": ctx.project_suffix,
+        "templates_dir": templates_dir,
     }
 
-    # Print info only once per Python process, but render files every call
-    print_once = not getattr(render_compose_templates, "_printed_once", False)
-    if print_once:
+    # Prefer mapping-style extraction from ctx when available
+    try:
+        if hasattr(ctx, "items"):
+            for key, value in ctx.items():
+                if not str(key).startswith("_"):
+                    variables[str(key)] = value
+        else:
+            # Fallback to dictionary coercion where possible
+            for key, value in dict(ctx).items():
+                if not str(key).startswith("_"):
+                    variables[str(key)] = value
+    except Exception:
+        # Best-effort attribute introspection: skip callables and private attributes
+        for key in dir(ctx):
+            if key.startswith("_"):
+                continue
+            try:
+                value = getattr(ctx, key)
+            except Exception as exc:
+                # skip attributes that cannot be accessed; log a warning so that
+                # we don't silently swallow unexpected failures (ruff:S112)
+                print(f"warning: unable to inspect ctx.{key}: {exc}")
+                continue
+            if callable(value):
+                continue
+            variables[key] = value
+
+    # Ensure important defaults exist so templates render even if ctx is missing them
+    variables.setdefault("project_name", project_name)
+    variables.setdefault("project_suffix", project_suffix)
+    variables.setdefault(
+        "nautobot_image_name", getattr(ctx, "nautobot_image_name", docker_registry + "/" + nautobot_container_name)
+    )
+    variables.setdefault("nautobot_container_name", getattr(ctx, "nautobot_container_name", nautobot_container_name))
+    variables.setdefault("python_ver", getattr(ctx, "python_ver", python_ver))
+    variables.setdefault("nautobot_ver", getattr(ctx, "nautobot_ver", None))
+    variables.setdefault("docker_registry", getattr(ctx, "docker_registry", docker_registry))
+    variables.setdefault("mkdocs_container_name", getattr(ctx, "mkdocs_container_name", mkdocs_container_name))
+    variables.setdefault("redis_container_name", getattr(ctx, "redis_container_name", redis_container_name))
+    variables.setdefault("db_container_name", getattr(ctx, "db_container_name", db_container_name))
+    variables.setdefault("celery_container_name", getattr(ctx, "celery_container_name", celery_container_name))
+    variables.setdefault("worker_container_name", getattr(ctx, "worker_container_name", worker_container_name))
+    variables.setdefault("worker2_container_name", getattr(ctx, "worker2_container_name", worker2_container_name))
+    variables.setdefault("backend_network_name", getattr(ctx, "backend_network_name", backend_network_name))
+    variables.setdefault("compose_files", getattr(ctx, "compose_files", []))
+    variables.setdefault("traefik_enabled", getattr(ctx, "traefik_enabled", False))
+    variables.setdefault(
+        "traefik_external_overlay_network", getattr(ctx, "traefik_external_overlay_network", "t3_proxy")
+    )
+    # Build target may be specified in invoke.yml as `build_target` (e.g. 'dev', 'final').
+    # If unset, templates should omit any `target` field.
+    variables.setdefault("build_target", getattr(ctx, "build_target", None))
+
+    # Determine whether we should print variable/debug output.
+    # Print when `always` is requested or when the Invoke echo flag is enabled.
+    should_print = bool(always) or _invoke_echo_enabled(ctx)
+    if should_print or context.config.run.echo:
         print("Rendering docker-compose templates with:")
         print("  Variables:")
-        for key, value in variables.items():
-            print(f"     {key.ljust(24)}: {value}")
+        for key, value in sorted(variables.items()):
+            print(f"     {key.ljust(28)}: {value}")
         print("  Rendered Compose Files:")
 
-    for fname in template_dir.iterdir():
+    for fname in templates_dir.iterdir():
         if not fname.name.endswith(".j2"):
             continue
         template_name = fname.name
         if template_name.startswith("docker-compose._"):
             # Skip internal templates that start with an underscore
             continue
+        # Check if fname starts with 'docker-compose.' and only render if it is in ctx compose files
+        if template_name.startswith("docker-compose.") and template_name[:-3] not in ctx.compose_files:
+            continue
         template = jinja_env.get_template(template_name)
         rendered = template.render(**variables)
         outname = template_name[:-3]  # remove .j2
         outpath = compose_dir.joinpath(outname)
-        if print_once:
-            print("    -", outpath)
-        with open(outpath, "w") as f:
+        if should_print or context.config.run.echo:
+            print(f"    - {outpath}")
+        with open(outpath, "w", encoding="utf-8") as f:
             f.write(rendered)
 
-    # Mark that we've printed once
-    if print_once:
+    # Mark that we've printed once (if we actually printed)
+    if should_print:
         setattr(render_compose_templates, "_printed_once", True)
 
-
-# Remove the broken patching logic (orig_docker_compose = docker_compose)
-# The correct docker_compose function is already defined below with render_compose_templates at the start.
+    _run_vaulttool_if_present(context, should_print=should_print)
 
 
 def docker_compose(context, command, **kwargs):
@@ -523,10 +822,10 @@ def docker_compose(context, command, **kwargs):
     compose_command_tokens = [
         "docker compose",
         f"--project-name {project_name}",
-        f'--project-directory "{ctx.compose_dir}"',
+        f'--project-directory "{ctx.compose_dir}/"',
     ]
     for compose_file in ctx.compose_files:
-        compose_file_path = os.path.join(ctx.compose_dir, compose_file)
+        compose_file_path = f"{str(ctx.compose_dir).split('/')[-1]}/{compose_file}"
         compose_command_tokens.append(f' -f "{compose_file_path}"')
 
     compose_command_tokens.append(command)
@@ -538,7 +837,8 @@ def docker_compose(context, command, **kwargs):
 
     silent = kwargs.pop("silent", False)
     if not silent:
-        print(f'Running docker compose command "{command}"')
+        if context.config.run.echo:
+            print(f"Running docker compose command '{command}'")
     compose_command = " ".join(compose_command_tokens)
 
     return context.run(compose_command, env=compose_env, **kwargs)
@@ -569,58 +869,11 @@ def run_command(context, command, service="nautobot", **kwargs):
         if service in results.stdout:
             compose_command = f"exec{command_env_args} {service} {command}"
         else:
-            # Start dependent services (db, redis) and wait for them to be healthy before running
-            # This ensures the 'run' container can connect to the database
-            print("Starting dependent services and waiting for them to be healthy...")
-            docker_compose(context, "up --detach db redis", silent=True)
-            # Wait for db service to be healthy (docker compose --wait may not work in all versions)
-            _wait_for_healthy_service(context, "db")
             compose_command = f"run{command_env_args} --rm --entrypoint='{command}' {service}"
 
         pty = kwargs.pop("pty", True)
 
         return docker_compose(context, compose_command, pty=pty, **kwargs)
-
-
-def _wait_for_healthy_service(context, service, timeout=None):
-    """Wait for a Docker Compose service to be healthy.
-
-    Args:
-        context: Invoke context
-        service: Name of the service to wait for
-        timeout: Maximum seconds to wait (defaults to DB_WAIT_TIMEOUT)
-    """
-    if timeout is None:
-        timeout = DB_WAIT_TIMEOUT
-
-    print(f"Waiting for {service} to be healthy (timeout: {timeout}s)...")
-    start_time = time.time()
-    while True:
-        result = docker_compose(
-            context,
-            f"ps --format json {service}",
-            hide="both",
-            warn=True,
-            silent=True,
-        )
-        if result and result.ok:
-            try:
-                # Docker Compose v2 outputs one JSON object per line
-                for line in result.stdout.strip().splitlines():
-                    if line:
-                        container_info = json.loads(line)
-                        health = container_info.get("Health", "")
-                        if health == "healthy":
-                            print(f"Service {service} is healthy.")
-                            return True
-            except (json.JSONDecodeError, KeyError):
-                pass
-
-        elapsed = time.time() - start_time
-        if elapsed >= timeout:
-            raise Exit(f"Timeout waiting for {service} to become healthy after {timeout}s")
-
-        time.sleep(2)
 
 
 # ------------------------------------------------------------------------------
@@ -638,10 +891,12 @@ def build(context, force_rm=True, cache=True):
     # Pull all git repositories in the plugins directory (but not the main repo)
     # Update the submodules to ensure all plugins are up-to-date
     if not ctx.local:
-        print("Pulling latest changes from git submodules...")
+        if _invoke_echo_enabled(context):
+            print("Pulling latest changes from git submodules...")
         context.run("git submodule update --remote --merge", pty=False, echo=False, hide=True)
     else:
-        print("Updating git submodules...")
+        if _invoke_echo_enabled(context):
+            print("Updating git submodules...")
 
     command = "build"
 
@@ -650,7 +905,10 @@ def build(context, force_rm=True, cache=True):
     if force_rm:
         command += " --force-rm"
 
-    print(f"Building Nautobot with Python {ctx.python_ver}...")
+    if _invoke_echo_enabled(context):
+        print(f"Building Nautobot with Python {ctx.python_ver}...")
+
+    _run_vaulttool_if_present(context, should_print=_invoke_echo_enabled(context))
     docker_compose(context, command)
 
 
@@ -679,15 +937,16 @@ def generate_packages(context):
         ),
     }
 )
-def lock(context, check=False, constrain_nautobot_ver=False, constrain_python_ver=""):
+def lock(context, check=False, constrain_nautobot_ver=False, constrain_python_ver=False):
     """Generate poetry.lock file."""
     ctx = _get_ctx(context)
     if constrain_nautobot_ver:
         docker_nautobot_version = _get_docker_nautobot_version(context)
         command = f"poetry add --lock nautobot@{docker_nautobot_version}"
         if constrain_python_ver:
-            command += f" --python {constrain_python_ver}"
+            command += f" --python {ctx.python_ver}"
         try:
+            run_command(context, command, hide=True)
             output = run_command(context, command, hide=True)
             print(output.stdout, end="")
             print(output.stderr, file=sys.stderr, end="")
@@ -698,7 +957,7 @@ def lock(context, check=False, constrain_nautobot_ver=False, constrain_python_ve
                 command += f" --python {ctx.python_ver}"
             run_command(context, command)
     else:
-        command = f"poetry {'check' if check else 'lock'}"
+        command = f"poetry {'check' if check else 'lock --no-update'}"
         run_command(context, command)
 
 
@@ -716,9 +975,19 @@ def debug(context, service=""):
     docker_compose(context, "up", service=service, env=env)
 
 
+def _print_compose_info_if_requested(context):
+    """Render and print compose templates and info if invoked."""
+    try:
+        render_compose_templates(context)
+    except Exception as exc:
+        print(f"Warning: failed to render/print compose templates: {exc}")
+
+
 @task(help={"service": "If specified, only affect this service."})
 def start(context, service=""):
     """Start specified or all services and its dependencies in detached mode."""
+    # If invoked with `-e/--echo`, optionally render/print compose templates and details.
+    _print_compose_info_if_requested(context)
     _print_context_info(context)
     print("Starting Nautobot in detached mode...")
     service = _service_name(context, service)
@@ -751,15 +1020,17 @@ def destroy(context, volumes=True, import_db_file="", confirm=True):
     """Destroy all containers and volumes. WARNING: This will delete ALL data!"""
     ctx = _get_ctx(context)
     if confirm:
-        print("Conatiner Name: ", ctx.nautobot_container_name)
-        print("WARNING: This operation will delete ALL containers, volumes, and data. This action is irreversible!")
+        print("Container Name: ", ctx.nautobot_container_name)
+        print("WARNING: This operation will delete ALL containers, networks and volumes. This action is irreversible!")
         response = input("Are you sure you want to continue? Type 'yes' to proceed: ")
         if response.strip().lower() != "yes":
             print("Aborted by user.")
             return
-    print("Destroying Nautobot...")
-    docker_compose(context, f"down --remove-orphans {'--volumes' if volumes else ''}")
+    print("Destroying Nautobot (removing volumes and orphans)...")
+    # always remove volumes and orphaned containers to prevent stale state/port conflicts
+    docker_compose(context, "down --remove-orphans --volumes")
 
+    # preserve the import-db-file functionality in case it's still needed
     if not import_db_file:
         return
 
@@ -840,8 +1111,8 @@ def config(context, service=""):
     """Generate and validate the docker compose configuration."""
     if service:
         service = _service_name(context, service)
-    print("Generating Docker Compose configuration...")
-    docker_compose(context, "config", service=service)
+    # print("Generating Docker Compose configuration...")
+    docker_compose(context, "config", service=service, silent=True)
 
 
 @task(help={"service": "If specified, only affect this service."})
@@ -1121,8 +1392,12 @@ def import_nautobot_data(context):
     run_command(context, import_cmd)
 
 
-@task
-def render_compose(context):
+@task(
+    help={
+        "always": "Always print diagnostic output, even if echo is not enabled",
+    }
+)
+def render_compose(context, always=False):
     """Render docker-compose YAML files from Jinja2 templates only."""
     render_compose_templates(context)
     print("Docker Compose YAML files rendered from templates.")
@@ -1142,8 +1417,8 @@ def render_compose(context):
 )
 def backup_db(context, db_name="", output_file="dump.sql", readable=True):
     """Dump database into `output_file` file from `db` container.
-    poe
-        This task will ensure that the `db` container is running and healthy before performing the backup.
+
+    This task will ensure that the `db` container is running and healthy before performing the backup.
     """
     ctx = _get_ctx(context)
     db = ctx.db_container_name
@@ -1536,20 +1811,42 @@ def hadolint(context):
 @task
 def pylint(context):
     """Run pylint code analysis."""
+    # Determine the module name from poetry metadata so we don't hardcode it.
+    pyproject = _load_pyproject_data()
+    # after migration the package name may live under [project] rather than
+    # [tool.poetry]; look in both places.  older poetry projects also used a
+    # separate `packages` table to declare the Python package(s) that should be
+    # included in the distribution.  In minimal pyproject.toml files the
+    # metadata name may not be present or may not match the actual package
+    # directory, so look there as a fallback.
+    module_name = pyproject.get("project", {}).get("name") or pyproject.get("tool", {}).get("poetry", {}).get(
+        "name", ""
+    )
+    if not module_name:
+        # try to infer the package name from the [tool.poetry.packages] list
+        packages_spec = pyproject.get("tool", {}).get("poetry", {}).get("packages", [])
+        if packages_spec:
+            first = packages_spec[0]
+            if isinstance(first, dict):
+                module_name = first.get("include", "")
+            elif isinstance(first, str):
+                module_name = first
+    module_name = module_name.replace("-", "_")
+
     exit_code = 0
 
     base_pylint_command = 'pylint --verbose --init-hook "import nautobot; nautobot.setup()" --rcfile pyproject.toml'
-    command = f"{base_pylint_command} nautobot_app_livedata"
+    command = f"{base_pylint_command} {module_name}"
     if not run_command(context, command, warn=True):
         exit_code = 1
 
     # run the pylint_django migrations checkers on the migrations directory, if one exists
-    migrations_dir = Path(__file__).absolute().parent / Path("nautobot_app_livedata") / Path("migrations")
+    migrations_dir = Path(__file__).absolute().parent / Path(module_name) / Path("migrations")
     if migrations_dir.is_dir():
         migrations_pylint_command = (
             f"{base_pylint_command} --load-plugins=pylint_django.checkers.migrations"
             " --disable=all --enable=fatal,new-db-field-with-default,missing-backwards-migration-callable"
-            " nautobot_app_livedata.migrations"
+            f" {module_name}.migrations"
         )
         if not run_command(context, migrations_pylint_command, warn=True):
             exit_code = 1
@@ -1582,7 +1879,8 @@ def check_migrations(context):
 @task(
     help={
         "keepdb": "save and re-use test database between test runs for faster re-testing.",
-        "label": "specify a directory or module to test instead of running all Nautobot tests",
+        "module": "Limit execution to a specific editable module (pip name or Python package).",
+        "label": "Specify a Django test label to run (defaults to the module name).",
         "failfast": "fail as soon as a single test fails don't run the entire test suite",
         "buffer": "Discard output from passing tests",
         "pattern": "Run specific test methods, classes, or modules instead of all tests",
@@ -1594,7 +1892,8 @@ def check_migrations(context):
 def unittest(
     context,
     keepdb=False,
-    label="nautobot_app_livedata",
+    module="",
+    label="",
     failfast=False,
     buffer=True,
     pattern="",
@@ -1602,35 +1901,31 @@ def unittest(
     coverage=False,
     skip_docs_build=False,
 ):
-    """Run Nautobot unit tests."""
+    """Run Nautobot unit tests for one or more editable modules."""
     if not skip_docs_build:
         build_and_check_docs(context)
-    config_path = "nautobot_app_livedata/tests/nautobot_config.py"
-    if coverage:
-        command = f"coverage run --module nautobot.core.cli --config={config_path} test {label}"
-    else:
-        command = f"nautobot-server --config={config_path} test {label}"
-
-    if keepdb:
-        command += " --keepdb"
-    if failfast:
-        command += " --failfast"
-    if buffer:
-        command += " --buffer"
-    if pattern:
-        command += f" -k='{pattern}'"
-    if verbose:
-        command += " --verbosity 2"
-
-    run_command(context, command)
+    return _run_unit_tests(
+        context,
+        keepdb=keepdb,
+        module=module,
+        label=label,
+        failfast=failfast,
+        buffer=buffer,
+        pattern=pattern,
+        verbose=verbose,
+        coverage=coverage,
+    )
 
 
-@task
-def unittest_coverage(context):
+@task(
+    help={
+        "module": "Limit coverage reporting to a specific editable module (pip name or Python package).",
+    }
+)
+def unittest_coverage(context, module=""):
     """Report on code test coverage as measured by 'invoke unittest'."""
-    command = "coverage report --skip-covered --include 'nautobot_app_livedata/*' --omit *migrations*"
-
-    run_command(context, command)
+    modules = _resolve_modules_for_tests(module)
+    _run_coverage_report(context, modules)
 
 
 @task
@@ -1654,9 +1949,10 @@ def coverage_xml(context):
         "failfast": "fail as soon as a single test fails don't run the entire test suite. (default: False)",
         "keepdb": "Save and re-use test database between test runs for faster re-testing. (default: False)",
         "lint-only": "Only run linters; unit tests will be excluded. (default: False)",
+        "module": "Limit execution to a specific editable module (pip name or Python package).",
     }
 )
-def tests(context, failfast=False, keepdb=False, lint_only=False):
+def tests(context, failfast=False, keepdb=False, lint_only=False, module=""):
     """Run all tests for this app."""
     ctx = _get_ctx(context)
     # If we are not running locally, start the docker containers so we don't have to for each test
@@ -1686,8 +1982,15 @@ def tests(context, failfast=False, keepdb=False, lint_only=False):
     validate_app_config(context)
     if not lint_only:
         print("Running unit tests...")
-        unittest(context, failfast=failfast, keepdb=keepdb, coverage=True, skip_docs_build=True)
-        unittest_coverage(context)
+        executed_modules = unittest(
+            context,
+            failfast=failfast,
+            keepdb=keepdb,
+            coverage=True,
+            skip_docs_build=True,
+            module=module,
+        )
+        _run_coverage_report(context, executed_modules)
         coverage_lcov(context)
         coverage_xml(context)
     print("All tests have passed!")

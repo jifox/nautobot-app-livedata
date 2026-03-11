@@ -1,10 +1,13 @@
-[tool.poetry]
+[project]
+# keys listed here are mostly static; dependencies and python requirement are
+# handled by Poetry and declared dynamic below.
+dynamic = ["dependencies", "requires-python"]
 name = "nautobot_app_livedata"
 version = "3.0.0"
 description = "Provides a live view of network data within Nautobot."
-authors = ["Josef Fuchs <josef.fuchs@j-fuchs.at>"]
-license = "Apache-2.0"
 readme = "README.md"
+authors = [{name = "Josef Fuchs", email = "josef.fuchs@j-fuchs.at"}]
+license = "Apache-2.0"
 keywords = ["nautobot", "nautobot-app", "nautobot-plugin"]
 classifiers = [
     "Intended Audience :: Developers",
@@ -15,9 +18,11 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
 ]
-homepage = "https://github.com/jifox/nautobot-app-livedata.git"
-repository = "https://github.com/jifox/nautobot-app-livedata.git"
-documentation = "https://nautobot-app-livedata.readthedocs.io/en/latest/"
+urls = { homepage = "https://github.com/jifox/nautobot-app-livedata.git", repository = "https://github.com/jifox/nautobot-app-livedata.git", documentation = "https://nautobot-app-livedata.readthedocs.io/en/latest/" }
+
+[tool.poetry]
+# metadata fields have been migrated to [project]; the remaining entries
+# are purely poetry-specific configuration.
 packages = [
     {include = "nautobot_app_livedata"},
 ]
