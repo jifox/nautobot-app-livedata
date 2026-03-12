@@ -9,18 +9,18 @@ from nautobot_app_livedata.utilities.primarydevice import PrimaryDeviceUtils
 
 
 class LivedataSerializer(serializers.Serializer):
-    """Serializer for the Nautobot App Livedata API to return the Managed Device.
+    """Serializer for the Nautobot App Livedata API to return the Primary Device.
 
     For more information on implementing jobs, refer to the Nautobot job documentation:
     https://docs.nautobot.com/projects/core/en/stable/development/jobs/
 
-    This serializer is used to get the managed device for the given object_type
+    This serializer is used to get the primary device for the given object_type
     and ID.
 
     Properties:
 
     - pk (UUID): The primary key of the object.
-    - object_type (str): The object type to get the managed device for.
+    - object_type (str): The object type to get the primary device for.
 
     Raises:
     - ValidationError: If the object type is not defined.

@@ -1,16 +1,17 @@
 """Comprehensive tests for jobs in nautobot_app_livedata."""
 
 from datetime import datetime
+from importlib import import_module
 from unittest.mock import Mock, patch
 
 from django.contrib.auth import get_user_model
 from django.utils.timezone import make_aware
 from nautobot.apps.testing import TestCase as APITransactionTestCase
 
-import nautobot_app_livedata.jobs as jobs_module  # Used in patch.object decorators
-from nautobot_app_livedata.jobs import LivedataCleanupJobResultsJob, LivedataQueryJob
-
 from .conftest import create_db_data
+from nautobot_app_livedata.jobs.jobs import LivedataCleanupJobResultsJob, LivedataQueryJob
+
+jobs_module = import_module("nautobot_app_livedata.jobs.jobs")
 
 User = get_user_model()
 

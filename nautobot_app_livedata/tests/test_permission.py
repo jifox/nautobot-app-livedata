@@ -5,9 +5,8 @@ from nautobot.core.models import ContentType
 from nautobot.dcim.models import Device
 from nautobot.users.models import ObjectPermission
 
-from nautobot_app_livedata.utilities.permission import create_permission
-
 from .conftest import wait_for_debugger_connection
+from nautobot_app_livedata.utilities.permission import create_permission
 
 
 class TestPermission(TestCase):

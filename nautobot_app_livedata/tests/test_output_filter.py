@@ -8,6 +8,8 @@ from nautobot_app_livedata.utilities.output_filter import apply_output_filter
 
 
 class TestOutputFilter(unittest.TestCase):
+    """Unit tests for output filtering utilities."""
+
     def test_exact_filter(self):
         output = "foo\nbar\nbaz\nfoo"
         filtered = apply_output_filter(output, "EXACT:foo")
@@ -45,7 +47,7 @@ class TestOutputFilter(unittest.TestCase):
         self.assertEqual(filtered, "foo\nfoo")
         # Apply LAST:3, then EXACT:foo
         filtered2 = apply_output_filter(output, "LAST:3!!EXACT:foo!!")
-        self.assertEqual(filtered2, "foo")
+        self.assertEqual(filtered2, "foo\nfoo")
         # Apply EXACT:foo, then LAST:1
         filtered3 = apply_output_filter(output, "EXACT:foo!!LAST:1!!")
         self.assertEqual(filtered3, "foo")

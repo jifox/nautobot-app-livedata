@@ -100,26 +100,26 @@ Please see the [official Poetry documentation on `version`](https://python-poetr
 !!! important
     The changelog must adhere to the [Keep a Changelog](https://keepachangelog.com/) style guide.
 
-This guide uses `1.4.2` as the new version in its examples, so change it to match the version you bumped to in the previous step! Every. single. time. you. copy/paste commands :)
+This guide uses `3.0.0` as the new version in its examples, so change it to match the version you bumped to in the previous step! Every. single. time. you. copy/paste commands :)
 
-First, create a release branch off of `develop` (`git switch -c release-1.4.2 develop`).
+First, create a release branch off of `develop` (`git switch -c release-3.0.0 develop`).
 
 > You will need to have the project's poetry environment built at this stage, as the towncrier command runs **locally only**. If you don't have it, run `poetry install` first.
 
-Generate release notes with `poetry shell`, `DJANGO_SETTINGS_MODULE=nautobot.core.settings poetry run towncrier build --version 1.4.2` and answer `yes` to the prompt `Is it okay if I remove those files? [Y/n]:`. This will update the release notes in `docs/admin/release_notes/version_X.Y.md`, stage that file in git, and `git rm` all the fragments that have now been incorporated into the release notes.
+Generate release notes with `poetry shell`, `DJANGO_SETTINGS_MODULE=nautobot.core.settings poetry run towncrier build --version 3.0.0` and answer `yes` to the prompt `Is it okay if I remove those files? [Y/n]:`. This will update the release notes in `docs/admin/release_notes/version_X.Y.md`, stage that file in git, and `git rm` all the fragments that have now been incorporated into the release notes.
 
 There are two possibilities:
 
-1. If you're releasing a new major or minor version, rename the `version_X.Y.md` file accordingly (e.g. rename to `docs/admin/release_notes/version_1.4.md`). Update the `Release Overview` and add this new page to the table of contents within `mkdocs.yml`.
-2. If you're releasing a patch version, copy your version's section from the `version_X.Y.md` file into the already existing `docs/admin/release_notes/version_1.4.md` file. Delete the `version_X.Y.md` file.
+1. If you're releasing a new major or minor version, rename the `version_X.Y.md` file accordingly (e.g. rename to `docs/admin/release_notes/version_3.0.md`). Update the `Release Overview` and add this new page to the table of contents within `mkdocs.yml`.
+2. If you're releasing a patch version, copy your version's section from the `version_X.Y.md` file into the already existing `docs/admin/release_notes/version_3.0.md` file. Delete the `version_X.Y.md` file.
 
 Stage all the changes (`git add`) and check the diffs to verify all of the changes are correct (`git diff --cached`).
 
-Commit `git commit -m "Release v1.4.2"` and `git push` the staged changes.
+Commit `git commit -m "Release v3.0.0"` and `git push` the staged changes.
 
 ### Submit Release Pull Request
 
-Submit a pull request titled `Release v1.4.2` to merge your release branch into `main`. Copy the documented release notes into the pull request's body.
+Submit a pull request titled `Release v3.0.0` to merge your release branch into `main`. Copy the documented release notes into the pull request's body.
 
 !!! important
     Do not squash merge this branch into `main`. Make sure to select `Create a merge commit` when merging in GitHub.
@@ -130,9 +130,9 @@ Once CI has completed on the PR, merge it.
 
 Draft a [new release](https://github.com/jifox/nautobot-app-livedata.git/releases/new) with the following parameters.
 
-* **Tag:** Input current version (e.g. `v1.4.2`) and select `Create new tag: v1.4.2 on publish`
-* **Target:** `main`
-* **Title:** Version and date (e.g. `v1.4.2 - 2024-04-02`)
+- **Tag:** Input current version (e.g. `v3.0.0`) and select `Create new tag: v3.0.0 on publish`
+- **Target:** `main`
+- **Title:** Version and date (e.g. `v3.0.0 - 2024-04-02`)
 
 Click "Generate Release Notes" and edit the auto-generated content as follows:
 
@@ -158,7 +158,7 @@ The release notes should look as follows:
 
 * @bob
 
-**Full Changelog**: https://github.com/jifox/nautobot-app-livedata.git/compare/v1.4.1...v1.4.2
+**Full Changelog**: https://github.com/jifox/nautobot-app-livedata.git/compare/v1.4.1...v3.0.0
 ```
 
 Publish the release!
@@ -167,16 +167,16 @@ Publish the release!
 
 First, sync your `main` branch with upstream changes: `git switch main && git pull`.
 
-Create a new branch from `main` called `release-1.4.2-to-develop` and use `poetry version prepatch` to bump the development version to the next release.
+Create a new branch from `main` called `release-3.0.0-to-develop` and use `poetry version prepatch` to bump the development version to the next release.
 
-For example, if you just released `v1.4.2`:
+For example, if you just released `v3.0.0`:
 
 ```no-highlight
-> git switch -c release-1.4.2-to-develop main
-Switched to a new branch 'release-1.4.2-to-develop'
+> git switch -c release-3.0.0-to-develop main
+Switched to a new branch 'release-3.0.0-to-develop'
 
 > poetry version prepatch
-Bumping version from 1.4.2 to 1.4.3a1
+Bumping version from 3.0.0 to 3.0.0a1
 
 > git add pyproject.toml && git commit -m "Bump version"
 
@@ -186,16 +186,15 @@ Bumping version from 1.4.2 to 1.4.3a1
 !!! important
     Do not squash merge this branch into `develop`. Make sure to select `Create a merge commit` when merging in GitHub.
 
-Open a new PR from `release-1.4.2-to-develop` against `develop`, wait for CI to pass, and merge it.
+Open a new PR from `release-3.0.0-to-develop` against `develop`, wait for CI to pass, and merge it.
 
 ### Final checks
 
-At this stage, the CI should be running or finished for the `v1.4.2` tag and a package successfully published to PyPI and added into the GitHub Release. Double check that's the case.
+At this stage, the CI should be running or finished for the `v3.0.0` tag and a package successfully published to PyPI and added into the GitHub Release. Double check that's the case.
 
 Documentation should also have been built for the tag on ReadTheDocs and if you're reading this page online, refresh it and look for the new version in the little version fly-out menu down at the bottom right of the page.
 
 All done!
-
 
 ## LTM Releases
 

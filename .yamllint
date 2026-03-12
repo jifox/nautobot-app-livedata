@@ -1,9 +1,10 @@
-extends: default
+---
+extends: "default"
 
 rules:
   line-length:
     max: 120
-    level: warning
+    level: "warning"
 
 ignore: |
   .git/logs/**
