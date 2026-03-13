@@ -24,7 +24,7 @@ services:
   docs:
     entrypoint: "mkdocs serve -v -a 0.0.0.0:8080"
     ports:
-      - "8001:8080"
+      - "8002:8080"
     volumes:
       - "../:/source"
     image: "livedata/nautobot:${NAUTOBOT_VER}-py${PYTHON_VER}"

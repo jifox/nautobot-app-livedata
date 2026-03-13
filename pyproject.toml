@@ -1,10 +1,13 @@
-[tool.poetry]
+[project]
+# keys listed here are mostly static; dependencies and python requirement are
+# handled by Poetry and declared dynamic below.
+dynamic = ["dependencies", "requires-python"]
 name = "nautobot_app_livedata"
-version = "3.0.0a0"
+version = "3.0.0"
 description = "Provides a live view of network data within Nautobot."
-authors = ["Josef Fuchs <josef.fuchs@j-fuchs.at>"]
-license = "Apache-2.0"
 readme = "README.md"
+authors = [{name = "Josef Fuchs", email = "josef.fuchs@j-fuchs.at"}]
+license = "Apache-2.0"
 keywords = ["nautobot", "nautobot-app", "nautobot-plugin"]
 classifiers = [
     "Intended Audience :: Developers",
@@ -15,9 +18,11 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
 ]
-homepage = "https://github.com/jifox/nautobot-app-livedata.git"
-repository = "https://github.com/jifox/nautobot-app-livedata.git"
-documentation = "https://nautobot-app-livedata.readthedocs.io/en/latest/"
+urls = { homepage = "https://github.com/jifox/nautobot-app-livedata.git", repository = "https://github.com/jifox/nautobot-app-livedata.git", documentation = "https://nautobot-app-livedata.readthedocs.io/en/latest/" }
+
+[tool.poetry]
+# metadata fields have been migrated to [project]; the remaining entries
+# are purely poetry-specific configuration.
 packages = [
     {include = "nautobot_app_livedata"},
 ]
@@ -25,13 +30,13 @@ include = ["LICENSE"]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.14"
-nautobot = ">=3.0.0,<4.0.0"
+nautobot = {version = "3.0.0", python = "3.13"}
 "to-json-schema" = "~=1.0.1"
 jsonschema = "^4.7.0"
 "python-dotenv" = "~=1.2.1"
 "nautobot-plugin-nornir" = "~=3.0.0"
 h11 = ">=0.16.0,<1.0.0"
-mysqlclient = "^2.2.7"
+mysqlclient = "^2.2.8"
 
 [tool.poetry.group.dev.dependencies]
 "django-debug-toolbar" = "~=5.2.0"
@@ -45,7 +50,6 @@ watchdog = "~=6.0.0"
 ipython = "*"
 toml = "*"
 Markdown = "~=3.8.2"
-griffe = "~=1.14.0"
 "python-dotenv" = "~=1.2.1"
 debugpy = ">=1.8.14"
 
@@ -62,18 +66,19 @@ mkdocs = "~=1.6.1"
 "mkdocs-section-index" = "~=0.3.10"
 mkdocstrings = "~=0.30.1"
 "mkdocstrings-python" = "~=1.18.2"
+griffe = "<2.0.0"
 
 [tool.poetry.group.linting.dependencies]
 pylint = "~=3.3.9"
 "pylint-django" = "~=2.6.1"
 "pymarkdownlnt" = "~=0.9.33"
-ruff = "~=0.14.5"
+ruff = "~=0.14.14"
 yamllint = "~=1.37.1"
 djhtml = "~=3.0.10"
 djlint = "~=1.36.4"
 
 [tool.poetry.group.testing.dependencies]
-coverage = "~=7.10.6"
+coverage = "~=7.13.4"
 
 [tool.pylint.master]
 # load-plugins = "pylint_django, pylint_nautobot"
