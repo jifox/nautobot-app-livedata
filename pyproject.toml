@@ -3,7 +3,7 @@
 # handled by Poetry and declared dynamic below.
 dynamic = ["dependencies", "requires-python"]
 name = "nautobot_app_livedata"
-version = "3.0.0"
+version = "3.0.1a0"
 description = "Provides a live view of network data within Nautobot."
 readme = "README.md"
 authors = [{name = "Josef Fuchs", email = "josef.fuchs@j-fuchs.at"}]
