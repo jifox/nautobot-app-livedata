@@ -1,0 +1,1 @@
+install Nautobot exactly at the version defined in invoke.yml, not the latest version.
