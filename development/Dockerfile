@@ -63,8 +63,28 @@ COPY . /source
 ARG NAUTOBOT_VER
 ARG PYTHON_VER
 
+# Pin Nautobot in the lock file BEFORE any install step, so poetry install
+# never resolves a newer patch release only to downgrade it afterwards.
+# If NAUTOBOT_VER is a channel/tag like "stable", resolve it to the version
+# already installed in the selected base image.
+# In CI this should be done outside the Dockerfile to prevent cross-compile build failures.
+ARG CI
+RUN if [ -z "${CI+x}" ]; then \
+        RESOLVED_NAUTOBOT_VER="${NAUTOBOT_VER}"; \
+        if ! [[ "${NAUTOBOT_VER}" =~ ^[0-9]+\.[0-9]+\.[0-9]+([A-Za-z0-9.+-]*)?$ ]]; then \
+            RESOLVED_NAUTOBOT_VER="$(pip show nautobot | awk -F': ' '/^Version:/{print $2}')"; \
+            if [ -z "${RESOLVED_NAUTOBOT_VER}" ]; then \
+                echo "Unable to resolve Nautobot version from base image for NAUTOBOT_VER=${NAUTOBOT_VER}"; \
+                exit 1; \
+            fi; \
+            echo "Resolved NAUTOBOT_VER=${NAUTOBOT_VER} to installed Nautobot ${RESOLVED_NAUTOBOT_VER}"; \
+        fi; \
+        if ! poetry add --lock "nautobot@${RESOLVED_NAUTOBOT_VER}" --python "${PYTHON_VER}"; then \
+            poetry add --lock "git+https://github.com/nautobot/nautobot.git#${NAUTOBOT_VER}" --python "${PYTHON_VER}"; \
+        fi; \
+    fi
 
-# Install the nautobot project to include Nautobot
+# Install the nautobot project (lock file is already pinned to NAUTOBOT_VER)
 RUN cd /source && \
     poetry install --no-interaction --no-ansi && \
     # Try to install the export plugin for Poetry v2, if it fails it's probably v1 so we can ignore it
@@ -72,17 +92,7 @@ RUN cd /source && \
     mkdir /tmp/dist && \
     poetry export --without-hashes -o /tmp/dist/requirements.txt
 
-# Constrain the Nautobot version to NAUTOBOT_VER, fall back to installing from git branch if not available on PyPi
-# In CI, this should be done outside of the Dockerfile to prevent cross-compile build failures
-ARG CI
-RUN if [ -z "${CI+x}" ]; then \
-        INSTALLED_NAUTOBOT_VER="$(pip show nautobot | grep "^Version" | sed "s/Version: //")"; \
-        if ! poetry add --lock "nautobot@${INSTALLED_NAUTOBOT_VER}" --python "${PYTHON_VER}"; then \
-            poetry add --lock "git+https://github.com/nautobot/nautobot.git#${NAUTOBOT_VER}" --python "${PYTHON_VER}"; \
-        fi; \
-    fi
-
-# Install the app
+# Install dev/docs/linting/testing extras
 RUN poetry install --with dev,docs,linting,testing
 
 COPY development/nautobot_config.py ${NAUTOBOT_ROOT}/nautobot_config.py
