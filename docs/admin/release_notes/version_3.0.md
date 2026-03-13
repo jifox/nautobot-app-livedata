@@ -60,6 +60,12 @@ Versioning](https://semver.org/spec/v2.0.0.html).
     forwards requests from the old path to the new one, but plan to remove such
     shims once consumers are updated.
 
+## [v3.0.1 (2026-03-13)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v3.0.1)
+
+### Fixed
+
+- [#188](https://github.com/jifox/nautobot-app-livedata/issues/188) - install Nautobot exactly at the version defined in invoke.yml, not the latest version.
+
 ## [v3.0.0 (2026-03-11)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v3.0.0)
 
 ### Breaking Changes (tag)
