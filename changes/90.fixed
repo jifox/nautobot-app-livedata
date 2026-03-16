@@ -1,0 +1,1 @@
+Improve Liveupdate error feedback when a device has no Secrets Group by raising a clear, actionable message so users can quickly resolve the missing configuration.

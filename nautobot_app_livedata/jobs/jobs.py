@@ -1,10 +1,8 @@
 """Jobs for the Nautobot App Livedata API."""
 
-from datetime import datetime
 from typing import Any
 
 from django.utils import timezone
-from django.utils.timezone import make_aware
 import jinja2
 from nautobot.apps.jobs import DryRunVar, IntegerVar, Job, ObjectVar
 from nautobot.dcim.models import Device, Interface, VirtualChassis
@@ -153,7 +151,7 @@ class LivedataQueryJob(Job):  # pylint: disable=too-many-instance-attributes
             ValueError: If call_object_type is not provided.
         """
         self.callername = self.user.username  # type: ignore
-        self.now = make_aware(datetime.now())
+        self.now = timezone.now()
         self.remote_addr = kwargs.get(REMOTE_ADDR)
         self.x_forwarded_for = kwargs.get(X_FORWARDED_FOR)
         self.call_object_type = kwargs.get(CALL_OBJECT_TYPE)
@@ -266,8 +264,14 @@ class LivedataQueryJob(Job):  # pylint: disable=too-many-instance-attributes
             ValueError: If command execution fails with NornirExecutionError.
         """
         callername = self.user.username  # type: ignore
-        now = make_aware(datetime.now())
+        now = timezone.now()
         qs = Device.objects.filter(id=self.primary_device.id).distinct()  # type: ignore
+
+        if not getattr(self.primary_device, "secrets_group", None):
+            raise ValueError(
+                f"No Secrets Group is defined for device '{self.primary_device.name}' (id={self.primary_device.id}). "
+                "Please assign a Secrets Group to this device in Nautobot before running this job."
+            )
 
         data = {
             "now": now,

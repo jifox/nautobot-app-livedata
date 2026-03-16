@@ -2,12 +2,12 @@
 Unit tests for output filtering utilities in Nautobot App Livedata.
 """
 
-import unittest
+from nautobot.apps.testing import TestCase
 
 from nautobot_app_livedata.utilities.output_filter import apply_output_filter
 
 
-class TestOutputFilter(unittest.TestCase):
+class TestOutputFilter(TestCase):
     """Unit tests for output filtering utilities."""
 
     def test_exact_filter(self):
@@ -56,7 +56,3 @@ class TestOutputFilter(unittest.TestCase):
         output = "line1\nline2\nline3\nline4\nline5"
         filtered = apply_output_filter(output, "FIRST:3")
         self.assertEqual(filtered, "line1\nline2\nline3")
-
-
-if __name__ == "__main__":
-    unittest.main()

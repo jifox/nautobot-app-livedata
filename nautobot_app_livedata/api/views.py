@@ -4,6 +4,7 @@
 
 from abc import ABC, abstractmethod
 from http import HTTPStatus
+import importlib
 import logging
 from typing import Any, Optional
 
@@ -23,26 +24,16 @@ from nautobot_app_livedata.utilities.primarydevice import (
 
 logger = logging.getLogger("nautobot_app_livedata")
 
-# Check that napalm is installed
-try:
-    import napalm  # pylint: disable=unused-import # noqa: F401
-except ImportError:
-    raise ImportError(  # pylint: disable=raise-missing-from
-        "ERROR NAPALM is not installed. Please see the documentation for instructions."
-    )
 
+def _runtime_dependencies_available() -> bool:
+    """Return True when required runtime dependencies can be imported."""
 
-# Check that celery worker is installed
-try:
-    from nautobot.core.celery import nautobot_task  # pylint: disable=unused-import,ungrouped-imports # noqa: F401
-
-    CELERY_WORKER = True
-except ImportError as err:
-    print("ERROR in nautobot_app_livedata: Celery is not Installed.")
-    logger.error(  # pylint: disable=raise-missing-from  # type: ignore
-        "ERROR in nautobot_app_livedata: Celery is not Installed."
-    )
-    raise ImportError from err
+    required_modules = ("napalm", "nautobot.core.celery")
+    missing_modules = [module for module in required_modules if importlib.util.find_spec(module) is None]
+    if missing_modules:
+        logger.error("Missing required dependencies for livedata API: %s", ", ".join(missing_modules))
+        return False
+    return True
 
 
 class LivedataQueryApiView(GenericAPIView, ABC):
@@ -112,6 +103,11 @@ class LivedataQueryApiView(GenericAPIView, ABC):
             self.__class__.__name__,
             getattr(getattr(self, "queryset", None), "model", None),
         )
+        if not _runtime_dependencies_available():
+            return Response(
+                "Required dependencies for Livedata are not installed.",
+                status=HTTPStatus.SERVICE_UNAVAILABLE,
+            )
         payload = self._build_serializer_payload(request, pk)
         serializer = self.get_serializer(data=payload)
         if not serializer.is_valid():

@@ -4,7 +4,7 @@
 
 from unittest.mock import Mock
 
-from django.test import TestCase
+from nautobot.apps.testing import TestCase
 from nornir.core.task import MultiResult, Result
 from nornir_nautobot.exceptions import NornirNautobotException
 
