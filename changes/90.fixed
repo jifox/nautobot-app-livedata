@@ -1,4 +1,5 @@
 Improve Liveupdate error feedback when a device has no Secrets Group by raising a clear, actionable message so users can quickly resolve the missing configuration.
+
 For GitHub Actions workflows, added the recommended environment variables at the top of the workflow so they apply to all jobs:
   - FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true — opt in to Node.js 24 now  
   - ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true — allows falling back to Node.js 20 if needed once Node.js 24 becomes the default (per GitHub’s guidance)
