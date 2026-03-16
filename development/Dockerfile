@@ -85,8 +85,7 @@ RUN if [ -z "${CI+x}" ]; then \
     fi
 
 # Install the nautobot project (lock file is already pinned to NAUTOBOT_VER)
-RUN cd /source && \
-    poetry install --no-interaction --no-ansi && \
+RUN poetry install --no-interaction --no-ansi && \
     # Try to install the export plugin for Poetry v2, if it fails it's probably v1 so we can ignore it
     poetry self add poetry-plugin-export || true && \
     mkdir /tmp/dist && \

@@ -16,6 +16,7 @@ from functools import lru_cache
 import json
 import os
 from pathlib import Path
+import platform
 import re
 import sys
 from time import sleep
@@ -970,6 +971,7 @@ def lock(context, check=False, constrain_nautobot_ver=False, constrain_python_ve
 def debug(context, service=""):
     """Start specified or all services and its dependencies in debug mode."""
     _print_context_info(context)
+    service = _service_name(context, service)
     print(f"Starting {service} in debug mode...")
     env = {
         "NAUTOBOT_DEBUG": "True",
@@ -999,6 +1001,7 @@ def start(context, service=""):
 @task(help={"service": "If specified, only affect this service."})
 def restart(context, service=""):
     """Gracefully restart specified or all services."""
+    service = _service_name(context, service)
     print("Restarting Nautobot...")
     docker_compose(context, "restart", service=service)
 
@@ -1006,6 +1009,7 @@ def restart(context, service=""):
 @task(help={"service": "If specified, only affect this service."})
 def stop(context, service=""):
     """Stop specified or all services, if service is not specified, remove all containers."""
+    service = _service_name(context, service)
     print("Stopping Nautobot...")
     docker_compose(context, "stop" if service else "down --remove-orphans", service=service)
 
@@ -1098,6 +1102,7 @@ def vscode(context):
 )
 def logs(context, service="", follow=False, tail=0):
     """View the logs of a docker compose service."""
+    service = _service_name(context, service)
     command = "logs "
 
     if follow:
@@ -2029,3 +2034,377 @@ def validate_app_config(context):
     """Validate the app config based on the app config schema."""
     start(context, service="nautobot")
     nbshell(context, plain=True, file="development/app_config_schema.py", env={"APP_CONFIG_SCHEMA_COMMAND": "validate"})
+
+
+# ----------------------------------------------------------------------------
+# UPSTREAM-ALIGNED TASKS (missing from local tasks.py)
+# ----------------------------------------------------------------------------
+
+
+def _ensure_port_file(context):
+    """Ensure .service_ports.json exists with current port mappings."""
+    dump_service_ports_to_disk(context)
+
+
+def task_navigate_to_service_port(context, service: str, internal_port: str, proto: str = "http", creds: str = ""):
+    """Open a browser to a service port exposed by docker compose."""
+    nautobot_raw_uri = docker_compose(context, f"port {service} {internal_port}", hide=True).stdout.rstrip()
+    nautobot_url = f"{proto}://{creds}{nautobot_raw_uri}".replace("0.0.0.0", "127.0.0.1")  # noqa: S104
+    if platform.system().lower() == "darwin":
+        open_cmd = "open"
+    else:
+        open_cmd = "xdg-open"
+    try:
+        context.run(f"{open_cmd} {nautobot_url}", hide="err")
+    except Exception:
+        print(f"Unable to open browser. {service} interface available at {nautobot_url}")
+
+
+@task(
+    help={
+        "service": "Source service to open (default: nautobot).",
+    }
+)
+def open_nautobot_web(context, service="nautobot"):
+    """Navigate to the Nautobot web UI in a browser."""
+    task_navigate_to_service_port(context, service, "8080")
+
+
+@task
+def open_docs_web(context):
+    """Navigate to the docs web UI in a browser."""
+    task_navigate_to_service_port(context, "mkdocs", "8001")
+
+
+@task
+def open_selenium_vnc(context):
+    """Navigate to the selenium VNC browser view."""
+    task_navigate_to_service_port(context, "selenium", "5900", proto="vnc", creds=":secret@")
+
+
+@task
+def serve_docs(context):
+    """Serve docs locally."""
+    docs(context)
+
+
+@task
+def dump_service_ports_to_disk(context):
+    """Dump currently exposed service ports to .service_ports.json."""
+    service_ports = {}
+
+    for attempt in range(4):
+        result = docker_compose(context, "ps --format json", hide=True)
+        for line in result.stdout.splitlines():
+            try:
+                service_def = json.loads(line)
+                service_name = re.search(
+                    r"com\.docker\.compose\.service=(?P<service>\w+)", service_def.get("Labels", "")
+                )
+                if not service_name:
+                    continue
+                service_name = service_name.group("service")
+                ports_found = {}
+                for port in service_def.get("Publishers", []):
+                    if port.get("PublishedPort", 0):
+                        ports_found[port["TargetPort"]] = port["PublishedPort"]
+                if ports_found:
+                    service_ports[service_name] = ports_found
+            except (json.decoder.JSONDecodeError, AttributeError, IndexError, KeyError):
+                continue
+
+        # Confirm required services are started
+        if set(["nautobot", "celery_worker"]).issubset(service_ports.keys()):
+            break
+
+        sleep(15)
+
+    with open(".service_ports.json", "w") as f:
+        json.dump(service_ports, f, indent=4)
+
+
+@task(
+    help={
+        "branch": "Branch name to switch to",
+        "create": "If specified, create the branch as a new branch",
+        "parent": "If specified with --create, use the given parent branch as baseline instead of the current branch",
+    },
+)
+def branch(context, *, branch=None, create=False, parent=None):
+    """Switch to a different git branch, creating it if requested."""
+    if not branch:
+        raise Exit("No branch specified, use --branch option")
+
+    if not is_truthy(_get_ctx(context).local):
+        stop(context)
+
+    if create:
+        if parent is not None:
+            context.run(f"git checkout '{parent}' && git pull", pty=True)
+        context.run(f"git checkout -b '{branch}'", pty=True)
+    else:
+        context.run(f"git checkout '{branch}'", pty=True)
+
+
+@task(
+    help={
+        "cache": "Whether to use Docker's cache when building the image. (Default: enabled)",
+        "cache_dir": "Directory to use for caching buildx output. (Default: current directory)",
+        "platforms": "Comma-separated list of platforms to build for. (Default: linux/amd64)",
+        "tag": "Tag to apply to the built image.",
+        "target": "Build target from Dockerfile. (Default: dev)",
+        "poetry_parallel": "Enable/disable poetry to install packages in parallel. (Default: False)",
+        "force_rm": "Always remove intermediate containers. (Default: True)",
+    },
+)
+def buildx(
+    context,
+    cache=False,
+    cache_dir="",
+    platforms="linux/amd64",
+    tag=None,
+    target="dev",
+    poetry_parallel=False,
+    force_rm=True,
+):
+    """Build Nautobot docker image using docker buildx."""
+    print(f"Building Nautobot {target} target with Python {_get_ctx(context).python_ver} for {platforms}...")
+    if tag is None:
+        if target == "dev":
+            tag = f"networktocode/nautobot-dev-py{_get_ctx(context).python_ver}:local"
+        elif target == "final-dev":
+            tag = f"networktocode/nautobot-dev-py{_get_ctx(context).python_ver}:local"
+        elif target == "final":
+            tag = f"networktocode/nautobot-py{_get_ctx(context).python_ver}:local"
+
+    command_tokens = [
+        "docker buildx build .",
+        f"--platform {platforms}",
+        f"--target {target}",
+        "--load",
+        "-f ./docker/Dockerfile",
+        f"--build-arg PYTHON_VER={_get_ctx(context).python_ver}",
+    ]
+    if force_rm:
+        command_tokens.append("--force-rm")
+
+    if tag is not None:
+        command_tokens.append(f"-t {tag}")
+    if not cache:
+        command_tokens.append("--no-cache")
+    else:
+        command_tokens += [
+            f"--cache-to type=local,dest={cache_dir}/{_get_ctx(context).python_ver}",
+            f"--cache-from type=local,src={cache_dir}/{_get_ctx(context).python_ver}",
+        ]
+    if poetry_parallel:
+        command_tokens.append("--build-arg POETRY_INSTALLER_PARALLEL=true")
+
+    command = " \\n".join(command_tokens)
+    run_command(context, command)
+
+
+@task(
+    help={
+        "poetry_parallel": "Enable/disable poetry to install packages in parallel. (Default: True)",
+    },
+)
+def build_dependencies(context, poetry_parallel=True):
+    """Build dependency image for Nautobot using buildx."""
+    buildx(context, target="dependencies", poetry_parallel=poetry_parallel)
+
+
+@task(
+    help={
+        "branch": "Source branch used to push.",
+        "commit": "Commit hash used to tag the image.",
+        "datestamp": "Datestamp used to tag the develop image.",
+    }
+)
+def docker_push(context, branch, commit="", datestamp=""):
+    """Tag and push docker images for release use."""
+    nautobot_version = re.findall(r"version = \"(.*)\"", open("pyproject.toml").read())[0]
+    docker_image_tags = [
+        f"stable-py{_get_ctx(context).python_ver}",
+        f"{nautobot_version}-py{_get_ctx(context).python_ver}",
+    ]
+
+    docker_image_names = [
+        "networktocode/nautobot",
+        "networktocode/nautobot-dev",
+    ]
+
+    for image_name in docker_image_names:
+        for image_tag in docker_image_tags:
+            new_image = f"{image_name}:{image_tag}"
+            local_image = (
+                f"networktocode/nautobot-dev-py{_get_ctx(context).python_ver}:local"
+                if image_name.endswith("-dev")
+                else f"networktocode/nautobot-py{_get_ctx(context).python_ver}:local"
+            )
+            context.run(f"docker tag {local_image} {new_image}")
+            context.run(f"docker push {new_image}")
+
+
+@task
+def showmigrations(context):
+    """Show migrations."""
+    command = "nautobot-server showmigrations"
+    run_command(context, command)
+
+
+@task(
+    help={
+        "filepath": "Path to the file to create or overwrite",
+        "format": "Output serialization format for dumped data. (Choices: json, xml, yaml)",
+        "model": "Model to include, such as 'dcim.device', repeat as needed",
+    },
+    iterable=["model"],
+)
+def dumpdata(context, format="json", model=None, filepath=None):
+    """Dump data from database to file."""
+    if not filepath:
+        filepath = f"db_output.{format}"
+    command = (
+        f"nautobot-server dumpdata --indent 2 --format {format} --natural-foreign --natural-primary --output {filepath}"
+    )
+    if model is not None:
+        command += f" {' '.join(model)}"
+    run_command(context, command)
+
+
+@task(help={"filepath": "Name and path of file to load."})
+def loaddata(context, filepath="db_output.json"):
+    """Load data from file."""
+    command = f"nautobot-server loaddata {filepath}"
+    run_command(context, command)
+
+
+@task(help={"command": "npm command to be executed, e.g. 'ci', 'install', 'remove', 'update', etc'."})
+def npm(context, command):
+    """Execute any given npm command inside `nautobot/ui` directory.
+
+    Nautobot apps (unlike Nautobot core) may not include the `nautobot/ui`
+    directory and thus cannot run npm-based linters/builds. Skip when the
+    expected package.json is missing.
+    """
+    package_json = Path("nautobot/ui/package.json")
+    if not package_json.exists():
+        print(f"Skipping npm command because {package_json} does not exist.")
+        return
+
+    context.run(f"npm --prefix nautobot/ui {command}", pty=True)
+
+
+@task(help={"watch": "Spawn a continuous process to watch source files and trigger re-build when they are changed."})
+def ui_build(context, watch=False):
+    """Build Nautobot UI from source."""
+    command = "run build"
+    if watch:
+        command += ":watch"
+    npm(context, command)
+
+
+@task
+def ui_code_check(context):
+    """Check Nautobot UI source code style and formatting."""
+    npm(context, "run code:check")
+
+
+@task
+def ui_code_format(context):
+    """Format Nautobot UI source code."""
+    npm(context, "run code:format")
+
+
+@task(help={"fix": "Automatically apply linting recommendations. May not be able to fix all linting issues."})
+def eslint(context, fix=False):
+    """Run ESLint to perform JavaScript code linting."""
+    command = "run eslint"
+    if fix:
+        command += ":fix"
+    npm(context, command)
+
+
+@task(help={"fix": "Automatically apply recommended formatting."})
+def prettier(context, fix=False):
+    """Run Prettier to format JavaScript code."""
+    command = "run prettier"
+    if fix:
+        command += ":fix"
+    npm(context, command)
+
+
+@task(
+    help={
+        "api_version": "Check a single specified API version only.",
+    },
+)
+def check_schema(context, api_version=None):
+    """Render the REST API schema and check for problems."""
+    command = "nautobot-server spectacular --validate --fail-on-warn --file /dev/null"
+    if api_version is not None:
+        command += f" --api-version {api_version}"
+    run_command(context, command)
+
+
+@task(
+    help={
+        "dataset": "File (.sql.tar.gz) to start from that will untar to 'nautobot.sql'",
+        "db_engine": "mysql or postgres",
+        "db_name": "Temporary database to create, test, and destroy",
+    },
+)
+def migration_test(context, dataset, db_engine="postgres", db_name="nautobot_migration_test"):
+    """Test database migration from a given dataset to the latest Nautobot schema."""
+    if is_truthy(_get_ctx(context).local):
+        run_command(context, f"tar zxvf {dataset}")
+    else:
+        start(context, service="db")
+        source_file = os.path.basename(dataset)
+        docker_compose(context, f"cp '{dataset}' db:/tmp/{source_file}")
+        run_command(context, command=f"tar zxvf /tmp/{source_file}", service="db")
+
+    if db_engine == "postgres":
+        common_args = "-U $NAUTOBOT_DB_USER --no-password -h localhost"
+        run_command(context, command=f"sh -c 'dropdb --if-exists {common_args} {db_name}'", service="db")
+        run_command(context, command=f"sh -c 'createdb {common_args} {db_name}'", service="db")
+        run_command(context, command=f"sh -c 'psql {common_args} -d {db_name} -f nautobot.sql'", service="db")
+    else:
+        base_command = "mysql --user=$NAUTOBOT_DB_USER --password=$NAUTOBOT_DB_PASSWORD --host 127.0.0.1"
+        run_command(context, command=f"sh -c '{base_command} -e \"DROP DATABASE IF EXISTS {db_name};\"'", service="db")
+        run_command(context, command=f"sh -c '{base_command} -e \"CREATE DATABASE {db_name};\"'", service="db")
+        run_command(context, command=f"sh -c '{base_command} {db_name} < nautobot.sql'", service="db")
+
+    if is_truthy(_get_ctx(context).local):
+        run_command(context, command="nautobot-server migrate", env={"NAUTOBOT_DB_NAME": db_name})
+    else:
+        docker_compose(
+            context,
+            command=f"run --rm --env NAUTOBOT_DB_NAME={db_name} --entrypoint 'nautobot-server migrate' nautobot",
+        )
+
+
+@task
+def lint(context):
+    """Run all linters."""
+    hadolint(context)
+    markdownlint(context)
+    yamllint(context)
+    ruff(context)
+    pylint(context)
+    eslint(context)
+    prettier(context)
+    djhtml(context)
+    djlint(context)
+    check_migrations(context)
+    check_schema(context)
+    build_and_check_docs(context)
+
+
+@task(help={"version": "The version number or the rule to update the version."})
+def version(context, version=None):
+    """Show or bump the version of the Nautobot Python package."""
+    if version is None:
+        version = ""
+    run_command(context, f"poetry version --short {version}")
