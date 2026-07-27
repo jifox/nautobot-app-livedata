@@ -2367,7 +2367,7 @@ version = "3.10.2"
 description = "Python implementation of John Gruber's Markdown."
 optional = false
 python-versions = ">=3.10"
-groups = ["main", "dev", "docs"]
+groups = ["main", "docs"]
 files = [
     {file = "markdown-3.10.2-py3-none-any.whl", hash = "sha256:e91464b71ae3ee7afd3017d9f358ef0baf158fd9a298db92f1d4761133824c36"},
     {file = "markdown-3.10.2.tar.gz", hash = "sha256:994d51325d25ad8aa7ce4ebaec003febcce822c3f8c911e3b17c52f7f589f950"},
@@ -5817,4 +5817,4 @@ test = ["coverage", "hypothesis", "pytest"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.14"
-content-hash = "88827aa9a9f2dec4aa381df3f043c71fadc59a24fa759ffd44a6927627b61fc5"
+content-hash = "641b864fb31204c55410acf424d2716471719c0f06c80026ae88dda5bff9ca87"

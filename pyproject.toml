@@ -50,12 +50,12 @@ towncrier = "~25.8.0"
 watchdog = "~6.0.0"
 ipython = "*"
 toml = "*"
-Markdown = "~=3.10.2"
 "python-dotenv" = "~=1.2.1"
 debugpy = ">=1.8.14"
 
 [tool.poetry.group.docs.dependencies]
 mkdocs = "~1.6.1"
+Markdown = "~=3.10.2"
 "markdown-data-tables" = "~1.0.0"
 "markdown-version-annotations" = "~1.0.1"
 "mkdocs-gen-files" = "~0.6.1"
