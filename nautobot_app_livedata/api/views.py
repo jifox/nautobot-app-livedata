@@ -238,7 +238,7 @@ class LivedataQueryApiView(GenericAPIView, ABC):
             job,
             user=user,
             task_queue=PLUGIN_SETTINGS["query_job_task_queue"],
-            **job_kwargs,
+            job_kwargs=job_kwargs,
         )
 
 

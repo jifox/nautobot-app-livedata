@@ -43,4 +43,4 @@ class TestPermission(TestCase):
         self.assertEqual(pu.name, "livedata.interact_with_devices")
         self.assertEqual(pu.actions, ["can_interact"])
         self.assertEqual(pu.description, "Interact with devices without permission to change device configurations.")
-        self.assertEqual(str(pu.object_types.first()), "dcim | device")
+        self.assertEqual(str(pu.object_types.first()), "DCIM | device")
