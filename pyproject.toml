@@ -3,7 +3,7 @@
 # handled by Poetry and declared dynamic below.
 dynamic = ["dependencies", "requires-python"]
 name = "nautobot_app_livedata"
-version = "3.0.3a0"
+version = "3.0.4a0"
 description = "Provides a live view of network data within Nautobot."
 readme = "README.md"
 authors = [{name = "Josef Fuchs", email = "josef.fuchs@j-fuchs.at"}]
@@ -141,6 +141,7 @@ extensions.front-matter.enabled = true  # needed for mkdocs-macros compatibility
 plugins.code-block-style.enabled = false  # inconsistency between "code" blocks and "admonition" blocks is expected
 plugins.line-length.enabled = false  # we don't wrap markdown to 80 characters
 plugins.list-anchored-indent.enabled = true
+plugins.md024.enabled = false  # duplicate headings expected in release notes
 plugins.proper-names.names = "Celery,Django,Nautobot,Nornir,Pylint,PyMarkdown,Python,REST API"
 plugins.proper-names.code_blocks = false  # don't check proper nouns inside ```code blocks```
 plugins.proper-names.code_spans = false  # don't check proper nouns inside `code spans`
