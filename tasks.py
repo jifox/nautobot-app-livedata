@@ -177,7 +177,7 @@ worker2_container_name = (
 )
 backend_network_name = f"{nautobot_container_name}_net"
 docker_registry = os.getenv("NAUTOBOT_DOCKER_REGISTRY", "local").replace("_", "-").lower()
-python_ver = os.getenv("PYTHON_VER", "3.10")
+python_ver = os.getenv("PYTHON_VER", "3.12")
 
 # Defined in local.env or creds.env
 project_name = str("-".join(str(CONFIGURATION_NAMESPACE).split("_")[:-1]).replace("_", "-")).lower()
@@ -210,14 +210,10 @@ namespace.configure(
             "nautobot_container_name": nautobot_container_name,
             "db_container_name": db_container_name,
             "redis_container_name": redis_container_name,
-            # the celery_container_name key was accidentally duplicated above; the
-            # second occurrence has been removed to avoid F601 (duplicate key).
             "worker_container_name": worker_container_name,
             "worker2_container_name": worker2_container_name,
             "backend_network_name": backend_network_name,
             "mkdocs_container_name": mkdocs_container_name,
-            # the docker_registry key is already defined earlier in this dict; drop
-            # the duplicate occurrence here.
             # Other settings
             "render_templates": False,  # Set to True to render templates before running docker compose
             # Build options: docker build target (one of: "final", "dev", "final-dev").
