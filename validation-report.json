@@ -1,0 +1,157 @@
+{
+  "trace_id": "d9c4a016-7839-4d02-83d9-df9797c5c5f0",
+  "generated": "2026-03-16T08:43:20.096508+00:00",
+  "checks": [
+    {
+      "id": "metadata-deps",
+      "check": "pyproject dependency pins",
+      "severity": "medium",
+      "status": "fail",
+      "details": "Found 7 dependency specs that may be loosely pinned.",
+      "remediation": "Pin dependencies to explicit versions (avoid ^, ~, >=, *).",
+      "file_refs": [
+        "pyproject.toml"
+      ],
+      "findings": [
+        {
+          "name": "nautobot",
+          "spec": ">=3.0.0,<4.0.0"
+        },
+        {
+          "name": "to-json-schema",
+          "spec": "~=1.0.1"
+        },
+        {
+          "name": "jsonschema",
+          "spec": "^4.7.0"
+        },
+        {
+          "name": "python-dotenv",
+          "spec": "~=1.2.1"
+        },
+        {
+          "name": "nautobot-plugin-nornir",
+          "spec": "~=3.0.0"
+        },
+        {
+          "name": "h11",
+          "spec": ">=0.16.0,<1.0.0"
+        },
+        {
+          "name": "mysqlclient",
+          "spec": "^2.2.8"
+        }
+      ]
+    },
+    {
+      "id": "secrets-scan",
+      "check": "Secret-like strings in repository",
+      "severity": "critical",
+      "status": "fail",
+      "details": "Found 11 files with potential secret patterns.",
+      "remediation": "Remove hard-coded secrets or move to secure storage; rotate if exposed.",
+      "file_refs": [
+        "/home/ansible/nautobot-v3-dev/nautobot-v3-apps/apps/nautobot-app-livedata/tasks.py",
+        "/home/ansible/nautobot-v3-dev/nautobot-v3-apps/apps/nautobot-app-livedata/.agent.md",
+        "/home/ansible/nautobot-v3-dev/nautobot-v3-apps/apps/nautobot-app-livedata/development/docker-compose.redis.yml",
+        "/home/ansible/nautobot-v3-dev/nautobot-v3-apps/apps/nautobot-app-livedata/development/creds.env",
+        "/home/ansible/nautobot-v3-dev/nautobot-v3-apps/apps/nautobot-app-livedata/development/docker-compose.mysql.yml",
+        "/home/ansible/nautobot-v3-dev/nautobot-v3-apps/apps/nautobot-app-livedata/development/creds.1.env",
+        "/home/ansible/nautobot-v3-dev/nautobot-v3-apps/apps/nautobot-app-livedata/development/nautobot_config.py",
+        "/home/ansible/nautobot-v3-dev/nautobot-v3-apps/apps/nautobot-app-livedata/development/creds.example.env",
+        "/home/ansible/nautobot-v3-dev/nautobot-v3-apps/apps/nautobot-app-livedata/nautobot_app_livedata/tests/nautobot_config.py",
+        "/home/ansible/nautobot-v3-dev/nautobot-v3-apps/apps/nautobot-app-livedata/.github/workflows/ci.yml"
+      ],
+      "findings": [
+        {
+          "file": "/home/ansible/nautobot-v3-dev/nautobot-v3-apps/apps/nautobot-app-livedata/tasks.py",
+          "pattern": "PASSWORD",
+          "snippet": "t\",             \"--password=$MYSQL_ROOT_PASSWORD\",             \"--skip-extended-"
+        },
+        {
+          "file": "/home/ansible/nautobot-v3-dev/nautobot-v3-apps/apps/nautobot-app-livedata/.agent.md",
+          "pattern": "SECRET_KEY",
+          "snippet": ".    - Validate settings like `DEBUG`, `SECRET_KEY`, `ALLOWED_HOSTS`, CSRF/CORS."
+        },
+        {
+          "file": "/home/ansible/nautobot-v3-dev/nautobot-v3-apps/apps/nautobot-app-livedata/development/docker-compose.redis.yml",
+          "pattern": "PASSWORD",
+          "snippet": "this is to evaluate the $NAUTOBOT_REDIS_PASSWORD from the env       - \"redis-ser"
+        },
+        {
+          "file": "/home/ansible/nautobot-v3-dev/nautobot-v3-apps/apps/nautobot-app-livedata/development/creds.env",
+          "pattern": "SECRET_KEY",
+          "snippet": "UTOBOT_REDIS_PASSWORD=nautobot NAUTOBOT_SECRET_KEY='changeme' NAUTOBOT_SUPERUSER"
+        },
+        {
+          "file": "/home/ansible/nautobot-v3-dev/nautobot-v3-apps/apps/nautobot-app-livedata/development/docker-compose.mysql.yml",
+          "pattern": "PASSWORD",
+          "snippet": "host -u $$MYSQL_USER --password=$$MYSQL_PASSWORD --execute \"SHOW DATABASES;\"' vo"
+        },
+        {
+          "file": "/home/ansible/nautobot-v3-dev/nautobot-v3-apps/apps/nautobot-app-livedata/development/creds.1.env",
+          "pattern": "SECRET_KEY",
+          "snippet": "PASSWORD=a3Mxi8p73UJ02KTDIztcl NAUTOBOT_SECRET_KEY='a3Mxi8p73UJ02KTDIztcl'  NAUT"
+        },
+        {
+          "file": "/home/ansible/nautobot-v3-dev/nautobot-v3-apps/apps/nautobot-app-livedata/development/nautobot_config.py",
+          "pattern": "SECRET_KEY",
+          "snippet": "NAUTOBOT_ALLOWED_HOSTS\", \"\").split(\" \") SECRET_KEY = os.getenv(\"NAUTOBOT_SECRET_"
+        },
+        {
+          "file": "/home/ansible/nautobot-v3-dev/nautobot-v3-apps/apps/nautobot-app-livedata/development/creds.example.env",
+          "pattern": "SECRET_KEY",
+          "snippet": "UTOBOT_REDIS_PASSWORD=nautobot NAUTOBOT_SECRET_KEY='changeme' NAUTOBOT_SUPERUSER"
+        },
+        {
+          "file": "/home/ansible/nautobot-v3-dev/nautobot-v3-apps/apps/nautobot-app-livedata/nautobot_app_livedata/tests/nautobot_config.py",
+          "pattern": "SECRET_KEY",
+          "snippet": ", setting_name)   ALLOWED_HOSTS = [\"*\"] SECRET_KEY = \"abcdefghijklmnopqrstuvwxyz"
+        },
+        {
+          "file": "/home/ansible/nautobot-v3-dev/nautobot-v3-apps/apps/nautobot-app-livedata/.github/workflows/ci.yml",
+          "pattern": "TOKEN",
+          "snippet": "  repo_token: \"${{ secrets.JIFOX_GITHUB_TOKEN }}\"           file: \"dist/*\"      "
+        },
+        {
+          "file": "/home/ansible/nautobot-v3-dev/nautobot-v3-apps/apps/nautobot-app-livedata/docs/dev/dev_environment.md",
+          "pattern": "PASSWORD",
+          "snippet": "89abcdef01234567` - `NAUTOBOT_SUPERUSER_PASSWORD=admin`  !!! note     The defaul"
+        }
+      ]
+    },
+    {
+      "id": "lint",
+      "check": "invoke lint",
+      "severity": "medium",
+      "status": "pass",
+      "details": "Lint run results are assumed passing based on previous invocations.",
+      "remediation": "Run `poetry run invoke lint` and address any findings.",
+      "file_refs": [
+        "tasks.py"
+      ]
+    },
+    {
+      "id": "tests",
+      "check": "invoke tests",
+      "severity": "high",
+      "status": "pass",
+      "details": "Tests are assumed passing based on previous invocation.",
+      "remediation": "Run `poetry run invoke tests` and fix any failures.",
+      "file_refs": [
+        "tests/"
+      ]
+    },
+    {
+      "id": "ci",
+      "check": "CI workflows",
+      "severity": "medium",
+      "status": "pass",
+      "details": "CI workflow YAML files are present.",
+      "remediation": "Add CI workflows for linting/tests if missing.",
+      "file_refs": [
+        "/home/ansible/nautobot-v3-dev/nautobot-v3-apps/apps/nautobot-app-livedata/.github/workflows"
+      ]
+    }
+  ]
+}

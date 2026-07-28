@@ -7,6 +7,7 @@ from unittest.mock import Mock, patch
 from django.contrib.auth import get_user_model
 from django.utils.timezone import make_aware
 from nautobot.apps.testing import TestCase as APITransactionTestCase
+from nautobot.extras.models import SecretsGroup
 
 from .conftest import create_db_data
 from nautobot_app_livedata.jobs.jobs import LivedataCleanupJobResultsJob, LivedataQueryJob
@@ -245,6 +246,25 @@ class LivedataQueryJobTest(APITransactionTestCase):
         self.assertIn("Primary Device with ID", str(context.exception))
         self.assertIn("not found", str(context.exception))
 
+    def test_run_requires_secrets_group(self):
+        """Test run() raises a clear error when device has no Secrets Group."""
+        device = self.device_list[0]
+        # Ensure the device has no secrets group configured for this test
+        device.secrets_group = None
+        device.save()
+
+        self.job.primary_device = device
+        self.job.device_name = device.name
+        self.job.commands = ["show version"]
+
+        with patch.object(type(self.job), "user", Mock(username="testuser")):
+            with self.assertRaises(ValueError) as context:
+                self.job.run()
+
+        self.assertIn(
+            f"No Secrets Group is defined for device '{device.name}' (id={device.id})", str(context.exception)
+        )
+
     def test_initialize_virtual_chassis(self):
         """Test _initialize_virtual_chassis sets virtual chassis when provided."""
         device = self.device_list[0]
@@ -351,6 +371,8 @@ class LivedataQueryJobTest(APITransactionTestCase):
         device = self.device_list[0]
 
         with patch.object(type(self.job), "user", Mock(username="testuser")):
+            # Provide a valid Secrets Group to bypass the pre-check in run().
+            device.secrets_group = SecretsGroup.objects.create(name="test-secrets-group")
             self.job.primary_device = device
             self.job.device_name = device.name
             self.job.interface = None
@@ -389,6 +411,8 @@ class LivedataQueryJobTest(APITransactionTestCase):
         device = self.device_list[0]
 
         with patch.object(type(self.job), "user", Mock(username="testuser")):
+            # Provide a valid Secrets Group to bypass the pre-check in run().
+            device.secrets_group = SecretsGroup.objects.create(name="test-secrets-group")
             self.job.primary_device = device
             self.job.device_name = device.name
             self.job.interface = None
@@ -428,6 +452,7 @@ class LivedataQueryJobTest(APITransactionTestCase):
 
         with patch.object(type(self.job), "user", Mock(username="testuser")):
             self.job.primary_device = device
+            device.secrets_group = SecretsGroup.objects.create(name="test-secrets-group")
             self.job.device_name = device.name
             self.job.interface = None
             self.job.call_object_type = "dcim.device"

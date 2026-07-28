@@ -1,6 +1,6 @@
 """Unit tests for contenttype.py."""
 
-from django.test import TestCase
+from nautobot.apps.testing import TestCase
 
 from .conftest import create_db_data, wait_for_debugger_connection
 from nautobot_app_livedata.utilities.contenttype import ContentTypeUtils

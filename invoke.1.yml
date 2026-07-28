@@ -1,0 +1,29 @@
+---
+nautobot_app_livedata:
+  nautobot_ver: "3.0.8"  # pyproject or version tag
+  python_ver: "3.13"
+  project_name": "nautobot-3-app-livedata"
+  project_suffix: "dev"
+  local: false
+  render_templates: false
+  compose_files:
+    - "docker-compose.base.yml"
+    - "docker-compose.redis.yml"
+    - "docker-compose.postgres.yml"
+    # - "docker-compose.mysql.yml"
+    - "docker-compose.dev.yml"
+    - "docker-compose.override.yml"
+    - "docker-compose.vscode-rdb.yml"
+  nautobot_container_name: "nautobot"
+  db_container_name: "db"
+  redis_container_name: "redis"
+
+
+# The following is an example of using MySQL as the database backend
+# ---
+# nautobot_app_livedata:
+#   compose_files:
+#     - "docker-compose.base.yml"
+#     - "docker-compose.redis.yml"
+#     - "docker-compose.mysql.yml"
+#     - "docker-compose.dev.yml"

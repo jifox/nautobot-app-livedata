@@ -1,5 +1,6 @@
 """Utilities for getting the primary device for a given object."""
 
+from collections.abc import Iterable
 from typing import Any, List, Optional
 
 from .contenttype import ContentTypeUtils
@@ -11,6 +12,20 @@ class PrimaryDeviceUtils:
     For more information on implementing jobs, refer to the Nautobot job documentation:
     https://docs.nautobot.com/projects/core/en/stable/development/jobs/
     """
+
+    @staticmethod
+    def _is_active_status(device: Any) -> bool:
+        """Return True when device status represents the active state."""
+
+        status = getattr(device, "status", None)
+        candidates = [
+            getattr(status, "slug", None),
+            getattr(status, "name", None),
+            getattr(status, "value", None),
+            str(status) if status is not None else None,
+        ]
+        normalized_candidates = {str(value).strip().lower() for value in candidates if value not in (None, "")}
+        return "active" in normalized_candidates
 
     def __init__(self, object_type: str, pk: str):
         """Initialize the PrimaryDeviceUtils class.
@@ -79,7 +94,7 @@ class PrimaryDeviceUtils:
         elif self._object_type == "dcim.device":
             try:
                 self._device = Device.objects.get(pk=self._pk)
-                if str(self._device.status) != "Active":  # type: ignore
+                if not self._is_active_status(self._device):  # type: ignore[arg-type]
                     raise ValueError(
                         (
                             f"Device '{self._device.name}' "  # type: ignore
@@ -128,15 +143,18 @@ class PrimaryDeviceUtils:
             # Try to loop over all devices in the virtual chassis and check if any of them has a primary IP address
             if self._primary_device.virtual_chassis:  # type: ignore
                 self._virtual_chassis = self._primary_device.virtual_chassis  # type: ignore
-                for member in self._primary_device.virtual_chassis.members.all():  # type: ignore
-                    if member.primary_ip:
-                        self._primary_device = member
-                        break
+                members_with_primary_ip: Iterable[Any] = (
+                    member
+                    for member in self._primary_device.virtual_chassis.members.all()  # type: ignore
+                    if member.primary_ip
+                )
+                self._primary_device = next(members_with_primary_ip, None)
+                if self._primary_device is None:
                     raise ValueError("Device does not have a primary IP address")
             else:
                 raise ValueError("Device does not have a primary IP address")
         # Check if the device state is active
-        if str(self._primary_device.status) != "Active":  # type: ignore
+        if not self._is_active_status(self._primary_device):  # type: ignore[arg-type]
             raise ValueError("Device status is not 'Active'")
 
     @property

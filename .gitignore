@@ -317,4 +317,4 @@ dump.sql
 media.tgz
 development/docker-compose.override.yml
 docs/admin/release_notes/version_X_Y.md
-temp_notes.txt
+temp_notes.txtdevelopment/creds.1.env

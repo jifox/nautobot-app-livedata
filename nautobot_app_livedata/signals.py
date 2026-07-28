@@ -2,6 +2,8 @@
 
 # filepath: nautobot_app_livedata/signals.py
 
+import logging
+
 from django.apps import apps as global_apps
 from django.conf import settings
 from django.db.models.signals import post_migrate
@@ -10,6 +12,8 @@ from nautobot.apps.choices import CustomFieldTypeChoices
 
 from .utilities.customfield import create_custom_field
 from .utilities.permission import create_permission
+
+logger = logging.getLogger("nautobot_app_livedata")
 
 
 def get_plugin_settings():
@@ -171,7 +175,7 @@ def nautobot_database_ready_callback(sender, **kwargs):  # pylint: disable=unuse
     try:
         create_custom_field(db_objects=app_db_ready_state.db_objects, content_type_objects=cto, **field_data)
     except Exception as e:  # pylint: disable=broad-except
-        print(f"ERROR: Database-Ready awaiting - {e}")
+        logger.exception("Database ready initialization failed while creating livedata_interface_commands: %s", e)
         return
 
     # Add the custom field to the Platform model, which is used to store the
@@ -195,7 +199,7 @@ def nautobot_database_ready_callback(sender, **kwargs):  # pylint: disable=unuse
     try:
         create_custom_field(db_objects=app_db_ready_state.db_objects, content_type_objects=cto, **field_data)
     except Exception as e:  # pylint: disable=broad-except
-        print(f"ERROR: Database-Ready awaiting - {e}")
+        logger.exception("Database ready initialization failed while creating livedata_device_commands: %s", e)
         return
 
     # Ensure that the jobs are enabled
@@ -218,6 +222,6 @@ def _enable_job(job_name):
         if not job.enabled:  # type: ignore
             job.enabled = True  # type: ignore
             job.save()
-            print(f"Database-Ready     - Job '{job_name}' enabled")
+            logger.info("Database-Ready - Job '%s' enabled", job_name)
     except Job.DoesNotExist:
-        print(f"WARNING: Database-Ready     - Job '{job_name}' not found")
+        logger.warning("Database-Ready - Job '%s' not found", job_name)

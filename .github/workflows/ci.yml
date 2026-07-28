@@ -18,6 +18,10 @@ on: # yamllint disable-line rule:truthy rule:comments
 env:
   APP_NAME: "nautobot_app_livedata"
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  # When GitHub Actions moves to Node.js 24 by default (June 2026),
+  # some bundled actions (e.g. setup-python/cache) may not yet be updated.
+  # Allow using Node.js 20 for those actions as a temporary opt-out.
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
 
 jobs:
   create_change_fragment:
@@ -45,7 +49,7 @@ jobs:
     steps:
       - name: "Check out repository code"
         uses: "actions/checkout@v6"
-      - name: Copy credentials
+      - name: "Copy credentials"
         run: "cp development/creds.example.env development/creds.env"
       - name: "Setup environment"
         uses: "networktocode/gh-action-setup-poetry-environment@v6"
@@ -66,7 +70,7 @@ jobs:
         with:
           poetry-version: "2.3.2"
           poetry-install-options: "--with dev,linting"
-      - name: Copy credentials
+      - name: "Copy credentials"
         run: "cp development/creds.example.env development/creds.env"
       - name: "Linting: ruff"
         run: "poetry run invoke ruff --action lint"
@@ -82,7 +86,7 @@ jobs:
         with:
           poetry-version: "2.3.2"
           poetry-install-options: "--with dev,docs"
-      - name: Copy credentials
+      - name: "Copy credentials"
         run: "cp development/creds.example.env development/creds.env"
       - name: "Check Docs Build"
         run: "poetry run invoke build-and-check-docs"
@@ -98,7 +102,7 @@ jobs:
         with:
           poetry-version: "2.3.2"
           poetry-install-options: "--with dev"
-      - name: Copy credentials
+      - name: "Copy credentials"
         run: "cp development/creds.example.env development/creds.env"
       - name: "Checking: poetry lock file"
         run: "poetry run invoke lock --check"
@@ -114,7 +118,7 @@ jobs:
         with:
           poetry-version: "2.3.2"
           poetry-install-options: "--with dev,linting"
-      - name: Copy credentials
+      - name: "Copy credentials"
         run: "cp development/creds.example.env development/creds.env"
       - name: "Linting: yamllint"
         run: "poetry run invoke yamllint"
@@ -130,7 +134,7 @@ jobs:
         with:
           poetry-version: "2.3.2"
           poetry-install-options: "--with docs,dev,linting"
-      - name: Copy credentials
+      - name: "Copy credentials"
         run: "cp development/creds.example.env development/creds.env"
       - name: "Linting: markdownlint"
         run: "poetry run invoke markdownlint"
