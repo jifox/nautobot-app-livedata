@@ -5,6 +5,7 @@
 from abc import ABC, abstractmethod
 from http import HTTPStatus
 import importlib
+import importlib.metadata
 import logging
 from typing import Any, Optional
 
@@ -12,6 +13,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from nautobot.dcim.models import Device, Interface
 from nautobot.extras.jobs import RunJobTaskFailed
 from nautobot.extras.models import Job, JobResult
+from packaging.version import Version
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
@@ -23,6 +25,8 @@ from nautobot_app_livedata.utilities.primarydevice import (
 )
 
 logger = logging.getLogger("nautobot_app_livedata")
+
+_NAUTOBOT_VERSION = Version(importlib.metadata.version("nautobot"))
 
 
 def _runtime_dependencies_available() -> bool:
@@ -234,12 +238,13 @@ class LivedataQueryApiView(GenericAPIView, ABC):
     def _enqueue_job(self, job: Job, user: Any, job_kwargs: dict[str, Any]) -> JobResult:
         """Enqueue the configured job and return the resulting JobResult."""
 
-        return JobResult.enqueue_job(
-            job,
-            user=user,
-            task_queue=PLUGIN_SETTINGS["query_job_task_queue"],
-            job_kwargs=job_kwargs,
-        )
+        common = {
+            "user": user,
+            "task_queue": PLUGIN_SETTINGS["query_job_task_queue"],
+        }
+        if _NAUTOBOT_VERSION >= Version("3.2.0"):
+            return JobResult.enqueue_job(job, job_kwargs=job_kwargs, **common)
+        return JobResult.enqueue_job(job, **common, **job_kwargs)
 
 
 class LivedataQueryInterfaceApiView(LivedataQueryApiView):
