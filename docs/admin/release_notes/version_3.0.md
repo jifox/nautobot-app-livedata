@@ -9,6 +9,16 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Major features or milestones
 - Changes to compatibility with Nautobot and/or other apps, libraries etc.
 
+## [v3.0.3 (2026-07-28)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v3.0.3)
+
+### Fixed
+
+- [#195](https://github.com/jifox/nautobot-app-livedata/issues/195) - Fix enqueue_job() regression on Nautobot < 3.2 by using version-aware dispatch: `**job_kwargs` on Nautobot < 3.2, `job_kwargs=job_kwargs` on Nautobot >= 3.2.
+
+### Dependencies
+
+- [#180](https://github.com/jifox/nautobot-app-livedata/issues/180) - Bump networktocode/gh-action-setup-poetry-environment from v6 to v7.
+
 ## [v3.0.2 (2026-07-28)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v3.0.2)
 
 ### Changed
