@@ -52,7 +52,7 @@ jobs:
       - name: "Copy credentials"
         run: "cp development/creds.example.env development/creds.env"
       - name: "Setup environment"
-        uses: "networktocode/gh-action-setup-poetry-environment@v6"
+        uses: "networktocode/gh-action-setup-poetry-environment@v7"
         with:
           poetry-version: "2.3.2"
           poetry-install-options: "--with dev,linting"
@@ -66,7 +66,7 @@ jobs:
       - name: "Check out repository code"
         uses: "actions/checkout@v6"
       - name: "Setup environment"
-        uses: "networktocode/gh-action-setup-poetry-environment@v6"
+        uses: "networktocode/gh-action-setup-poetry-environment@v7"
         with:
           poetry-version: "2.3.2"
           poetry-install-options: "--with dev,linting"
@@ -82,7 +82,7 @@ jobs:
       - name: "Check out repository code"
         uses: "actions/checkout@v6"
       - name: "Setup environment"
-        uses: "networktocode/gh-action-setup-poetry-environment@v6"
+        uses: "networktocode/gh-action-setup-poetry-environment@v7"
         with:
           poetry-version: "2.3.2"
           poetry-install-options: "--with dev,docs"
@@ -98,7 +98,7 @@ jobs:
       - name: "Check out repository code"
         uses: "actions/checkout@v6"
       - name: "Setup environment"
-        uses: "networktocode/gh-action-setup-poetry-environment@v6"
+        uses: "networktocode/gh-action-setup-poetry-environment@v7"
         with:
           poetry-version: "2.3.2"
           poetry-install-options: "--with dev"
@@ -114,7 +114,7 @@ jobs:
       - name: "Check out repository code"
         uses: "actions/checkout@v6"
       - name: "Setup environment"
-        uses: "networktocode/gh-action-setup-poetry-environment@v6"
+        uses: "networktocode/gh-action-setup-poetry-environment@v7"
         with:
           poetry-version: "2.3.2"
           poetry-install-options: "--with dev,linting"
@@ -130,7 +130,7 @@ jobs:
       - name: "Check out repository code"
         uses: "actions/checkout@v6"
       - name: "Setup environment"
-        uses: "networktocode/gh-action-setup-poetry-environment@v6"
+        uses: "networktocode/gh-action-setup-poetry-environment@v7"
         with:
           poetry-version: "2.3.2"
           poetry-install-options: "--with docs,dev,linting"
@@ -158,7 +158,7 @@ jobs:
       - name: "Check out repository code"
         uses: "actions/checkout@v6"
       - name: "Setup environment"
-        uses: "networktocode/gh-action-setup-poetry-environment@v6"
+        uses: "networktocode/gh-action-setup-poetry-environment@v7"
         with:
           poetry-version: "2.3.2"
       - name: "Copy credentials"
@@ -219,7 +219,7 @@ jobs:
       - name: "Check out repository code"
         uses: "actions/checkout@v6"
       - name: "Setup environment"
-        uses: "networktocode/gh-action-setup-poetry-environment@v6"
+        uses: "networktocode/gh-action-setup-poetry-environment@v7"
         with:
           poetry-version: "2.3.2"
       - name: "Copy credentials"
@@ -268,7 +268,7 @@ jobs:
         with:
           fetch-depth: "0"
       - name: "Setup environment"
-        uses: "networktocode/gh-action-setup-poetry-environment@v6"
+        uses: "networktocode/gh-action-setup-poetry-environment@v7"
         with:
           poetry-version: "2.3.2"
       - name: "Check for changelog entry"
@@ -289,7 +289,7 @@ jobs:
       - name: "Check out repository code"
         uses: "actions/checkout@v6"
       - name: "Setup environment"
-        uses: "networktocode/gh-action-setup-poetry-environment@v6"
+        uses: "networktocode/gh-action-setup-poetry-environment@v7"
         with:
           poetry-version: "2.3.2"
           python-version: "3.12"
@@ -322,7 +322,7 @@ jobs:
       - name: "Check out repository code"
         uses: "actions/checkout@v6"
       - name: "Setup environment"
-        uses: "networktocode/gh-action-setup-poetry-environment@v6"
+        uses: "networktocode/gh-action-setup-poetry-environment@v7"
         with:
           poetry-version: "2.3.2"
           python-version: "3.12"
