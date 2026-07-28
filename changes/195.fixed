@@ -1,0 +1,1 @@
+Fix enqueue_job() regression on Nautobot < 3.2 by using version-aware dispatch: `**job_kwargs` on Nautobot < 3.2, `job_kwargs=job_kwargs` on Nautobot >= 3.2.
