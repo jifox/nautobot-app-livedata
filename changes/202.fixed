@@ -1,0 +1,1 @@
+Fix `poetry install` failing to build `mysqlclient` when the system MySQL/MariaDB client dev libraries are missing.
