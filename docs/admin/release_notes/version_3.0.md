@@ -9,6 +9,17 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Major features or milestones
 - Changes to compatibility with Nautobot and/or other apps, libraries etc.
 
+## [v3.0.4 (2026-08-01)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v3.0.4)
+
+### Fixed
+
+- [#200](https://github.com/jifox/nautobot-app-livedata/issues/200) - Fix Read the Docs build by updating .readthedocs.yaml to use ubuntu-lts-latest, Python 3.12, and Poetry-based docs installation.
+- [#202](https://github.com/jifox/nautobot-app-livedata/issues/202) - Fix `poetry install` failing to build `mysqlclient` when the system MySQL/MariaDB client dev libraries are missing.
+
+### Dependencies
+
+- [#197](https://github.com/jifox/nautobot-app-livedata/issues/197) - Bump pyjwt from 2.12.1 to 2.13.0.
+
 ## [v3.0.3 (2026-07-28)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v3.0.3)
 
 ### Fixed
