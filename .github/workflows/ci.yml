@@ -358,7 +358,7 @@ jobs:
         # ENVs cannot be used directly in job.if. This is a workaround to check
         # if SLACK_WEBHOOK_URL is present.
         if: "env.SLACK_WEBHOOK_URL != ''"
-        uses: "slackapi/slack-github-action@v2"
+        uses: "slackapi/slack-github-action@v4"
         with:
           payload: |
             {
