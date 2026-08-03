@@ -44,12 +44,8 @@ PLUGINS = ["nautobot_app_livedata"]
 PLUGINS_CONFIG = {
     "nautobot_app_livedata": {
         "query_job_name": os.getenv("LIVEDATA_QUERY_JOB_NAME", "Livedata Query Job"),
-        "query_job_description": os.getenv(
-            "LIVEDATA_QUERY_JOB_DESCRIPTION", "Job to query live data on a device."
-        ),
-        "query_job_soft_time_limit": int(
-            os.getenv("LIVEDATA_QUERY_JOB_SOFT_TIME_LIMIT", "30")
-        ),
+        "query_job_description": os.getenv("LIVEDATA_QUERY_JOB_DESCRIPTION", "Job to query live data on a device."),
+        "query_job_soft_time_limit": int(os.getenv("LIVEDATA_QUERY_JOB_SOFT_TIME_LIMIT", "30")),
         "query_job_task_queue": os.getenv("LIVEDATA_QUERY_JOB_TASK_QUEUE", None),
         "query_job_hidden": is_truthy(os.getenv("LIVEDATA_QUERY_JOB_HIDDEN", "True")),
         "query_job_has_sensitive_variables": False,
@@ -71,7 +67,7 @@ PLUGINS_CONFIG.update(  # type: ignore
             "denied_location_types": ["rack"],
             "nornir_settings": {
                 "credentials": (
-                    "nautobot_plugin_nornir.plugins.credentials." "nautobot_secrets.CredentialsNautobotSecrets"
+                    "nautobot_plugin_nornir.plugins.credentials.nautobot_secrets.CredentialsNautobotSecrets"
                 ),
                 "runner": {
                     "plugin": "threaded",
