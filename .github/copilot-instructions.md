@@ -183,8 +183,10 @@ Options:
 
 ```python
 """API tests for Widget."""
+
 from nautobot.apps.testing import APIViewTestCases
 from . import models
+
 
 class WidgetAPITests(
     APIViewTestCases.CreateObjectViewTestCase,
@@ -194,6 +196,7 @@ class WidgetAPITests(
     APIViewTestCases.DeleteObjectViewTestCase,
 ):
     """CRUD tests for the Widget REST API."""
+
     model = models.Widget
 
     # Returned keys for `?brief=true` (sorted)
@@ -212,11 +215,14 @@ class WidgetAPITests(
 
 ```python
 """Filter tests for Widget."""
+
 from nautobot.apps.testing import FilterTestCases
 from . import filters as widget_filters, models
 
+
 class WidgetFilterTests(FilterTestCases.FilterTestCase):
     """Generic filter assertions for WidgetFilterSet."""
+
     filterset = widget_filters.WidgetFilterSet
     queryset = models.Widget.objects.all()
 
@@ -231,11 +237,14 @@ class WidgetFilterTests(FilterTestCases.FilterTestCase):
 
 ```python
 """View tests for Widget UI."""
+
 from nautobot.apps.testing import ViewTestCases
 from . import models
 
+
 class WidgetUIViewTests(ViewTestCases.PrimaryObjectViewTestCase):
     """UI list/detail/create/edit/delete tests for Widget."""
+
     model = models.Widget
     bulk_edit_data = {"name": "Bulk Renamed"}
 ```
@@ -364,11 +373,14 @@ tenant = models.ForeignKey(
 **Serializer**
 ```python
 """Serializer for DeviceNote."""
+
 from nautobot.apps.api import NautobotModelSerializer, TaggedModelSerializerMixin
 from .models import DeviceNote
 
+
 class DeviceNoteSerializer(NautobotModelSerializer, TaggedModelSerializerMixin):
     """Serialize DeviceNote objects."""
+
     class Meta:
         model = DeviceNote
         fields = "__all__"
@@ -377,11 +389,14 @@ class DeviceNoteSerializer(NautobotModelSerializer, TaggedModelSerializerMixin):
 **FilterSet**
 ```python
 """FilterSet for DeviceNote."""
+
 from nautobot.apps.filters import NautobotFilterSet, TenancyModelFilterSetMixin
 from .models import DeviceNote
 
+
 class DeviceNoteFilter(TenancyModelFilterSetMixin, NautobotFilterSet):
     """Filter DeviceNote by name/content."""
+
     class Meta:
         model = DeviceNote
         fields = "__all__"
@@ -390,13 +405,16 @@ class DeviceNoteFilter(TenancyModelFilterSetMixin, NautobotFilterSet):
 **API ViewSet**
 ```python
 """API viewset for DeviceNote."""
+
 from nautobot.apps.api import NautobotModelViewSet
 from .filters import DeviceNoteFilter
 from .serializers import DeviceNoteSerializer
 from .models import DeviceNote
 
+
 class DeviceNoteViewSet(NautobotModelViewSet):
     """List, retrieve, and manage DeviceNotes via REST API."""
+
     queryset = DeviceNote.objects.all()
     serializer_class = DeviceNoteSerializer
     filterset_class = DeviceNoteFilter
