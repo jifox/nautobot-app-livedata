@@ -9,6 +9,24 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Major features or milestones
 - Changes to compatibility with Nautobot and/or other apps, libraries etc.
 
+## [v3.0.5 (2026-08-05)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v3.0.5)
+
+### Fixed
+
+- [#206](https://github.com/jifox/nautobot-app-livedata/issues/206) - Fixed the `EXACT:` output filter dropping log lines that reference an interface by its full name (e.g. `Interface GigabitEthernet4/0/36`) from the Live Data interface tab.
+- [#206](https://github.com/jifox/nautobot-app-livedata/issues/206) - Fixed the Read the Docs / mkdocs build failure caused by a `griffe`/`griffelib` dependency conflict (`ImportError: cannot import name 'ExprInterpolation'`) by removing the obsolete `griffe` pin and re-locking to a single griffe 2.x source.
+
+### Dependencies
+
+- [#212](https://github.com/jifox/nautobot-app-livedata/issues/212) - Bump `actions/checkout` from `6` to `7`.
+- [#212](https://github.com/jifox/nautobot-app-livedata/issues/212) - Bump `docker/build-push-action` from `6` to `7`.
+- [#212](https://github.com/jifox/nautobot-app-livedata/issues/212) - Bump `docker/setup-buildx-action` from `3` to `4`.
+- [#212](https://github.com/jifox/nautobot-app-livedata/issues/212) - Bump `pypa/gh-action-pypi-publish` from `1.13.0` to `1.14.2`.
+- [#212](https://github.com/jifox/nautobot-app-livedata/issues/212) - Bump `pylint-django` from `2.7.0` to `2.8.0`.
+- [#212](https://github.com/jifox/nautobot-app-livedata/issues/212) - Bump `slackapi/slack-github-action` from `2` to `4`.
+- [#215](https://github.com/jifox/nautobot-app-livedata/issues/215) - Bump `mkdocs-include-markdown-plugin` from `7.2.2` to `7.3.0`.
+- [#216](https://github.com/jifox/nautobot-app-livedata/issues/216) - Bump `ruff` from `0.15.22` to `0.16.1`.
+
 ## [v3.0.4 (2026-08-01)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v3.0.4)
 
 ### Fixed
