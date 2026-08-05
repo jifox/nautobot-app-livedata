@@ -3,7 +3,7 @@
 # handled by Poetry and declared dynamic below.
 dynamic = ["dependencies", "requires-python"]
 name = "nautobot_app_livedata"
-version = "3.0.4"
+version = "3.0.5"
 description = "Provides a live view of network data within Nautobot."
 readme = "README.md"
 authors = [{name = "Josef Fuchs", email = "josef.fuchs@j-fuchs.at"}]
@@ -59,20 +59,19 @@ mkdocs = "~1.6.1"
 "markdown-version-annotations" = "~1.0.1"
 "mkdocs-gen-files" = "~0.6.1"
 "mkdocs-glightbox" = "~0.5.2"
-"mkdocs-include-markdown-plugin" = "~=7.2.0"
+"mkdocs-include-markdown-plugin" = "~=7.3.0"
 "mkdocs-macros-plugin" = "~1.5.0"
 "mkdocs-material" = "~9.7.6"
 "mkdocs-redirects" = "~1.2.3"
 "mkdocs-section-index" = "~0.3.12"
 mkdocstrings = "~1.0.4"
 "mkdocstrings-python" = "~2.0.4"
-griffe = "<2.0.0"
 
 [tool.poetry.group.linting.dependencies]
 pylint = "~4.0.5"
-"pylint-django" = "~2.7.0"
+"pylint-django" = "~2.8.0"
 "pymarkdownlnt" = "~0.9.37"
-ruff = "~0.15.16"
+ruff = "~0.16.1"
 yamllint = "~1.38.0"
 djhtml = "~3.0.11"
 djlint = "~1.36.4"

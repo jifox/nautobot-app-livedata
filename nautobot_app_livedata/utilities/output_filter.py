@@ -8,6 +8,10 @@ from netutils.interface import split_interface
 
 BOUNDARY_CHAR_CLASS = r"A-Za-z0-9_/"
 KNOWN_INTERFACE_PREFIXES = frozenset(BASE_INTERFACES)
+# Matches an optional interface-type prefix followed by a dotted/slashed number
+# (e.g. "GigabitEthernet4/0/36"), so EXACT filters can match full interface names
+# embedded in larger lines such as syslog output.
+INTERFACE_MENTION_RE = re.compile(r"(?P<type>[A-Za-z][A-Za-z-]*)?(?P<number>\d+(?:[./]\d+)+)(?![A-Za-z0-9_])")
 
 
 def _exact_match_predicate(pattern: str) -> Callable[[str], bool]:
@@ -22,8 +26,17 @@ def _exact_match_predicate(pattern: str) -> Callable[[str], bool]:
         try:
             interface_type, interface_number = split_interface(stripped_line)
         except ValueError:
-            return False
-        return interface_type in KNOWN_INTERFACE_PREFIXES and interface_number == pattern
+            interface_type, interface_number = None, None
+        if interface_type in KNOWN_INTERFACE_PREFIXES and interface_number == pattern:
+            return True
+        # Match interface mentions embedded in larger lines (e.g. log output), such
+        # as "Interface GigabitEthernet4/0/36, changed state to up" with pattern "4/0/36".
+        for match in INTERFACE_MENTION_RE.finditer(line):
+            mentioned_type = match.group("type") or ""
+            mentioned_number = match.group("number")
+            if mentioned_number == pattern and (not mentioned_type or mentioned_type in KNOWN_INTERFACE_PREFIXES):
+                return True
+        return False
 
     return predicate
 

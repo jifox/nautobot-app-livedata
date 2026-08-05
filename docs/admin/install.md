@@ -44,12 +44,8 @@ PLUGINS = ["nautobot_app_livedata"]
 PLUGINS_CONFIG = {
     "nautobot_app_livedata": {
         "query_job_name": os.getenv("LIVEDATA_QUERY_JOB_NAME", "Livedata Query Job"),
-        "query_job_description": os.getenv(
-            "LIVEDATA_QUERY_JOB_DESCRIPTION", "Job to query live data on a device."
-        ),
-        "query_job_soft_time_limit": int(
-            os.getenv("LIVEDATA_QUERY_JOB_SOFT_TIME_LIMIT", "30")
-        ),
+        "query_job_description": os.getenv("LIVEDATA_QUERY_JOB_DESCRIPTION", "Job to query live data on a device."),
+        "query_job_soft_time_limit": int(os.getenv("LIVEDATA_QUERY_JOB_SOFT_TIME_LIMIT", "30")),
         "query_job_task_queue": os.getenv("LIVEDATA_QUERY_JOB_TASK_QUEUE", None),
         "query_job_hidden": is_truthy(os.getenv("LIVEDATA_QUERY_JOB_HIDDEN", "True")),
         "query_job_has_sensitive_variables": False,
@@ -71,7 +67,7 @@ PLUGINS_CONFIG.update(  # type: ignore
             "denied_location_types": ["rack"],
             "nornir_settings": {
                 "credentials": (
-                    "nautobot_plugin_nornir.plugins.credentials." "nautobot_secrets.CredentialsNautobotSecrets"
+                    "nautobot_plugin_nornir.plugins.credentials.nautobot_secrets.CredentialsNautobotSecrets"
                 ),
                 "runner": {
                     "plugin": "threaded",
@@ -183,12 +179,12 @@ Multiple filters can be chained in a single line by separating each filter with 
 
 **Examples:**
 
-- `show logging | i {{intf_number}} !!EXACT:{{intf_number}}!!` — Filters the output to contain only lines that contain the interface number as a whole word (for example, matches `Gi1/0/1`, `1/0/1` with trailing whitespace, `^1/0/1`, or `1/0/1$` but not `11/0/1`, `1/0/11`, or `foo1/0/1bar`).
+- `show logging | i {{intf_number}} !!EXACT:{{intf_number}}!!` — Filters the output to contain only lines that contain the interface number as a whole word or as the numeric part of an interface name (for example, matches `Gi1/0/1`, `1/0/1` with trailing whitespace, `^1/0/1`, `1/0/1$`, or full names embedded in lines such as `Interface GigabitEthernet4/0/36, changed state to up` with `EXACT:4/0/36`, but not `11/0/1`, `1/0/11`, `14/0/36`, `4/0/360`, or `foo1/0/1bar`).
 - `show logging !!LAST:100!!` — Returns only the last 100 lines of the output.
 
 **Supported Filters:**
 
-- `!!EXACT:<pattern>!!` — Only lines that contain `<pattern>` as a whole word (ignoring leading/trailing whitespace, not matching substrings within other numbers or words)
+- `!!EXACT:<pattern>!!` — Only lines that contain `<pattern>` as a whole word or as the numeric part of an interface name (ignoring leading/trailing whitespace, not matching substrings within other numbers or words)
 - `!!LAST:<N>!!` — Only the last N lines
 - `!!FIRST:<N>!!` — Only the first N lines
 

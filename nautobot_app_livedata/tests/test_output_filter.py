@@ -56,3 +56,28 @@ class TestOutputFilter(TestCase):
         output = "line1\nline2\nline3\nline4\nline5"
         filtered = apply_output_filter(output, "FIRST:3")
         self.assertEqual(filtered, "line1\nline2\nline3")
+
+    def test_exact_filter_full_interface_name_in_log_line(self):
+        output = "\n".join(
+            [
+                "Aug  3 09:49:20.277 MES: %LINK-5-UPDOWN: Interface GigabitEthernet4/0/36, changed state to up",
+                "Aug  3 09:49:21.277 MES: %LINEPROTO-5-UPDOWN: Line protocol on Interface "
+                "GigabitEthernet4/0/36, changed state to up",
+                "Aug  3 09:49:20.277 MES: %LINK-5-UPDOWN: Interface GigabitEthernet14/0/36, changed state to up",
+                "Aug  3 09:49:20.277 MES: %LINK-5-UPDOWN: Interface GigabitEthernet4/0/360, changed state to up",
+                "Aug  3 09:49:20.277 MES: %LINK-5-UPDOWN: Interface GigabitEthernet4/0/3, changed state to up",
+            ]
+        )
+        filtered = apply_output_filter(output, "EXACT:4/0/36")
+        self.assertEqual(
+            filtered,
+            "Aug  3 09:49:20.277 MES: %LINK-5-UPDOWN: Interface GigabitEthernet4/0/36, "
+            "changed state to up\n"
+            "Aug  3 09:49:21.277 MES: %LINEPROTO-5-UPDOWN: Line protocol on Interface "
+            "GigabitEthernet4/0/36, changed state to up",
+        )
+
+    def test_exact_filter_interface_mention_with_trailing_text(self):
+        output = "Gi1/0/1 is up\nfoo1/0/1 is up\nGi1/0/1\nTe1/0/11 is up"
+        filtered = apply_output_filter(output, "EXACT:1/0/1")
+        self.assertEqual(filtered, "Gi1/0/1 is up\nGi1/0/1")
