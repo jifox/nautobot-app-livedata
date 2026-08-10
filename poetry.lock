@@ -2945,19 +2945,19 @@ sso = ["social-auth-core[saml] (>=4.8.7,<4.9)"]
 
 [[package]]
 name = "nautobot-plugin-nornir"
-version = "3.0.0"
+version = "3.2.2"
 description = "Nautobot App that provides a shim layer to simplify using Nornir within other Nautobot Apps and Nautobot Jobs"
 optional = false
-python-versions = "<3.14,>=3.10"
+python-versions = "<3.15,>=3.10"
 groups = ["main"]
 files = [
-    {file = "nautobot_plugin_nornir-3.0.0-py3-none-any.whl", hash = "sha256:cc16c4971b66212462f947ab02167b9f1f2d2029ffe4314024b50bc00822020e"},
-    {file = "nautobot_plugin_nornir-3.0.0.tar.gz", hash = "sha256:6fef33ffc69b230f75d28d78e30e5ed8c2a685607736bda2e7208c09943708a1"},
+    {file = "nautobot_plugin_nornir-3.2.2-py3-none-any.whl", hash = "sha256:d283184e4e0bda20740f28067ad579bfe3115cf191e70aecc02b68d1a1e4c931"},
+    {file = "nautobot_plugin_nornir-3.2.2.tar.gz", hash = "sha256:251c0990513349d2fcd6ae7a8d4b2bd5ee2957ae72723a1ba7363759a453a5c3"},
 ]
 
 [package.dependencies]
 nautobot = ">=3.0.0,<4.0.0"
-nornir-nautobot = ">=4.0.0,<5.0.0"
+nornir-nautobot = ">=4.3.0,<5.0.0"
 
 [[package]]
 name = "ncclient"
@@ -5798,4 +5798,4 @@ test = ["coverage", "hypothesis", "pytest"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.14"
-content-hash = "efbed7ae62f4a2ba0ee2bd02e5321f2a408c79a8932e7745e21abda82c7f8b30"
+content-hash = "fe9f2c2cf30d4d2a479399d954d297f196d5d9afa584dedfa334b950cd2d2ce7"

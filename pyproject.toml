@@ -35,7 +35,7 @@ nautobot = ">=3.0.0,<4.0.0"
 "to-json-schema" = "~=1.0.1"
 jsonschema = "^4.7.0"
 "python-dotenv" = "~=1.2.1"
-"nautobot-plugin-nornir" = "~=3.0.0"
+"nautobot-plugin-nornir" = "~=3.2.2"
 h11 = ">=0.16.0,<1.0.0"
 mysqlclient = "^2.2.8"
 
