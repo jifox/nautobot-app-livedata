@@ -9,6 +9,16 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Major features or milestones
 - Changes to compatibility with Nautobot and/or other apps, libraries etc.
 
+## [v3.0.6 (2026-10-05)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v3.0.6)
+
+### Fixed
+
+- [#232](https://github.com/jifox/nautobot-app-livedata/issues/232) - Set markdown table indentation to 4 blanks
+
+### Dependencies
+
+- [#232](https://github.com/jifox/nautobot-app-livedata/issues/232) - Bump `nautobot-plugin-nornir` from `3.0.0` to `3.2.5`
+
 ## [v3.0.5 (2026-08-05)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v3.0.5)
 
 ### Fixed
