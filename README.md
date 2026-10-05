@@ -21,9 +21,9 @@ Lightweight Nautobot plugin that fetches and displays live device and interface 
 - Configurable per-platform show commands (set at Platform objects).
 - Inline filtering of command output using `!!` filter syntax (EXACT/LAST/FIRST).
 - Background jobs included for scheduling and housekeeping:
-  - `LivedataQueryJob` — run queries against devices.
-  - `LivedataCleanupJobResultsJob` — remove stale collected results.
-  - `EnforceDefaultJobQueueJob` — align Job queue assignments with a default worker queue.
+    - `LivedataQueryJob` — run queries against devices.
+    - `LivedataCleanupJobResultsJob` — remove stale collected results.
+    - `EnforceDefaultJobQueueJob` — align Job queue assignments with a default worker queue.
 
 ### Screenshots
 
