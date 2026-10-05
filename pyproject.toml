@@ -3,7 +3,7 @@
 # handled by Poetry and declared dynamic below.
 dynamic = ["dependencies", "requires-python"]
 name = "nautobot_app_livedata"
-version = "3.0.6a0"
+version = "3.0.6"
 description = "Provides a live view of network data within Nautobot."
 readme = "README.md"
 authors = [{name = "Josef Fuchs", email = "josef.fuchs@j-fuchs.at"}]
@@ -35,7 +35,7 @@ nautobot = ">=3.0.0,<4.0.0"
 "to-json-schema" = "~=1.0.1"
 jsonschema = "^4.7.0"
 "python-dotenv" = "~=1.2.1"
-"nautobot-plugin-nornir" = "~=3.0.0"
+"nautobot-plugin-nornir" = "~=3.2.0"
 h11 = ">=0.16.0,<1.0.0"
 mysqlclient = "^2.2.8"
 
@@ -43,7 +43,7 @@ mysqlclient = "^2.2.8"
 "django-debug-toolbar" = "~6.2.0"
 "factory-boy" = "~3.3.3"
 faker = "^40.21.0"
-invoke = "~2.2.1"
+invoke = "*"
 PyYAML = "~=6.0.3"
 rich = "~14.3.4"
 towncrier = "~25.8.0"

@@ -7,7 +7,7 @@ services:
       - "PYDEVD_DISABLE_FILE_VALIDATION=1"
       # - "REMOTE_TEST_DEBUG_ENABLE=True"
     ports:
-      - "8080:8080"
+      - "8088:8080"
       - "6899:6899"  # For remote debugging of nautobot
       - "6897:6897"  # For remote debugging of tests
     entrypoint: ""
