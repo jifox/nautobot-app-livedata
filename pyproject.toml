@@ -36,6 +36,8 @@ nautobot = ">=3.0.0,<4.0.0"
 jsonschema = "^4.7.0"
 "python-dotenv" = "~=1.2.1"
 "nautobot-plugin-nornir" = "~=3.2.0"
+# nornir-scrapli imports Scrapli from the pre-2.0 API.
+scrapli = ">=2025.1.30,<2026.0.0"
 h11 = ">=0.16.0,<1.0.0"
 mysqlclient = "^2.2.8"
 
