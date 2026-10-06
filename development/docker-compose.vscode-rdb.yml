@@ -8,7 +8,7 @@ services:
       # - "REMOTE_TEST_DEBUG_ENABLE=True"
     ports:
       - "8088:8080"
-      - "6899:6899"  # For remote debugging of nautobot
+      - "6889:6899"  # For remote debugging of nautobot
       - "6897:6897"  # For remote debugging of tests
     entrypoint: ""
     command: >
@@ -20,7 +20,7 @@ services:
     environment:
       - "PYDEVD_DISABLE_FILE_VALIDATION=1"
     ports:
-      - "6898:6898"  # For remote debugging of Jobs (Celery)
+      - "6888:6898"  # For remote debugging of Jobs (Celery)
     entrypoint: ""
     command: >-
       sh -c "
