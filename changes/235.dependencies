@@ -1,6 +1,0 @@
-Pin `scrapli` to `>=2025.1.30,<2026.0.0` because `nornir-scrapli` imports `Scrapli` from the pre-2.0 API, restoring compatibility with Nautobot 3.2.6.
-Bump `aiohttp` from `3.14.3` to `3.14.4`.
-Bump `amqp` from `5.4.0` to `5.4.1`.
-Bump `faker` from `40.40.0` to `40.41.0`.
-Bump `griffelib` from `2.3.0` to `2.3.1`.
-Bump `ttp-templates` from `0.6.12` to `0.6.13`.

@@ -9,6 +9,23 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Major features or milestones
 - Changes to compatibility with Nautobot and/or other apps, libraries etc.
 
+## [v3.0.7 (2026-10-06)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v3.0.7)
+
+### Dependencies
+
+- [#235](https://github.com/jifox/nautobot-app-livedata/issues/235) - Pin `scrapli` to `>=2025.1.30,<2026.0.0` because `nornir-scrapli` imports `Scrapli` from the pre-2.0 API, restoring compatibility with Nautobot 3.2.6.
+- [#235](https://github.com/jifox/nautobot-app-livedata/issues/235) - Bump `aiohttp` from `3.14.3` to `3.14.4`.
+- [#235](https://github.com/jifox/nautobot-app-livedata/issues/235) - Bump `amqp` from `5.4.0` to `5.4.1`.
+- [#235](https://github.com/jifox/nautobot-app-livedata/issues/235) - Bump `faker` from `40.40.0` to `40.41.0`.
+- [#235](https://github.com/jifox/nautobot-app-livedata/issues/235) - Bump `griffelib` from `2.3.0` to `2.3.1`.
+- [#235](https://github.com/jifox/nautobot-app-livedata/issues/235) - Bump `ttp-templates` from `0.6.12` to `0.6.13`.
+
+### Housekeeping
+
+- [#235](https://github.com/jifox/nautobot-app-livedata/issues/235) - Prepare the app for compatibility with Nautobot 3.2.6.
+- [#235](https://github.com/jifox/nautobot-app-livedata/issues/235) - Remove the obsolete `.github/agents` helper files.
+- [#235](https://github.com/jifox/nautobot-app-livedata/issues/235) - Fix the VS Code remote-debug port mappings in `development/docker-compose.vscode-rdb.yml`.
+
 ## [v3.0.6 (2026-10-05)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v3.0.6)
 
 ### Fixed
