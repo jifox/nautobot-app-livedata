@@ -1,0 +1,3 @@
+Prepare the app for compatibility with Nautobot 3.2.6.
+Remove the obsolete `.github/agents` helper files.
+Fix the VS Code remote-debug port mappings in `development/docker-compose.vscode-rdb.yml`.
