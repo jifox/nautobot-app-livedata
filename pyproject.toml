@@ -3,7 +3,7 @@
 # handled by Poetry and declared dynamic below.
 dynamic = ["dependencies", "requires-python"]
 name = "nautobot_app_livedata"
-version = "3.0.7"
+version = "3.0.8"
 description = "Provides a live view of network data within Nautobot."
 readme = "README.md"
 authors = [{name = "Josef Fuchs", email = "josef.fuchs@j-fuchs.at"}]
@@ -13,7 +13,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "Development Status :: 5 - Production/Stable",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -30,12 +29,12 @@ packages = [
 include = ["LICENSE"]
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.14"
+python = ">=3.11,<3.15"
 nautobot = ">=3.0.0,<4.0.0"
 "to-json-schema" = "~=1.0.1"
 jsonschema = "^4.7.0"
 "python-dotenv" = "~=1.2.1"
-"nautobot-plugin-nornir" = "~=3.2.0"
+"nautobot-plugin-nornir" = "~=3.2.2"
 # nornir-scrapli imports Scrapli from the pre-2.0 API.
 scrapli = ">=2025.1.30,<2026.0.0"
 h11 = ">=0.16.0,<1.0.0"
@@ -45,7 +44,7 @@ mysqlclient = "^2.2.8"
 "django-debug-toolbar" = "~6.2.0"
 "factory-boy" = "~3.3.3"
 faker = "^40.21.0"
-invoke = "*"
+invoke = "~3.0.3"
 PyYAML = "~=6.0.3"
 rich = "~14.3.4"
 towncrier = "~25.8.0"
@@ -76,7 +75,7 @@ pylint = "~4.0.5"
 ruff = "~0.16.1"
 yamllint = "~1.38.0"
 djhtml = "~3.0.11"
-djlint = "~1.36.4"
+djlint = "~1.44.1"
 
 [tool.poetry.group.testing.dependencies]
 coverage = "~7.13.5"
@@ -84,7 +83,7 @@ coverage = "~7.13.5"
 [tool.pylint.master]
 # load-plugins = "pylint_django, pylint_nautobot"
 load-plugins = "pylint_django"
-py-version = "3.10"
+py-version = "3.11"
 ignore = ".venv"
 ignore-paths = [
     ".*third_party.*",
@@ -150,7 +149,7 @@ plugins.ul-indent.enabled = false  # doesn't work well with MkDocs expectations,
 
 [tool.ruff]
 line-length = 120
-target-version = "py310"
+target-version = "py311"
 
 [tool.ruff.lint]
 select = [
