@@ -1,1 +1,0 @@
-Bump `djlint` to `~1.44.1`, `invoke` to `~3.0.3` and `nautobot-plugin-nornir` to `~=3.2.2`; re-lock dependencies, including `nautobot` 3.2.9, `django` 5.2.19, `djangorestframework` 3.18.3, `certifi` 2026.10.23, `oauthlib` 4.0.1 and `sqlparse` 0.6.1.

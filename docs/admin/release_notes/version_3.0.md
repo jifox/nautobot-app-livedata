@@ -9,6 +9,20 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Major features or milestones
 - Changes to compatibility with Nautobot and/or other apps, libraries etc.
 
+## [v3.0.8 (2026-11-11)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v3.0.8)
+
+### Changed
+
+- [#241](https://github.com/jifox/nautobot-app-livedata/issues/241) - Require Python 3.11 or later; Python 3.10 is end-of-life and is no longer supported by Nautobot 3.2.9.
+
+### Fixed
+
+- [#241](https://github.com/jifox/nautobot-app-livedata/issues/241) - Read the repository URL from the PEP 621 `[project.urls]` table in the app config schema helper.
+
+### Dependencies
+
+- [#241](https://github.com/jifox/nautobot-app-livedata/issues/241) - Bump `djlint` to `~1.44.1`, `invoke` to `~3.0.3` and `nautobot-plugin-nornir` to `~=3.2.2`; re-lock dependencies, including `nautobot` 3.2.9, `django` 5.2.19, `djangorestframework` 3.18.3, `certifi` 2026.10.23, `oauthlib` 4.0.1 and `sqlparse` 0.6.1.
+
 ## [v3.0.7 (2026-10-06)](https://github.com/jifox/nautobot-app-livedata.git/releases/tag/v3.0.7)
 
 ### Dependencies
