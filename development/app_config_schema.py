@@ -26,7 +26,10 @@ def _enrich_object_schema(schema, defaults, required):
 
 def _main():
     pyproject = toml.loads(Path("pyproject.toml").read_text())
-    url = urlparse(pyproject["tool"]["poetry"]["repository"])
+    repository_url = pyproject.get("project", {}).get("urls", {}).get("repository")
+    if not repository_url:
+        repository_url = pyproject["tool"]["poetry"]["repository"]
+    url = urlparse(repository_url)
     _, owner, repository = url.path.split("/")
     package_name = pyproject["tool"]["poetry"]["packages"][0]["include"]
     app_config = settings.PLUGINS_CONFIG[package_name]  # type: ignore
